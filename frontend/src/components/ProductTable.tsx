@@ -7,16 +7,11 @@ interface ProductTableProps {
   onDelete: (id: number) => void;
 }
 
-// Formatăm prețul ca monedă românească. Intl este nativ în browser - fără librării.
 const currency = new Intl.NumberFormat("ro-RO", {
   style: "currency",
   currency: "RON",
 });
 
-/**
- * Componentă "de prezentare" (presentational): primește date prin props și
- * notifică părintele prin callback-uri. Nu știe nimic despre API sau state global.
- */
 export function ProductTable({
   products,
   onEdit,
@@ -43,7 +38,6 @@ export function ProductTable({
         </tr>
       </thead>
       <tbody>
-        {/* key={product.id} ajută React să identifice fiecare rând eficient la re-render. */}
         {products.map((product) => (
           <tr key={product.id}>
             <td>{product.id}</td>
