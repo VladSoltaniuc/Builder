@@ -1,5 +1,6 @@
 // UI orchestration layer
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useProducts } from "./hooks/useProducts";
 import { ProductForm } from "./components/ProductForm";
 import { ProductTable } from "./components/ProductTable";
@@ -19,14 +20,30 @@ export function App() {
   } = useProducts();
 
   const [editing, setEditing] = useState<Product | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  function openCreate() {
+    setEditing(null);
+    setIsModalOpen(true);
+  }
+
+  function openEdit(product: Product) {
+    setEditing(product);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+    setEditing(null);
+  }
 
   async function handleSubmit(input: ProductInput) {
     if (editing) {
       await updateProduct(editing.id, input, editing.version);
-      setEditing(null);
     } else {
       await createProduct(input);
     }
+    closeModal();
   }
 
   async function handleDelete(id: number) {
@@ -34,7 +51,7 @@ export function App() {
       return;
     }
     if (editing?.id === id) {
-      setEditing(null);
+      closeModal();
     }
     await deleteProduct(id);
   }
@@ -46,43 +63,44 @@ export function App() {
         <p className="subtitle">Demo CRUD: React + .NET Minimal API</p>
       </header>
 
-      <ProductForm
-        editing={editing}
-        onSubmit={handleSubmit}
-        onCancel={() => setEditing(null)}
-      />
-
       {error && <p className="error">⚠️ {error}</p>}
+
+      <div className="toolbar">
+        <button className="btn btn-primary" onClick={openCreate}>
+          + Adaugă produs
+        </button>
+      </div>
 
       {isLoading ? (
         <p className="loading">Se încarcă produsele...</p>
       ) : (
-        <ProductTable
-          products={products}
-          onEdit={setEditing}
-          onDelete={handleDelete}
-        />
+        <ProductTable products={products} onEdit={openEdit} onDelete={handleDelete} />
       )}
 
       <div className="pagination">
-        <button
-          className="btn"
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-        >
+        <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>
           Anterior
         </button>
-        <span>
-          Pagina {page} din {totalPages}
-        </span>
-        <button
-          className="btn"
-          disabled={page === totalPages}
-          onClick={() => setPage(page + 1)}
-        >
+        <span>Pagina {page} din {totalPages}</span>
+        <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
           Următor
         </button>
       </div>
+
+      {isModalOpen && createPortal(
+        <div className="modal-backdrop" onClick={closeModal}>
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <ProductForm editing={editing} onSubmit={handleSubmit} onCancel={closeModal} />
+          </div>
+        </div>,
+        document.body
+      )}
     </main>
   );
 }

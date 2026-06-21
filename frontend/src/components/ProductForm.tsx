@@ -30,6 +30,14 @@ export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
     }
   }, [editing]);
 
+  // Suprascrie mesajul de validare al browserului cu unul în română.
+  function validate(message: string) {
+    return {
+      onInvalid: (e: React.InvalidEvent<HTMLInputElement>) => e.target.setCustomValidity(message),
+      onInput:   (e: React.FormEvent<HTMLInputElement>)   => (e.target as HTMLInputElement).setCustomValidity(''),
+    };
+  }
+
   // Un singur handler pentru toate input-urile, pe baza atributului "name".
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type } = event.target;
@@ -66,6 +74,7 @@ export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
             onChange={handleChange}
             required
             minLength={2}
+            {...validate('Numele este obligatoriu și trebuie să aibă cel puțin 2 caractere.')}
           />
         </label>
 
@@ -76,6 +85,7 @@ export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
             value={form.category}
             onChange={handleChange}
             required
+            {...validate('Categoria este obligatorie.')}
           />
         </label>
 
@@ -89,6 +99,7 @@ export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
             value={form.price}
             onChange={handleChange}
             required
+            {...validate('Prețul este obligatoriu și trebuie să fie mai mare ca 0.')}
           />
         </label>
 
@@ -101,6 +112,7 @@ export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
             value={form.stock}
             onChange={handleChange}
             required
+            {...validate('Stocul nu poate fi negativ.')}
           />
         </label>
       </div>
