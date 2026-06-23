@@ -10,6 +10,7 @@ Full-stack CRUD app: React + .NET 8 Web API.
 - [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 - [Node.js 22+](https://nodejs.org/en/download)
 - [PostgreSQL](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads) (installed locally)
+- [HeidiSQL](https://www.heidisql.com/download.php) (tool to inspect the database)
 
 ### Backend
 ```bash
