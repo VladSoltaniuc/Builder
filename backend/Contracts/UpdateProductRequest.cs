@@ -1,11 +1,8 @@
+// Application layer
 using System.ComponentModel.DataAnnotations;
 
 namespace ProductApi.Contracts;
 
-/// <summary>
-/// DTO pentru actualizarea completă a unui produs (PUT).
-/// Id-ul vine din ruta URL (/api/products/{id}), nu din body, de aceea nu e aici.
-/// </summary>
 public class UpdateProductRequest
 {
     [Required(ErrorMessage = "Numele este obligatoriu.")]

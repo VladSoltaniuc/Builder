@@ -1,3 +1,4 @@
+// Application layer
 namespace ProductApi.Contracts;
 
 public record UpdateProductResult(ProductResponse? Product, bool IsConflict)

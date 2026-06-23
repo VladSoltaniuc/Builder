@@ -1,3 +1,4 @@
+// Application layer
 namespace ProductApi.Contracts;
 
 public record PagedResponse<T>(

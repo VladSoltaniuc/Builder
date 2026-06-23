@@ -1,12 +1,8 @@
+// Application layer
 using System.ComponentModel.DataAnnotations;
 
 namespace ProductApi.Contracts;
 
-/// <summary>
-/// DTO pentru crearea unui produs (POST). Nu conține Id - acela este generat de server.
-/// Atributele [Required]/[Range] sunt validate automat de ASP.NET înainte să intre în controller
-/// (pentru că folosim [ApiController]). Dacă validarea pică, clientul primește automat 400.
-/// </summary>
 public class CreateProductRequest
 {
     [Required(ErrorMessage = "Numele este obligatoriu.")]
