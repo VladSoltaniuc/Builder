@@ -1,4 +1,4 @@
-// ListView - Presentation layer
+// Presentation layer — list view
 import type { Product } from "../types/product";
 
 interface ProductTableProps {

@@ -1,3 +1,4 @@
+// Shared layer — constants
 export const validationMessages = {
   name:     'Numele este obligatoriu și trebuie să aibă cel puțin 2 caractere.',
   category: 'Categoria este obligatorie.',

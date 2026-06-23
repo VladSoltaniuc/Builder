@@ -1,4 +1,4 @@
-// File API requests - transport layer
+// Transport layer — file API requests
 import { ApiError } from './errors';
 
 async function request<T>(path: string, method: string, file?: File, asBlob = false): Promise<T> {

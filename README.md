@@ -69,7 +69,27 @@ npm run dev                 # starts UI on http://localhost:5173
 | `__EFMigrationsHistory` | EF Core internal — tracks which migrations have been applied. Never touch it. |
 
 
-## Frontend Architecture (WIP)
+## Frontend Architecture
+
+### ✓ Important
+
+- **api/httpCore.ts** — transport layer. Raw HTTP calls (GET, POST, PUT, DELETE) and error handling. Nothing else touches `fetch` directly.
+- **api/products.ts** — API layer. All product-specific API calls in one place. Calls `httpCore`, returns typed responses.
+- **hooks/useProducts.ts** — service layer. All data fetching, pagination, and mutations. Components never call the API directly — they go through hooks.
+- **components/ProductTable.tsx** — presentation layer (list view). Renders the product list and triggers edit/delete actions.
+- **components/ProductForm.tsx** — presentation layer (detail view). Handles the create/edit form inside the modal.
+- **App.tsx** — UI orchestration layer. Owns modal state, wires hooks to components, handles submit/delete flow.
+- **types/** — domain types. TypeScript interfaces for `Product` and `PagedResponse`. The shape of data across the whole app.
+- **constants/validationMessages.ts** — shared constants. Form validation messages and button labels.
+- **main.tsx** — composition root. Entry point — mounts the React app into `index.html`.
+
+### ⚠ Ignore — boilerplate
+
+- **vite-env.d.ts** — tells TypeScript about Vite's `import.meta.env`. Auto-generated, never edit.
+- **index.html** — shell HTML. Vite injects the built JS bundle here. Only touch it to add a favicon or meta tags.
+- **package.json** — npm dependencies and scripts. Touch it only to add/remove packages.
+- **vite.config.ts** — Vite bundler config. Touch it only to change build settings.
+- **tsconfig.json** — TypeScript compiler config. Touch it only to change TS strictness rules.
 
 
 ## Shared

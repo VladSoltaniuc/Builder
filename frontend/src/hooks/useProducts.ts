@@ -1,4 +1,4 @@
-// Products - service layer
+// Service layer — products
 import { useCallback, useEffect, useState } from 'react';
 import { productsApi } from '../api/products';
 import { ApiError } from '../api/errors';

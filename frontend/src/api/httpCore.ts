@@ -1,4 +1,4 @@
-// Core API requests - transport layer
+// Transport layer — Core API requests
 import { ApiError } from './errors';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

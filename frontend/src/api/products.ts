@@ -1,4 +1,4 @@
-// Products - API layer
+// API layer — products
 import { httpCore } from './httpCore';
 import type { Product, ProductInput } from '../types/product';
 import type { PagedResponse } from '../types/pagination';

@@ -74,33 +74,52 @@ export function App() {
       {isLoading ? (
         <p className="loading">Se încarcă produsele...</p>
       ) : (
-        <ProductTable products={products} onEdit={openEdit} onDelete={handleDelete} />
+        <ProductTable
+          products={products}
+          onEdit={openEdit}
+          onDelete={handleDelete}
+        />
       )}
 
       <div className="pagination">
-        <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>
+        <button
+          className="btn"
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+        >
           Anterior
         </button>
-        <span>Pagina {page} din {totalPages}</span>
-        <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+        <span>
+          Pagina {page} din {totalPages}
+        </span>
+        <button
+          className="btn"
+          disabled={page === totalPages}
+          onClick={() => setPage(page + 1)}
+        >
           Următor
         </button>
       </div>
 
-      {isModalOpen && createPortal(
-        <div className="modal-backdrop" onClick={closeModal}>
-          <div
-            className="modal"
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
-            <ProductForm editing={editing} onSubmit={handleSubmit} onCancel={closeModal} />
-          </div>
-        </div>,
-        document.body
-      )}
+      {isModalOpen &&
+        createPortal(
+          <div className="modal-backdrop" onClick={closeModal}>
+            <div
+              className="modal"
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              <ProductForm
+                editing={editing}
+                onSubmit={handleSubmit}
+                onCancel={closeModal}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </main>
   );
 }

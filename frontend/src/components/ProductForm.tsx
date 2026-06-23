@@ -1,4 +1,4 @@
-// DetailView - Presentation layer
+// Presentation layer — detail view
 import { useEffect, useState, type FormEvent } from "react";
 import type { Product, ProductInput } from "../types/product";
 import {

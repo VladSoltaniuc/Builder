@@ -1,4 +1,4 @@
-// Error handling layer
+// API layer — error handling
 import { getStatusMessage } from './errorMessages';
 
 export class ApiError extends Error {

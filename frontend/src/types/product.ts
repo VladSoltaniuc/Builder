@@ -1,3 +1,4 @@
+// Shared layer — API contract types
 export interface Product {
   id: number;
   name: string;

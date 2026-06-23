@@ -1,4 +1,4 @@
-// Error handling layer
+// API layer — error messages
 const statusMessages: Record<number, string> = {
   0:   'Conexiune eșuată. Verifică internetul sau încearcă mai târziu.',
   1:   'A apărut o eroare neașteptată. Contactează administratorul.',
