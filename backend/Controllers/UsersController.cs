@@ -1,6 +1,5 @@
 // Presentation layer
 using Microsoft.AspNetCore.Mvc;
-using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Services;
 
@@ -12,10 +11,8 @@ public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<UserResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResponse<UserResponse>>> GetAll(
-        [FromQuery] int page = PaginationDefaults.Page,
-        [FromQuery] int pageSize = PaginationDefaults.PageSize)
-        => Ok(await userService.GetAll(page, pageSize));
+    public async Task<ActionResult<PagedResponse<UserResponse>>> GetAll([FromQuery] PageQuery query)
+        => Ok(await userService.GetAll(query));
 
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]

@@ -5,7 +5,8 @@ namespace ProductApi.Services;
 
 public interface IProductService
 {
-    Task<PagedResponse<ProductResponse>> GetAll(int page, int pageSize);
+    ProductOptionsResponse GetOptions();
+    Task<PagedResponse<ProductResponse>> GetAll(ProductQuery query);
     Task<ProductResponse?> GetById(int id);
     Task<ProductResponse> Create(CreateProductRequest request);
     Task<UpdateProductResult> Update(int id, UpdateProductRequest request);

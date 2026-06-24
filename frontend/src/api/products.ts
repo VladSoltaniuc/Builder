@@ -1,13 +1,17 @@
 // API layer — products
 import { httpCore } from './httpCore';
+import { buildPagedParams } from './buildPagedParams';
 import type { Product, ProductInput } from '../types/product';
 import type { PagedResponse } from '../types/pagination';
+import type { ProductOptions } from '../types/options';
 
 const RESOURCE = '/products';
 
 export const productsApi = {
-  getAll: (page: number, pageSize: number) =>
-    httpCore.get<PagedResponse<Product>>(`${RESOURCE}?page=${page}&pageSize=${pageSize}`),
+  getOptions: () => httpCore.get<ProductOptions>(`${RESOURCE}/options`),
+
+  getAll: (page: number, pageSize: number, sortBy?: string, search?: string, filters?: Record<string, string>) =>
+    httpCore.get<PagedResponse<Product>>(`${RESOURCE}?${buildPagedParams(page, pageSize, sortBy, search, filters)}`),
 
   create: (input: ProductInput) => httpCore.post<Product>(RESOURCE, input),
 

@@ -9,4 +9,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Order> Orders => Set<Order>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Order>()
+            .Property(o => o.Status)
+            .HasConversion<string>();
+    }
 }

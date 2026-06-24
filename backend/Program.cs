@@ -1,4 +1,5 @@
 // Composition root
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Data;
 using ProductApi.Services;
@@ -7,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "AllowFrontend";
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

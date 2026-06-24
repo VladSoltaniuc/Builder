@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { productsApi } from '../api/products';
 import { ApiError } from '../api/errors';
 import type { Product, ProductInput } from '../types/product';
+import type { SortState } from '../types/query';
+import { toSortBy } from '../types/query';
 import { PAGE_SIZE } from '../constants/pagination';
 
 export function useProducts() {
@@ -12,11 +14,23 @@ export function useProducts() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const loadProducts = useCallback(async function loadProducts(p: number) {
+  // --- Sorting ---
+  const [sort, setSort] = useState<SortState | null>(null);
+
+  // --- Filtering ---
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<Record<string, string>>({});
+
+  const loadProducts = useCallback(async function loadProducts(
+    p: number,
+    s: SortState | null,
+    search: string,
+    filters: Record<string, string>,
+  ) {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await productsApi.getAll(p, PAGE_SIZE);
+      const data = await productsApi.getAll(p, PAGE_SIZE, toSortBy(s), search || undefined, Object.keys(filters).length ? filters : undefined);
       setProducts(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
@@ -28,10 +42,9 @@ export function useProducts() {
 
   const createProduct = useCallback(async function createProduct(input: ProductInput) {
     await productsApi.create(input);
-    // Go to page 1 after create — triggers useEffect which reloads
-    if (page === 1) void loadProducts(1);
+    if (page === 1) void loadProducts(1, sort, search, filters);
     else setPage(1);
-  }, [loadProducts, page]);
+  }, [loadProducts, page, sort, search, filters]);
 
   const updateProduct = useCallback(async function updateProduct(id: number, input: ProductInput, version: number) {
     const updated = await productsApi.update(id, input, version);
@@ -40,26 +53,21 @@ export function useProducts() {
 
   const deleteProduct = useCallback(async function deleteProduct(id: number) {
     await productsApi.remove(id);
-    // If this was the last item on a non-first page, go back one page
     const newPage = products.length === 1 && page > 1 ? page - 1 : page;
-    if (newPage === page) void loadProducts(page);
+    if (newPage === page) void loadProducts(page, sort, search, filters);
     else setPage(newPage);
-  }, [loadProducts, page, products.length]);
+  }, [loadProducts, page, products.length, sort, search, filters]);
 
-  // Reload whenever page changes
   useEffect(() => {
-    void loadProducts(page);
-  }, [loadProducts, page]);
+    void loadProducts(page, sort, search, filters);
+  }, [loadProducts, page, sort, search, filters]);
 
   return {
-    products,
-    isLoading,
-    error,
-    page,
-    totalPages: Math.max(1, Math.ceil(totalCount / PAGE_SIZE)),
-    setPage,
-    createProduct,
-    updateProduct,
-    deleteProduct,
+    products, isLoading, error,
+    page, totalPages: Math.max(1, Math.ceil(totalCount / PAGE_SIZE)), setPage,
+    sort, setSort,
+    search, setSearch,
+    filters, setFilters,
+    createProduct, updateProduct, deleteProduct,
   };
 }

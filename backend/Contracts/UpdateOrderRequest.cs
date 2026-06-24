@@ -1,5 +1,6 @@
 // Application layer
 using System.ComponentModel.DataAnnotations;
+using ProductApi.Models;
 
 namespace ProductApi.Contracts;
 
@@ -9,7 +10,7 @@ public class UpdateOrderRequest
     public int Quantity { get; set; }
 
     [Required(ErrorMessage = "Status is required.")]
-    public string Status { get; set; } = string.Empty;
+    public OrderStatus Status { get; set; }
 
     [Required]
     public int Version { get; set; }

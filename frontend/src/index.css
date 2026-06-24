@@ -209,6 +209,40 @@ input:focus {
   padding: 2rem;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  color: var(--text);
+}
+
+.sort-icon {
+  opacity: 0.3;
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.sort-icon.active {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.filters {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.filters input,
+.filters select {
+  flex: 1;
+  min-width: 160px;
+}
+
 .toolbar {
   display: flex;
   justify-content: flex-end;
@@ -224,31 +258,39 @@ input:focus {
   color: var(--muted);
 }
 
-.modal-backdrop {
+button.modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: none;
+  cursor: default;
   z-index: 100;
-  padding: 1rem;
+  padding: 0;
 }
 
-.modal {
-  width: 100%;
+dialog.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 2rem);
   max-width: 760px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  z-index: 101;
 }
 
-.modal .card {
+dialog.modal .card {
   margin: 0;
 }
 
-.modal .form-grid {
+dialog.modal .form-grid {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.modal .form-grid > * {
+dialog.modal .form-grid > * {
   min-width: 0;
 }
 

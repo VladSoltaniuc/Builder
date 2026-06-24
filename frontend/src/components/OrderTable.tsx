@@ -1,24 +1,30 @@
 // Presentation layer — list view
 import type { Order } from "../types/order";
+import type { SortState } from "../types/query";
+import { toggleSort } from "../types/query";
+import { sortIcons } from "../constants/ui";
 
 interface OrderTableProps {
   orders: Order[];
+  sort: SortState | null;
+  onSort: (sort: SortState | null) => void;
   onEdit: (order: Order) => void;
   onDelete: (id: number) => void;
 }
 
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
+const currency = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" });
 
-const STATUS_LABELS: Record<string, string> = {
-  Pending: "Pending",
-  Completed: "Completed",
-  Cancelled: "Cancelled",
-};
 
-export function OrderTable({ orders, onEdit, onDelete }: OrderTableProps) {
+function SortIcon({ field, sort }: Readonly<{ field: string; sort: SortState | null }>) {
+  if (sort?.field !== field) return <span className="sort-icon">{sortIcons.both}</span>;
+  return <span className="sort-icon active">{sort.dir === 'ASC' ? sortIcons.asc : sortIcons.desc}</span>;
+}
+
+export function OrderTable({ orders, sort, onSort, onEdit, onDelete }: Readonly<OrderTableProps>) {
+  function handleSort(field: string) {
+    onSort(toggleSort(sort, field));
+  }
+
   if (orders.length === 0) {
     return <p className="empty">No orders. Add one using the form above.</p>;
   }
@@ -30,10 +36,18 @@ export function OrderTable({ orders, onEdit, onDelete }: OrderTableProps) {
           <th>#</th>
           <th>User</th>
           <th>Product</th>
-          <th className="num">Qty</th>
-          <th className="num">Total</th>
-          <th>Status</th>
-          <th>Date</th>
+          <th className="num sortable" onClick={() => handleSort('quantity')}>
+            Qty <SortIcon field="quantity" sort={sort} />
+          </th>
+          <th className="num sortable" onClick={() => handleSort('totalPrice')}>
+            Total <SortIcon field="totalPrice" sort={sort} />
+          </th>
+          <th className="sortable" onClick={() => handleSort('status')}>
+            Status <SortIcon field="status" sort={sort} />
+          </th>
+          <th className="sortable" onClick={() => handleSort('createdAt')}>
+            Date <SortIcon field="createdAt" sort={sort} />
+          </th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -45,19 +59,12 @@ export function OrderTable({ orders, onEdit, onDelete }: OrderTableProps) {
             <td>{order.productName}</td>
             <td className="num">{order.quantity}</td>
             <td className="num">{currency.format(order.totalPrice)}</td>
-            <td>{STATUS_LABELS[order.status] ?? order.status}</td>
+            <td>{order.status}</td>
             <td>{new Date(order.createdAt).toLocaleDateString()}</td>
             <td>
               <div className="row-actions">
-                <button className="btn btn-small" onClick={() => onEdit(order)}>
-                  Edit
-                </button>
-                <button
-                  className="btn btn-small btn-danger"
-                  onClick={() => onDelete(order.id)}
-                >
-                  Delete
-                </button>
+                <button className="btn btn-small" onClick={() => onEdit(order)}>Edit</button>
+                <button className="btn btn-small btn-danger" onClick={() => onDelete(order.id)}>Delete</button>
               </div>
             </td>
           </tr>

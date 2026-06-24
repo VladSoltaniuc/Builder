@@ -1,7 +1,7 @@
 # TODO
 
 ## UI
-- [ ] Add language selector EN/RO
+- [ ] Add language selector EN/RO (react-i18next, move all UI copy to locales/ro.json + locales/en.json)
 - [x] Add another page
 - [ ] Filtering
 - [ ] Sorting

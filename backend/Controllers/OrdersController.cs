@@ -1,6 +1,5 @@
 // Presentation layer
 using Microsoft.AspNetCore.Mvc;
-using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Services;
 
@@ -10,12 +9,14 @@ namespace ProductApi.Controllers;
 [Route("api/[controller]")]
 public class OrdersController(IOrderService orderService) : ControllerBase
 {
+    [HttpGet("options")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult GetOptions() => Ok(orderService.GetOptions());
+
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<OrderResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResponse<OrderResponse>>> GetAll(
-        [FromQuery] int page = PaginationDefaults.Page,
-        [FromQuery] int pageSize = PaginationDefaults.PageSize)
-        => Ok(await orderService.GetAll(page, pageSize));
+    public async Task<ActionResult<PagedResponse<OrderResponse>>> GetAll([FromQuery] OrderQuery query)
+        => Ok(await orderService.GetAll(query));
 
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]

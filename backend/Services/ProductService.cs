@@ -1,22 +1,96 @@
 // Application layer
 using Microsoft.EntityFrameworkCore;
+using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Infrastructure;
 using ProductApi.Models;
 
 namespace ProductApi.Services;
 
 public class ProductService(AppDbContext db) : IProductService
 {
-    public async Task<PagedResponse<ProductResponse>> GetAll(int page, int pageSize)
+    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Product, object>>> SortColumns = new()
     {
-        var total = await db.Products.CountAsync();
-        var items = await db.Products
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+        ["name"]     = p => p.Name,
+        ["category"] = p => p.Category,
+        ["price"]    = p => p.Price,
+        ["stock"]    = p => p.Stock,
+    };
+
+    // String columns: all ops are case-insensitive (ILike)
+    // Numeric columns: support $eq $gt $gte $lt $lte $btw $in
+    private static readonly Dictionary<string, Func<IQueryable<Product>, string, string, IQueryable<Product>>> FilterColumns = new()
+    {
+        ["name"] = (q, op, val) => op switch
+        {
+            "$eq"    => q.Where(p => EF.Functions.ILike(p.Name, val)),
+            "$not"   => q.Where(p => !EF.Functions.ILike(p.Name, val)),
+            "$ilike" => q.Where(p => EF.Functions.ILike(p.Name, $"%{val}%")),
+            "$sw"    => q.Where(p => EF.Functions.ILike(p.Name, $"{val}%")),
+            _ => q
+        },
+        ["category"] = (q, op, val) => op switch
+        {
+            "$eq"    => q.Where(p => EF.Functions.ILike(p.Category, val)),
+            "$not"   => q.Where(p => !EF.Functions.ILike(p.Category, val)),
+            "$ilike" => q.Where(p => EF.Functions.ILike(p.Category, $"%{val}%")),
+            "$sw"    => q.Where(p => EF.Functions.ILike(p.Category, $"{val}%")),
+            _ => q
+        },
+        ["price"] = (q, op, val) =>
+        {
+            if (op == "$btw") { var r = FilterHelper.ParseBtw(val); return r is null ? q : q.Where(p => p.Price >= r.Value.Min && p.Price <= r.Value.Max); }
+            if (!decimal.TryParse(val, out var d)) return q;
+            return op switch
+            {
+                "$eq"  => q.Where(p => p.Price == d),
+                "$gt"  => q.Where(p => p.Price > d),
+                "$gte" => q.Where(p => p.Price >= d),
+                "$lt"  => q.Where(p => p.Price < d),
+                "$lte" => q.Where(p => p.Price <= d),
+                _ => q
+            };
+        },
+        ["stock"] = (q, op, val) =>
+        {
+            if (op == "$in") { var ids = FilterHelper.ParseInInt(val); return ids is null ? q : q.Where(p => ids.Contains(p.Stock)); }
+            if (!int.TryParse(val, out var n)) return q;
+            return op switch
+            {
+                "$eq"  => q.Where(p => p.Stock == n),
+                "$gt"  => q.Where(p => p.Stock > n),
+                "$gte" => q.Where(p => p.Stock >= n),
+                "$lt"  => q.Where(p => p.Stock < n),
+                "$lte" => q.Where(p => p.Stock <= n),
+                _ => q
+            };
+        },
+    };
+
+    public ProductOptionsResponse GetOptions() => new(ProductOptions.Categories);
+
+    public async Task<PagedResponse<ProductResponse>> GetAll(ProductQuery q)
+    {
+        var query = db.Products.AsQueryable();
+
+        // --- Filter ---
+        query = query.ApplyFilters(q.Filters, FilterColumns);
+
+        // --- Search ---
+        if (!string.IsNullOrWhiteSpace(q.Search))
+            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{q.Search}%") || EF.Functions.ILike(p.Category, $"%{q.Search}%"));
+
+        // --- Sort ---
+        query = query.ApplySort(q.SortBy, SortColumns);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((q.Page - 1) * q.PageSize)
+            .Take(q.PageSize)
             .Select(p => ToResponse(p))
             .ToListAsync();
-        return new PagedResponse<ProductResponse>(items, total, page, pageSize);
+        return new PagedResponse<ProductResponse>(items, total, q.Page, q.PageSize);
     }
 
     public async Task<ProductResponse?> GetById(int id)

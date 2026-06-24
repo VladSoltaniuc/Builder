@@ -10,7 +10,7 @@ public class Order
     public Product Product { get; set; } = null!;
     public int Quantity { get; set; }
     public decimal TotalPrice { get; set; }
-    public string Status { get; set; } = "Pending";
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int Version { get; set; } = 1;
 }

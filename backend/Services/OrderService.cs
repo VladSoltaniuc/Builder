@@ -1,24 +1,90 @@
 // Application layer
 using Microsoft.EntityFrameworkCore;
+using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Infrastructure;
 using ProductApi.Models;
 
 namespace ProductApi.Services;
 
 public class OrderService(AppDbContext db) : IOrderService
 {
-    public async Task<PagedResponse<OrderResponse>> GetAll(int page, int pageSize)
+    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Order, object>>> SortColumns = new()
     {
-        var total = await db.Orders.CountAsync();
-        var items = await db.Orders
+        ["status"]     = o => o.Status,
+        ["totalPrice"] = o => o.TotalPrice,
+        ["quantity"]   = o => o.Quantity,
+        ["createdAt"]  = o => o.CreatedAt,
+    };
+
+    private static readonly Dictionary<string, Func<IQueryable<Order>, string, string, IQueryable<Order>>> FilterColumns = new()
+    {
+        ["status"] = (q, op, val) =>
+        {
+            if (!Enum.TryParse<OrderStatus>(val, ignoreCase: true, out var status)) return q;
+            return op switch
+            {
+                "$eq"  => q.Where(o => o.Status == status),
+                "$not" => q.Where(o => o.Status != status),
+                _ => q
+            };
+        },
+        ["totalPrice"] = (q, op, val) =>
+        {
+            if (op == "$btw") { var r = FilterHelper.ParseBtw(val); return r is null ? q : q.Where(o => o.TotalPrice >= r.Value.Min && o.TotalPrice <= r.Value.Max); }
+            if (!decimal.TryParse(val, out var d)) return q;
+            return op switch
+            {
+                "$eq"  => q.Where(o => o.TotalPrice == d),
+                "$gt"  => q.Where(o => o.TotalPrice > d),
+                "$gte" => q.Where(o => o.TotalPrice >= d),
+                "$lt"  => q.Where(o => o.TotalPrice < d),
+                "$lte" => q.Where(o => o.TotalPrice <= d),
+                _ => q
+            };
+        },
+        ["quantity"] = (q, op, val) =>
+        {
+            if (!int.TryParse(val, out var n)) return q;
+            return op switch
+            {
+                "$eq"  => q.Where(o => o.Quantity == n),
+                "$gt"  => q.Where(o => o.Quantity > n),
+                "$gte" => q.Where(o => o.Quantity >= n),
+                "$lt"  => q.Where(o => o.Quantity < n),
+                "$lte" => q.Where(o => o.Quantity <= n),
+                _ => q
+            };
+        },
+    };
+
+    public OrderOptionsResponse GetOptions() => new(OrderOptions.Statuses);
+
+    public async Task<PagedResponse<OrderResponse>> GetAll(OrderQuery q)
+    {
+        var query = db.Orders
             .Include(o => o.User)
             .Include(o => o.Product)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .AsQueryable();
+
+        // --- Filter ---
+        query = query.ApplyFilters(q.Filters, FilterColumns);
+
+        // --- Search ---
+        if (!string.IsNullOrWhiteSpace(q.Search))
+            query = query.Where(o => EF.Functions.ILike(o.User.Name, $"%{q.Search}%") || EF.Functions.ILike(o.Product.Name, $"%{q.Search}%"));
+
+        // --- Sort ---
+        query = query.ApplySort(q.SortBy, SortColumns);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((q.Page - 1) * q.PageSize)
+            .Take(q.PageSize)
             .Select(o => ToResponse(o))
             .ToListAsync();
-        return new PagedResponse<OrderResponse>(items, total, page, pageSize);
+        return new PagedResponse<OrderResponse>(items, total, q.Page, q.PageSize);
     }
 
     public async Task<OrderResponse?> GetById(int id)
@@ -44,7 +110,7 @@ public class OrderService(AppDbContext db) : IOrderService
             ProductId = request.ProductId,
             Quantity = request.Quantity,
             TotalPrice = product.Price * request.Quantity,
-            Status = "Pending",
+            Status = OrderStatus.Pending,
             CreatedAt = DateTime.UtcNow,
         };
 

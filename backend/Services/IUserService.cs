@@ -5,7 +5,7 @@ namespace ProductApi.Services;
 
 public interface IUserService
 {
-    Task<PagedResponse<UserResponse>> GetAll(int page, int pageSize);
+    Task<PagedResponse<UserResponse>> GetAll(PageQuery query);
     Task<UserResponse?> GetById(int id);
     Task<UserResponse> Create(CreateUserRequest request);
     Task<UpdateUserResult> Update(int id, UpdateUserRequest request);
