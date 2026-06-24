@@ -28,6 +28,28 @@ npm run dev                 # starts UI on http://localhost:5173
 
 > **Note:** Copy your connection string into `backend/appsettings.Development.json` before running. This file is gitignored — you must create it manually.
 
+### Tests
+
+Set the test database connection string once (bash):
+```bash
+echo 'export TEST_CONNECTION_STRING="Host=127.0.0.1;Port=5432;Database=builder_test;Username=<user>;Password=<password>"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Then run:
+```bash
+# Unit tests
+dotnet test tests/ProductApi.UnitTests
+
+# Integration tests (requires PostgreSQL running)
+dotnet test tests/ProductApi.IntegrationTests
+
+# All tests
+dotnet test
+```
+
+> Integration tests use a separate `builder_test` database. It is created and migrated automatically on first run.
+
 ---
 
 ## Backend Architecture

@@ -42,7 +42,7 @@
 
 ## Testing & CI/CD
 - [x] Unit tests
-- [ ] Integration tests
+- [x] Integration tests
 - [ ] CI/CD pipeline (GitHub Actions)
 
 ## Performance & Concurrency

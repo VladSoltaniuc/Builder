@@ -40,3 +40,6 @@ app.UseCors(FrontendCorsPolicy);
 app.MapControllers();
 
 app.Run();
+
+// Exposes Program to WebApplicationFactory in integration tests
+public partial class Program { }
