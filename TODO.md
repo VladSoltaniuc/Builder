@@ -3,8 +3,9 @@
 ## UI
 - [ ] Add language selector EN/RO (react-i18next, move all UI copy to locales/ro.json + locales/en.json)
 - [x] Add another page
-- [ ] Filtering
-- [ ] Sorting
+- [x] Filtering
+- [x] Sorting
+- [x] Search
 - [ ] Toast notifications
 - [ ] Theme selector
 - [ ] Migrate to Material UI (MUI)
