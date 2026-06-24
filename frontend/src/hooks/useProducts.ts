@@ -3,8 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { productsApi } from '../api/products';
 import { ApiError } from '../api/errors';
 import type { Product, ProductInput } from '../types/product';
-
-const PAGE_SIZE = 10;
+import { PAGE_SIZE } from '../constants/pagination';
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);

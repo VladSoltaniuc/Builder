@@ -2,7 +2,7 @@
 
 ## UI
 - [ ] Add language selector EN/RO
-- [ ] Add another page
+- [x] Add another page
 - [ ] Filtering
 - [ ] Sorting
 - [ ] Toast notifications
@@ -22,6 +22,10 @@
 
 ## Database
 - [ ] Migrate from in-memory to PostgreSQL + Entity Framework Core
+- [ ] Redis (caching)
+
+## Patterns
+- [ ] Mediator pattern (MediatR)
 
 ## Backend
 - [ ] View (virtual table from joins + computed columns)
@@ -47,7 +51,6 @@
 
 ## DevOps
 - [ ] Docker
-- [ ] Redis (caching)
 - [ ] Kubernetes
 - [ ] Sharding
 - [ ] Multiple PODs

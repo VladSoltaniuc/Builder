@@ -7,32 +7,32 @@ import {
 } from "../constants/validationMessages";
 
 interface ProductFormProps {
-  editing: Product | null;
+  product: Product | null;
   onSubmit: (input: ProductInput) => Promise<void>;
   onCancel: () => void;
 }
 
 const EMPTY_FORM: ProductInput = { name: "", category: "", price: 0, stock: 0 };
 
-export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
+export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
   const [form, setForm] = useState<ProductInput>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (editing) {
-      const { name, category, price, stock } = editing;
+    if (product) {
+      const { name, category, price, stock } = product;
       setForm({ name, category, price, stock });
     } else {
       setForm(EMPTY_FORM);
     }
-  }, [editing]);
+  }, [product]);
 
   function validate(message: string) {
     return {
-      onInvalid: (e: React.InvalidEvent<HTMLInputElement>) =>
-        e.target.setCustomValidity(message),
-      onInput: (e: React.FormEvent<HTMLInputElement>) =>
-        (e.target as HTMLInputElement).setCustomValidity(""),
+      onInvalid: (event: React.InvalidEvent<HTMLInputElement>) =>
+        event.target.setCustomValidity(message),
+      onInput: (event: React.FormEvent<HTMLInputElement>) =>
+        (event.target as HTMLInputElement).setCustomValidity(""),
     };
   }
 
@@ -54,11 +54,11 @@ export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
     }
   }
 
-  const submitLabel = editing ? formLabels.save : formLabels.add;
+  const submitLabel = product ? formLabels.save : formLabels.add;
 
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>{editing ? `Editează produsul #${editing.id}` : "Adaugă produs"}</h2>
+      <h2>{product ? `Editează produsul #${product.id}` : "Adaugă produs"}</h2>
 
       <div className="form-grid">
         <label>
@@ -120,7 +120,7 @@ export function ProductForm({ editing, onSubmit, onCancel }: ProductFormProps) {
         >
           {isSubmitting ? formLabels.saving : submitLabel}
         </button>
-        {editing && (
+        {product && (
           <button
             type="button"
             className="btn"
