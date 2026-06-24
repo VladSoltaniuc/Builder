@@ -22,7 +22,7 @@ public static class FilterHelper
     public static (string Op, string Val) ParseFilter(string raw)
     {
         if (string.IsNullOrWhiteSpace(raw) || !raw.StartsWith('$'))
-            return ("$eq", raw ?? string.Empty);
+            return ("$eq", raw?.Trim() ?? string.Empty);
 
         var colon = raw.IndexOf(':');
         return colon < 0

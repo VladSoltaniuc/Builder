@@ -22,7 +22,7 @@
 - [ ] Roles & permissions (admin vs read-only)
 
 ## Database
-- [ ] Migrate from in-memory to PostgreSQL + Entity Framework Core
+- [x] Migrate from in-memory to PostgreSQL + Entity Framework Core
 - [ ] Redis (caching)
 
 ## Patterns
@@ -41,7 +41,7 @@
 - [ ] SMS sending
 
 ## Testing & CI/CD
-- [ ] Unit tests
+- [x] Unit tests
 - [ ] Integration tests
 - [ ] CI/CD pipeline (GitHub Actions)
 
@@ -49,9 +49,3 @@
 - [ ] Parallel programming
 - [ ] Multithreading
 - [ ] 10,000 record stress test
-
-## DevOps
-- [ ] Docker
-- [ ] Kubernetes
-- [ ] Sharding
-- [ ] Multiple PODs
