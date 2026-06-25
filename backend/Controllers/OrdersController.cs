@@ -58,4 +58,38 @@ public class OrdersController(IOrderService orderService) : ControllerBase
         var deleted = await orderService.Delete(id);
         return deleted ? NoContent() : NotFound();
     }
+
+    [HttpPost("{id:int}/invoice")]
+    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<OrderResponse>> UploadInvoice(int id, IFormFile file)
+    {
+        if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+            return BadRequest("Only PDF files are allowed.");
+        if (file.Length > 10 * 1024 * 1024)
+            return BadRequest("Invoice must be under 10 MB.");
+
+        var result = await orderService.UploadInvoice(id, file);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpDelete("{id:int}/invoice")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteInvoice(int id)
+    {
+        var deleted = await orderService.DeleteInvoice(id);
+        return deleted ? NoContent() : NotFound();
+    }
+
+    [HttpGet("{id:int}/invoice")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadInvoice(int id)
+    {
+        var path = await orderService.GetInvoicePath(id);
+        if (path is null) return NotFound();
+        return PhysicalFile(path, "application/pdf", $"invoice-{id}.pdf");
+    }
 }

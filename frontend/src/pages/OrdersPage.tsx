@@ -20,6 +20,7 @@ export function OrdersPage() {
     search, setSearch,
     setFilters,
     createOrder, updateOrder, deleteOrder,
+    uploadInvoice, deleteInvoice, downloadInvoice,
   } = useOrders();
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
@@ -67,6 +68,32 @@ export function OrdersPage() {
     }
   }
 
+  async function handleUploadInvoice(id: number, file: File) {
+    try {
+      await uploadInvoice(id, file);
+      toast.success(t('orders.invoice.uploaded'));
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
+  }
+
+  async function handleDeleteInvoice(id: number) {
+    try {
+      await deleteInvoice(id);
+      toast.success(t('orders.invoice.removed'));
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
+  }
+
+  async function handleDownloadInvoice(id: number) {
+    try {
+      await downloadInvoice(id);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
+  }
+
   return (
     <main className="container">
       <header><h1>{t('orders.title')}</h1></header>
@@ -92,7 +119,16 @@ export function OrdersPage() {
       {isLoading ? (
         <p className="loading">{t('common.loading')}</p>
       ) : (
-        <OrderTable orders={orders} sort={sort} onSort={setSort} onEdit={openEdit} onDelete={handleDelete} />
+        <OrderTable
+          orders={orders}
+          sort={sort}
+          onSort={setSort}
+          onEdit={openEdit}
+          onDelete={handleDelete}
+          onUploadInvoice={handleUploadInvoice}
+          onDeleteInvoice={handleDeleteInvoice}
+          onDownloadInvoice={handleDownloadInvoice}
+        />
       )}
 
       <div className="pagination">

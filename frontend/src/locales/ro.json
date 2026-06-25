@@ -20,7 +20,11 @@
       "name": "Nume",
       "category": "Categorie",
       "price": "Preț (RON)",
-      "stock": "Stoc"
+      "stock": "Stoc",
+      "image": "Imagine produs",
+      "uploadImage": "Încarcă imagine",
+      "changeImage": "Schimbă imaginea",
+      "removeImage": "Elimină imaginea"
     },
     "validation": {
       "name": "Numele este obligatoriu și trebuie să aibă cel puțin 2 caractere.",
@@ -62,6 +66,13 @@
       "productId": "ID Produs",
       "quantity": "Cantitate",
       "status": "Status"
+    },
+    "invoice": {
+      "upload": "Încarcă PDF",
+      "download": "Descarcă PDF",
+      "remove": "Elimină PDF",
+      "uploaded": "Factură încărcată",
+      "removed": "Factură eliminată"
     }
   },
   "table": {

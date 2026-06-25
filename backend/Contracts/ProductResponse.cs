@@ -7,4 +7,5 @@ public record ProductResponse(
     string Category,
     decimal Price,
     int Stock,
-    int Version);
+    int Version,
+    string? ImageUrl);

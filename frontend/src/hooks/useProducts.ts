@@ -58,6 +58,17 @@ export function useProducts() {
     else setPage(newPage);
   }, [loadProducts, page, products.length, sort, search, filters]);
 
+  const uploadImage = useCallback(async function uploadImage(id: number, file: File) {
+    const updated = await productsApi.uploadImage(id, file);
+    setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    return updated;
+  }, []);
+
+  const deleteImage = useCallback(async function deleteImage(id: number) {
+    await productsApi.deleteImage(id);
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, imageUrl: undefined } : p)));
+  }, []);
+
   useEffect(() => {
     void loadProducts(page, sort, search, filters);
   }, [loadProducts, page, sort, search, filters]);
@@ -69,5 +80,6 @@ export function useProducts() {
     search, setSearch,
     filters, setFilters,
     createProduct, updateProduct, deleteProduct,
+    uploadImage, deleteImage,
   };
 }

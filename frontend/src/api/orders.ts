@@ -1,5 +1,6 @@
 // API layer — orders
 import { httpCore } from './httpCore';
+import { httpFile } from './httpFile';
 import { buildPagedParams } from './buildPagedParams';
 import type { Order, OrderInput, OrderUpdateInput } from '../types/order';
 import type { PagedResponse } from '../types/pagination';
@@ -20,4 +21,10 @@ export const ordersApi = {
   update: (id: number, input: OrderUpdateInput) => httpCore.put<Order>(`${RESOURCE}/${id}`, input),
 
   remove: (id: number) => httpCore.delete(`${RESOURCE}/${id}`),
+
+  uploadInvoice: (id: number, file: File) => httpFile.upload<Order>(`${RESOURCE}/${id}/invoice`, file),
+
+  deleteInvoice: (id: number) => httpFile.delete(`${RESOURCE}/${id}/invoice`),
+
+  downloadInvoice: (id: number) => httpFile.download(`${RESOURCE}/${id}/invoice`),
 };

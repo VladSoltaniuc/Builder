@@ -14,4 +14,6 @@ public class Product
     public int Stock { get; set; }
 
     public int Version { get; set; } = 1;
+
+    public string? ImagePath { get; set; }
 }

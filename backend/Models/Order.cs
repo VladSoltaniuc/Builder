@@ -13,4 +13,6 @@ public class Order
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int Version { get; set; } = 1;
+
+    public string? InvoicePath { get; set; }
 }

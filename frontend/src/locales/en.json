@@ -20,7 +20,11 @@
       "name": "Name",
       "category": "Category",
       "price": "Price (RON)",
-      "stock": "Stock"
+      "stock": "Stock",
+      "image": "Product Image",
+      "uploadImage": "Upload Image",
+      "changeImage": "Change Image",
+      "removeImage": "Remove Image"
     },
     "validation": {
       "name": "Name is required and must be at least 2 characters.",
@@ -62,6 +66,13 @@
       "productId": "Product ID",
       "quantity": "Quantity",
       "status": "Status"
+    },
+    "invoice": {
+      "upload": "Upload PDF",
+      "download": "Download PDF",
+      "remove": "Remove PDF",
+      "uploaded": "Invoice uploaded",
+      "removed": "Invoice removed"
     }
   },
   "table": {

@@ -1,5 +1,6 @@
 // API layer — products
 import { httpCore } from './httpCore';
+import { httpFile } from './httpFile';
 import { buildPagedParams } from './buildPagedParams';
 import type { Product, ProductInput } from '../types/product';
 import type { PagedResponse } from '../types/pagination';
@@ -19,4 +20,8 @@ export const productsApi = {
     httpCore.put<Product>(`${RESOURCE}/${id}`, { ...input, version }),
 
   remove: (id: number) => httpCore.delete(`${RESOURCE}/${id}`),
+
+  uploadImage: (id: number, file: File) => httpFile.upload<Product>(`${RESOURCE}/${id}/image`, file),
+
+  deleteImage: (id: number) => httpFile.delete(`${RESOURCE}/${id}/image`),
 };

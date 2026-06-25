@@ -20,6 +20,7 @@ export function ProductsPage() {
     search, setSearch,
     setFilters,
     createProduct, updateProduct, deleteProduct,
+    uploadImage, deleteImage,
   } = useProducts();
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -67,6 +68,27 @@ export function ProductsPage() {
     }
   }
 
+  async function handleUploadImage(file: File) {
+    try {
+      const updated = await uploadImage(editingProduct!.id, file);
+      setEditingProduct(updated);
+      return updated;
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+      throw err;
+    }
+  }
+
+  async function handleDeleteImage() {
+    try {
+      await deleteImage(editingProduct!.id);
+      setEditingProduct((prev) => prev ? { ...prev, imageUrl: undefined } : null);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+      throw err;
+    }
+  }
+
   return (
     <main className="container">
       <header><h1>{t('products.title')}</h1></header>
@@ -106,7 +128,13 @@ export function ProductsPage() {
           <>
             <button className="modal-backdrop" onClick={closeModal} aria-label="Close modal" />
             <dialog className="modal" open>
-              <ProductForm product={editingProduct} onSubmit={handleSubmit} onCancel={closeModal} />
+              <ProductForm
+                product={editingProduct}
+                onSubmit={handleSubmit}
+                onCancel={closeModal}
+                onUploadImage={editingProduct ? handleUploadImage : undefined}
+                onDeleteImage={editingProduct ? handleDeleteImage : undefined}
+              />
             </dialog>
           </>,
           document.body,

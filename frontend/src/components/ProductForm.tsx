@@ -1,5 +1,5 @@
 // Presentation layer — detail view
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { Product, ProductInput } from "../types/product";
 
@@ -7,9 +7,13 @@ interface ProductFormProps {
   product: Product | null;
   onSubmit: (input: ProductInput) => Promise<void>;
   onCancel: () => void;
+  onUploadImage?: (file: File) => Promise<Product>;
+  onDeleteImage?: () => Promise<void>;
 }
 
 const EMPTY_FORM: ProductInput = { name: "", category: "", price: 0, stock: 0 };
+
+const STATIC_BASE = import.meta.env.VITE_STATIC_BASE_URL as string;
 
 function validate(message: string) {
   return {
@@ -20,10 +24,13 @@ function validate(message: string) {
   };
 }
 
-export function ProductForm({ product, onSubmit, onCancel }: Readonly<ProductFormProps>) {
+export function ProductForm({ product, onSubmit, onCancel, onUploadImage, onDeleteImage }: Readonly<ProductFormProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<ProductInput>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(product?.imageUrl);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (product) {
@@ -32,6 +39,7 @@ export function ProductForm({ product, onSubmit, onCancel }: Readonly<ProductFor
     } else {
       setForm(EMPTY_FORM);
     }
+    setImageUrl(product?.imageUrl);
   }, [product]);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -49,6 +57,30 @@ export function ProductForm({ product, onSubmit, onCancel }: Readonly<ProductFor
       await onSubmit(form);
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file || !onUploadImage) return;
+    setIsImageLoading(true);
+    try {
+      const updated = await onUploadImage(file);
+      setImageUrl(updated.imageUrl);
+    } finally {
+      setIsImageLoading(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleDeleteImage() {
+    if (!onDeleteImage) return;
+    setIsImageLoading(true);
+    try {
+      await onDeleteImage();
+      setImageUrl(undefined);
+    } finally {
+      setIsImageLoading(false);
     }
   }
 
@@ -109,6 +141,36 @@ export function ProductForm({ product, onSubmit, onCancel }: Readonly<ProductFor
           />
         </label>
       </div>
+
+      {product && onUploadImage && (
+        <div className="image-section">
+          <p className="image-label">{t('products.form.image')}</p>
+          {imageUrl && (
+            <img
+              src={`${STATIC_BASE}${imageUrl}`}
+              alt={form.name}
+              className="product-image-preview"
+            />
+          )}
+          <div className="row-actions">
+            <button type="button" className="btn btn-small" onClick={() => fileInputRef.current?.click()} disabled={isImageLoading}>
+              {imageUrl ? t('products.form.changeImage') : t('products.form.uploadImage')}
+            </button>
+            {imageUrl && onDeleteImage && (
+              <button type="button" className="btn btn-small btn-danger" onClick={handleDeleteImage} disabled={isImageLoading}>
+                {t('products.form.removeImage')}
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp"
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+        </div>
+      )}
 
       <div className="form-actions">
         <button type="submit" className="btn btn-primary" disabled={isSubmitting}>

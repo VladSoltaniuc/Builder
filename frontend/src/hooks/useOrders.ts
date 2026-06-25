@@ -58,6 +58,28 @@ export function useOrders() {
     else setPage(newPage);
   }, [loadOrders, page, orders.length, sort, search, filters]);
 
+  const uploadInvoice = useCallback(async function uploadInvoice(id: number, file: File) {
+    const updated = await ordersApi.uploadInvoice(id, file);
+    setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+  }, []);
+
+  const deleteInvoice = useCallback(async function deleteInvoice(id: number) {
+    await ordersApi.deleteInvoice(id);
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, invoiceUrl: undefined } : o)));
+  }, []);
+
+  const downloadInvoice = useCallback(async function downloadInvoice(id: number) {
+    const blob = await ordersApi.downloadInvoice(id);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${id}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, []);
+
   useEffect(() => {
     void loadOrders(page, sort, search, filters);
   }, [loadOrders, page, sort, search, filters]);
@@ -69,5 +91,6 @@ export function useOrders() {
     search, setSearch,
     filters, setFilters,
     createOrder, updateOrder, deleteOrder,
+    uploadInvoice, deleteInvoice, downloadInvoice,
   };
 }

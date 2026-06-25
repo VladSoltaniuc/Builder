@@ -9,6 +9,8 @@ namespace ProductApi.Controllers;
 [Route("api/[controller]")]
 public class ProductsController(IProductService productService) : ControllerBase
 {
+    private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+
     [HttpGet("options")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult GetOptions() => Ok(productService.GetOptions());
@@ -54,6 +56,31 @@ public class ProductsController(IProductService productService) : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await productService.Delete(id);
+        return deleted ? NoContent() : NotFound();
+    }
+
+    [HttpPost("{id:int}/image")]
+    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProductResponse>> UploadImage(int id, IFormFile file)
+    {
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!AllowedImageExtensions.Contains(ext))
+            return BadRequest("Only JPG, PNG, and WebP images are allowed.");
+        if (file.Length > 5 * 1024 * 1024)
+            return BadRequest("Image must be under 5 MB.");
+
+        var result = await productService.UploadImage(id, file);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpDelete("{id:int}/image")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteImage(int id)
+    {
+        var deleted = await productService.DeleteImage(id);
         return deleted ? NoContent() : NotFound();
     }
 }

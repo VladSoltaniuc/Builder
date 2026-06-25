@@ -8,7 +8,7 @@ using ProductApi.Models;
 
 namespace ProductApi.Services;
 
-public class OrderService(AppDbContext db) : IOrderService
+public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderService
 {
     private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Order, object>>> SortColumns = new()
     {
@@ -150,11 +150,62 @@ public class OrderService(AppDbContext db) : IOrderService
         if (order is null)
             return false;
 
+        if (order.InvoicePath is not null)
+            DeleteFile(order.InvoicePath);
+
         db.Orders.Remove(order);
         await db.SaveChangesAsync();
         return true;
     }
 
+    public async Task<OrderResponse?> UploadInvoice(int id, IFormFile file)
+    {
+        var order = await db.Orders
+            .Include(o => o.User)
+            .Include(o => o.Product)
+            .FirstOrDefaultAsync(o => o.Id == id);
+        if (order is null) return null;
+
+        if (order.InvoicePath is not null)
+            DeleteFile(order.InvoicePath);
+
+        var relativePath = $"uploads/invoices/{id}.pdf";
+        var fullPath = Path.Combine(env.WebRootPath, relativePath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+        await using var stream = File.Create(fullPath);
+        await file.CopyToAsync(stream);
+
+        order.InvoicePath = relativePath;
+        await db.SaveChangesAsync();
+        return ToResponse(order);
+    }
+
+    public async Task<bool> DeleteInvoice(int id)
+    {
+        var order = await db.Orders.FindAsync(id);
+        if (order is null || order.InvoicePath is null) return false;
+
+        DeleteFile(order.InvoicePath);
+        order.InvoicePath = null;
+        await db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<string?> GetInvoicePath(int id)
+    {
+        var order = await db.Orders.FindAsync(id);
+        if (order?.InvoicePath is null) return null;
+        return Path.Combine(env.WebRootPath, order.InvoicePath);
+    }
+
+    private void DeleteFile(string relativePath)
+    {
+        var fullPath = Path.Combine(env.WebRootPath, relativePath);
+        if (File.Exists(fullPath)) File.Delete(fullPath);
+    }
+
     private static OrderResponse ToResponse(Order o) =>
-        new(o.Id, o.UserId, o.User.Name, o.ProductId, o.Product.Name, o.Quantity, o.TotalPrice, o.Status, o.CreatedAt, o.Version);
+        new(o.Id, o.UserId, o.User.Name, o.ProductId, o.Product.Name, o.Quantity, o.TotalPrice, o.Status, o.CreatedAt, o.Version,
+            o.InvoicePath is null ? null : $"/{o.InvoicePath}");
 }

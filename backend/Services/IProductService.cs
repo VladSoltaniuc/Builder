@@ -11,4 +11,6 @@ public interface IProductService
     Task<ProductResponse> Create(CreateProductRequest request);
     Task<UpdateProductResult> Update(int id, UpdateProductRequest request);
     Task<bool> Delete(int id);
+    Task<ProductResponse?> UploadImage(int id, IFormFile file);
+    Task<bool> DeleteImage(int id);
 }

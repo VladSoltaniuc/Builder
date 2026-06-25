@@ -10,6 +10,7 @@ export interface Order {
   status: string;
   createdAt: string;
   version: number;
+  invoiceUrl?: string;
 }
 
 export interface OrderInput {

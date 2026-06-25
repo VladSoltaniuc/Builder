@@ -6,6 +6,7 @@ export interface Product {
   price: number;
   stock: number;
   version: number;
+  imageUrl?: string;
 }
 
 // Form fields only — id and version are server-managed

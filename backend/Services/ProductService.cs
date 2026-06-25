@@ -8,7 +8,7 @@ using ProductApi.Models;
 
 namespace ProductApi.Services;
 
-public class ProductService(AppDbContext db) : IProductService
+public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProductService
 {
     private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Product, object>>> SortColumns = new()
     {
@@ -138,11 +138,53 @@ public class ProductService(AppDbContext db) : IProductService
         if (product is null)
             return false;
 
+        if (product.ImagePath is not null)
+            DeleteFile(product.ImagePath);
+
         db.Products.Remove(product);
         await db.SaveChangesAsync();
         return true;
     }
 
+    public async Task<ProductResponse?> UploadImage(int id, IFormFile file)
+    {
+        var product = await db.Products.FindAsync(id);
+        if (product is null) return null;
+
+        if (product.ImagePath is not null)
+            DeleteFile(product.ImagePath);
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var relativePath = $"uploads/products/{id}{ext}";
+        var fullPath = Path.Combine(env.WebRootPath, relativePath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
+        await using var stream = File.Create(fullPath);
+        await file.CopyToAsync(stream);
+
+        product.ImagePath = relativePath;
+        await db.SaveChangesAsync();
+        return ToResponse(product);
+    }
+
+    public async Task<bool> DeleteImage(int id)
+    {
+        var product = await db.Products.FindAsync(id);
+        if (product is null || product.ImagePath is null) return false;
+
+        DeleteFile(product.ImagePath);
+        product.ImagePath = null;
+        await db.SaveChangesAsync();
+        return true;
+    }
+
+    private void DeleteFile(string relativePath)
+    {
+        var fullPath = Path.Combine(env.WebRootPath, relativePath);
+        if (File.Exists(fullPath)) File.Delete(fullPath);
+    }
+
     private static ProductResponse ToResponse(Product p) =>
-        new(p.Id, p.Name, p.Category, p.Price, p.Stock, p.Version);
+        new(p.Id, p.Name, p.Category, p.Price, p.Stock, p.Version,
+            p.ImagePath is null ? null : $"/{p.ImagePath}");
 }

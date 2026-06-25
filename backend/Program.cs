@@ -63,6 +63,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors(FrontendCorsPolicy);
 if (rateLimitSection.GetValue<bool>("Enabled"))
     app.UseRateLimiter();
+app.UseStaticFiles();
 app.MapControllers();
 
 app.Run();
