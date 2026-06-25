@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "products": "Products",
+    "users": "Users",
+    "orders": "Orders"
+  },
+  "products": {
+    "title": "Products",
+    "add": "+ Add Product",
+    "search": "Search name or category...",
+    "allCategories": "All categories",
+    "deleteConfirm": "Delete this product?",
+    "created": "Product created",
+    "updated": "Product updated",
+    "deleted": "Product deleted",
+    "empty": "No products. Add one using the button above.",
+    "form": {
+      "editTitle": "Edit Product #{{id}}",
+      "addTitle": "Add Product",
+      "name": "Name",
+      "category": "Category",
+      "price": "Price (RON)",
+      "stock": "Stock"
+    },
+    "validation": {
+      "name": "Name is required and must be at least 2 characters.",
+      "category": "Category is required.",
+      "price": "Price is required and must be greater than 0.",
+      "stock": "Stock cannot be negative."
+    }
+  },
+  "users": {
+    "title": "Users",
+    "add": "+ Add User",
+    "search": "Search name or email...",
+    "deleteConfirm": "Delete this user?",
+    "created": "User created",
+    "updated": "User updated",
+    "deleted": "User deleted",
+    "empty": "No users. Add one using the button above.",
+    "form": {
+      "editTitle": "Edit User #{{id}}",
+      "addTitle": "Add User",
+      "name": "Name",
+      "email": "Email"
+    }
+  },
+  "orders": {
+    "title": "Orders",
+    "add": "+ Create Order",
+    "search": "Search user or product...",
+    "allStatuses": "All statuses",
+    "deleteConfirm": "Delete this order?",
+    "created": "Order created",
+    "updated": "Order updated",
+    "deleted": "Order deleted",
+    "empty": "No orders. Add one using the button above.",
+    "form": {
+      "editTitle": "Edit Order #{{id}}",
+      "addTitle": "Create Order",
+      "userId": "User ID",
+      "productId": "Product ID",
+      "quantity": "Quantity",
+      "status": "Status"
+    }
+  },
+  "table": {
+    "name": "Name",
+    "category": "Category",
+    "price": "Price",
+    "stock": "Stock",
+    "actions": "Actions",
+    "email": "Email",
+    "user": "User",
+    "product": "Product",
+    "qty": "Qty",
+    "total": "Total",
+    "status": "Status",
+    "date": "Date"
+  },
+  "form": {
+    "saving": "Saving...",
+    "save": "Save",
+    "add": "Add",
+    "cancel": "Cancel"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}} of {{total}}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "edit": "Edit",
+    "delete": "Delete"
+  }
+}

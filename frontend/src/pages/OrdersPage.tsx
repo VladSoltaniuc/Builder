@@ -2,17 +2,17 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import { Button } from "@mui/material";
 import { useOrders } from "../hooks/useOrders";
 import { ordersApi } from "../api/orders";
 import { OrderForm } from "../components/OrderForm";
 import { OrderTable } from "../components/OrderTable";
 import type { Order, OrderInput, OrderUpdateInput } from "../types/order";
 import { ApiError } from "../api/errors";
-import { Button } from "@mui/material";
-
-const ENTITY = "Order";
 
 export function OrdersPage() {
+  const { t } = useTranslation();
   const {
     orders, isLoading, error,
     page, totalPages, setPage,
@@ -45,10 +45,10 @@ export function OrdersPage() {
     try {
       if (editingOrder) {
         await updateOrder(editingOrder.id, input as OrderUpdateInput);
-        toast.success(`${ENTITY} updated`);
+        toast.success(t('orders.updated'));
       } else {
         await createOrder(input as OrderInput);
-        toast.success(`${ENTITY} created`);
+        toast.success(t('orders.created'));
       }
       closeModal();
     } catch (err) {
@@ -57,11 +57,11 @@ export function OrdersPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!globalThis.confirm("Delete this order?")) return;
+    if (!globalThis.confirm(t('orders.deleteConfirm'))) return;
     try {
       if (editingOrder?.id === id) closeModal();
       await deleteOrder(id);
-      toast.success(`${ENTITY} deleted`);
+      toast.success(t('orders.deleted'));
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Something went wrong");
     }
@@ -69,36 +69,36 @@ export function OrdersPage() {
 
   return (
     <main className="container">
-      <header><h1>Orders</h1></header>
+      <header><h1>{t('orders.title')}</h1></header>
 
       {error && <p className="error">⚠️ {error}</p>}
 
       <div className="filters">
         <input
-          placeholder="Search user or product..."
+          placeholder={t('orders.search')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
         <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)}>
-          <option value="">All statuses</option>
+          <option value="">{t('orders.allStatuses')}</option>
           {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
       <div className="toolbar">
-        <Button variant="contained" onClick={openCreate}>+ Create Order</Button>
+        <Button variant="contained" onClick={openCreate}>{t('orders.add')}</Button>
       </div>
 
       {isLoading ? (
-        <p className="loading">Loading...</p>
+        <p className="loading">{t('common.loading')}</p>
       ) : (
         <OrderTable orders={orders} sort={sort} onSort={setSort} onEdit={openEdit} onDelete={handleDelete} />
       )}
 
       <div className="pagination">
-        <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button>
-        <span>Page {page} of {totalPages}</span>
-        <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>
+        <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>{t('pagination.previous')}</button>
+        <span>{t('pagination.page', { page, total: totalPages })}</span>
+        <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>{t('pagination.next')}</button>
       </div>
 
       {isModalOpen &&

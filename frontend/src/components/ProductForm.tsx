@@ -1,10 +1,7 @@
 // Presentation layer — detail view
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import type { Product, ProductInput } from "../types/product";
-import {
-  validationMessages,
-  formLabels,
-} from "../constants/validationMessages";
 
 interface ProductFormProps {
   product: Product | null;
@@ -14,7 +11,17 @@ interface ProductFormProps {
 
 const EMPTY_FORM: ProductInput = { name: "", category: "", price: 0, stock: 0 };
 
-export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
+function validate(message: string) {
+  return {
+    onInvalid: (event: React.InvalidEvent<HTMLInputElement>) =>
+      event.target.setCustomValidity(message),
+    onInput: (event: React.FormEvent<HTMLInputElement>) =>
+      (event.target as HTMLInputElement).setCustomValidity(""),
+  };
+}
+
+export function ProductForm({ product, onSubmit, onCancel }: Readonly<ProductFormProps>) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<ProductInput>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,15 +33,6 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
       setForm(EMPTY_FORM);
     }
   }, [product]);
-
-  function validate(message: string) {
-    return {
-      onInvalid: (event: React.InvalidEvent<HTMLInputElement>) =>
-        event.target.setCustomValidity(message),
-      onInput: (event: React.FormEvent<HTMLInputElement>) =>
-        (event.target as HTMLInputElement).setCustomValidity(""),
-    };
-  }
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type } = event.target;
@@ -54,38 +52,38 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
     }
   }
 
-  const submitLabel = product ? formLabels.save : formLabels.add;
+  const submitLabel = product ? t('form.save') : t('form.add');
 
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>{product ? `Editează produsul #${product.id}` : "Adaugă produs"}</h2>
+      <h2>{product ? t('products.form.editTitle', { id: product.id }) : t('products.form.addTitle')}</h2>
 
       <div className="form-grid">
         <label>
-          Nume
+          {t('products.form.name')}
           <input
             name="name"
             value={form.name}
             onChange={handleChange}
             required
             minLength={2}
-            {...validate(validationMessages.name)}
+            {...validate(t('products.validation.name'))}
           />
         </label>
 
         <label>
-          Categorie
+          {t('products.form.category')}
           <input
             name="category"
             value={form.category}
             onChange={handleChange}
             required
-            {...validate(validationMessages.category)}
+            {...validate(t('products.validation.category'))}
           />
         </label>
 
         <label>
-          Preț (RON)
+          {t('products.form.price')}
           <input
             name="price"
             type="number"
@@ -94,12 +92,12 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
             value={form.price}
             onChange={handleChange}
             required
-            {...validate(validationMessages.price)}
+            {...validate(t('products.validation.price'))}
           />
         </label>
 
         <label>
-          Stoc
+          {t('products.form.stock')}
           <input
             name="stock"
             type="number"
@@ -107,27 +105,18 @@ export function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
             value={form.stock}
             onChange={handleChange}
             required
-            {...validate(validationMessages.stock)}
+            {...validate(t('products.validation.stock'))}
           />
         </label>
       </div>
 
       <div className="form-actions">
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? formLabels.saving : submitLabel}
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          {isSubmitting ? t('form.saving') : submitLabel}
         </button>
         {product && (
-          <button
-            type="button"
-            className="btn"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Anulează
+          <button type="button" className="btn" onClick={onCancel} disabled={isSubmitting}>
+            {t('form.cancel')}
           </button>
         )}
       </div>

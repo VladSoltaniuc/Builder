@@ -1,5 +1,6 @@
 // Presentation layer — detail view
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import type { Order, OrderInput, OrderUpdateInput } from "../types/order";
 
 interface OrderFormProps {
@@ -10,7 +11,8 @@ interface OrderFormProps {
 
 const STATUSES = ["Pending", "Completed", "Cancelled"];
 
-export function OrderForm({ order, onSubmit, onCancel }: OrderFormProps) {
+export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps>) {
+  const { t } = useTranslation();
   const [userId, setUserId] = useState("");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -36,62 +38,66 @@ export function OrderForm({ order, onSubmit, onCancel }: OrderFormProps) {
     setIsSubmitting(true);
     try {
       if (order) {
-        const input: OrderUpdateInput = { quantity, status, version: order.version };
-        await onSubmit(input);
+        await onSubmit({ quantity, status, version: order.version } as OrderUpdateInput);
       } else {
-        const input: OrderInput = { userId: Number(userId), productId: Number(productId), quantity };
-        await onSubmit(input);
+        await onSubmit({ userId: Number(userId), productId: Number(productId), quantity } as OrderInput);
       }
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  const formTitle = order ? t('orders.form.editTitle', { id: order.id }) : t('orders.form.addTitle');
+  const submitLabel = order ? t('form.save') : t('orders.form.addTitle');
+
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>{order ? `Edit Order #${order.id}` : "Create Order"}</h2>
+      <h2>{formTitle}</h2>
 
       <div className="form-grid">
         {!order && (
           <>
             <label>
-              User ID
+              {t('orders.form.userId')}
               <input
                 type="number"
                 min="1"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
                 required
+                placeholder=" "
               />
             </label>
 
             <label>
-              Product ID
+              {t('orders.form.productId')}
               <input
                 type="number"
                 min="1"
                 value={productId}
                 onChange={(e) => setProductId(e.target.value)}
                 required
+                placeholder=" "
               />
             </label>
           </>
         )}
 
         <label>
-          Quantity
+          {t('orders.form.quantity')}
           <input
             type="number"
             min="1"
             value={quantity}
             onChange={(e) => setQuantity(Number(e.target.value))}
             required
+            placeholder=" "
           />
         </label>
 
         {order && (
           <label>
-            Status
+            {t('orders.form.status')}
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
               {STATUSES.map((s) => (
                 <option key={s} value={s}>{s}</option>
@@ -103,11 +109,11 @@ export function OrderForm({ order, onSubmit, onCancel }: OrderFormProps) {
 
       <div className="form-actions">
         <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : order ? "Save" : "Create Order"}
+          {isSubmitting ? t('form.saving') : submitLabel}
         </button>
         {order && (
           <button type="button" className="btn" onClick={onCancel} disabled={isSubmitting}>
-            Cancel
+            {t('form.cancel')}
           </button>
         )}
       </div>

@@ -1,5 +1,6 @@
 // Presentation layer — detail view
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 import type { User, UserInput } from "../types/user";
 
 interface UserFormProps {
@@ -10,7 +11,8 @@ interface UserFormProps {
 
 const EMPTY_FORM: UserInput = { name: "", email: "" };
 
-export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
+export function UserForm({ user, onSubmit, onCancel }: Readonly<UserFormProps>) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<UserInput>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,41 +39,46 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
     }
   }
 
+  const formTitle = user ? t('users.form.editTitle', { id: user.id }) : t('users.form.addTitle');
+  const submitLabel = user ? t('form.save') : t('users.add');
+
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>{user ? `Edit User #${user.id}` : "Add User"}</h2>
+      <h2>{formTitle}</h2>
 
       <div className="form-grid">
         <label>
-          Name
+          {t('users.form.name')}
           <input
             name="name"
             value={form.name}
             onChange={handleChange}
             required
             minLength={2}
+            placeholder=" "
           />
         </label>
 
         <label>
-          Email
+          {t('users.form.email')}
           <input
             name="email"
             type="email"
             value={form.email}
             onChange={handleChange}
             required
+            placeholder=" "
           />
         </label>
       </div>
 
       <div className="form-actions">
         <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : user ? "Save" : "Add User"}
+          {isSubmitting ? t('form.saving') : submitLabel}
         </button>
         {user && (
           <button type="button" className="btn" onClick={onCancel} disabled={isSubmitting}>
-            Cancel
+            {t('form.cancel')}
           </button>
         )}
       </div>

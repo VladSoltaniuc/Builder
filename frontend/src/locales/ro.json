@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "products": "Produse",
+    "users": "Utilizatori",
+    "orders": "Comenzi"
+  },
+  "products": {
+    "title": "Produse",
+    "add": "+ Adaugă Produs",
+    "search": "Caută după nume sau categorie...",
+    "allCategories": "Toate categoriile",
+    "deleteConfirm": "Ștergi acest produs?",
+    "created": "Produs creat",
+    "updated": "Produs actualizat",
+    "deleted": "Produs șters",
+    "empty": "Niciun produs. Adaugă unul folosind butonul de mai sus.",
+    "form": {
+      "editTitle": "Editează produsul #{{id}}",
+      "addTitle": "Adaugă produs",
+      "name": "Nume",
+      "category": "Categorie",
+      "price": "Preț (RON)",
+      "stock": "Stoc"
+    },
+    "validation": {
+      "name": "Numele este obligatoriu și trebuie să aibă cel puțin 2 caractere.",
+      "category": "Categoria este obligatorie.",
+      "price": "Prețul este obligatoriu și trebuie să fie mai mare ca 0.",
+      "stock": "Stocul nu poate fi negativ."
+    }
+  },
+  "users": {
+    "title": "Utilizatori",
+    "add": "+ Adaugă Utilizator",
+    "search": "Caută după nume sau email...",
+    "deleteConfirm": "Ștergi acest utilizator?",
+    "created": "Utilizator creat",
+    "updated": "Utilizator actualizat",
+    "deleted": "Utilizator șters",
+    "empty": "Niciun utilizator. Adaugă unul folosind butonul de mai sus.",
+    "form": {
+      "editTitle": "Editează utilizatorul #{{id}}",
+      "addTitle": "Adaugă utilizator",
+      "name": "Nume",
+      "email": "Email"
+    }
+  },
+  "orders": {
+    "title": "Comenzi",
+    "add": "+ Creează Comandă",
+    "search": "Caută după utilizator sau produs...",
+    "allStatuses": "Toate statusurile",
+    "deleteConfirm": "Ștergi această comandă?",
+    "created": "Comandă creată",
+    "updated": "Comandă actualizată",
+    "deleted": "Comandă ștearsă",
+    "empty": "Nicio comandă. Adaugă una folosind butonul de mai sus.",
+    "form": {
+      "editTitle": "Editează comanda #{{id}}",
+      "addTitle": "Creează comandă",
+      "userId": "ID Utilizator",
+      "productId": "ID Produs",
+      "quantity": "Cantitate",
+      "status": "Status"
+    }
+  },
+  "table": {
+    "name": "Nume",
+    "category": "Categorie",
+    "price": "Preț",
+    "stock": "Stoc",
+    "actions": "Acțiuni",
+    "email": "Email",
+    "user": "Utilizator",
+    "product": "Produs",
+    "qty": "Cant.",
+    "total": "Total",
+    "status": "Status",
+    "date": "Dată"
+  },
+  "form": {
+    "saving": "Se salvează...",
+    "save": "Salvează",
+    "add": "Adaugă",
+    "cancel": "Anulează"
+  },
+  "pagination": {
+    "previous": "Anterior",
+    "next": "Următor",
+    "page": "Pagina {{page}} din {{total}}"
+  },
+  "common": {
+    "loading": "Se încarcă...",
+    "edit": "Editează",
+    "delete": "Șterge"
+  }
+}

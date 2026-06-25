@@ -2,16 +2,16 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import { Button } from "@mui/material";
 import { useUsers } from "../hooks/useUsers";
 import { UserForm } from "../components/UserForm";
 import { UserTable } from "../components/UserTable";
 import type { User, UserInput } from "../types/user";
 import { ApiError } from "../api/errors";
-import { Button } from "@mui/material";
-
-const ENTITY = "User";
 
 export function UsersPage() {
+  const { t } = useTranslation();
   const {
     users, isLoading, error,
     page, totalPages, setPage,
@@ -31,10 +31,10 @@ export function UsersPage() {
     try {
       if (editingUser) {
         await updateUser(editingUser.id, input, editingUser.version);
-        toast.success(`${ENTITY} updated`);
+        toast.success(t('users.updated'));
       } else {
         await createUser(input);
-        toast.success(`${ENTITY} created`);
+        toast.success(t('users.created'));
       }
       closeModal();
     } catch (err) {
@@ -43,11 +43,11 @@ export function UsersPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!globalThis.confirm("Delete this user?")) return;
+    if (!globalThis.confirm(t('users.deleteConfirm'))) return;
     try {
       if (editingUser?.id === id) closeModal();
       await deleteUser(id);
-      toast.success(`${ENTITY} deleted`);
+      toast.success(t('users.deleted'));
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Something went wrong");
     }
@@ -55,32 +55,32 @@ export function UsersPage() {
 
   return (
     <main className="container">
-      <header><h1>Users</h1></header>
+      <header><h1>{t('users.title')}</h1></header>
 
       {error && <p className="error">⚠️ {error}</p>}
 
       <div className="filters">
         <input
-          placeholder="Search name or email..."
+          placeholder={t('users.search')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
       </div>
 
       <div className="toolbar">
-        <Button variant="contained" onClick={openCreate}>+ Add User</Button>
+        <Button variant="contained" onClick={openCreate}>{t('users.add')}</Button>
       </div>
 
       {isLoading ? (
-        <p className="loading">Loading...</p>
+        <p className="loading">{t('common.loading')}</p>
       ) : (
         <UserTable users={users} sort={sort} onSort={setSort} onEdit={openEdit} onDelete={handleDelete} />
       )}
 
       <div className="pagination">
-        <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</button>
-        <span>Page {page} of {totalPages}</span>
-        <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>
+        <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>{t('pagination.previous')}</button>
+        <span>{t('pagination.page', { page, total: totalPages })}</span>
+        <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>{t('pagination.next')}</button>
       </div>
 
       {isModalOpen &&

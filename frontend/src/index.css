@@ -23,8 +23,10 @@ body {
   align-items: center;
 }
 
-.nav-theme-toggle {
+.nav-controls {
   margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .nav-link {

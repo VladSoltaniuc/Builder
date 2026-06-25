@@ -1,4 +1,5 @@
 // Presentation layer — list view
+import { useTranslation } from "react-i18next";
 import type { User } from "../types/user";
 import type { SortState } from "../types/query";
 import { toggleSort } from "../types/query";
@@ -18,12 +19,14 @@ function SortIcon({ field, sort }: Readonly<{ field: string; sort: SortState | n
 }
 
 export function UserTable({ users, sort, onSort, onEdit, onDelete }: Readonly<UserTableProps>) {
+  const { t } = useTranslation();
+
   function handleSort(field: string) {
     onSort(toggleSort(sort, field));
   }
 
   if (users.length === 0) {
-    return <p className="empty">No users. Add one using the form above.</p>;
+    return <p className="empty">{t('users.empty')}</p>;
   }
 
   return (
@@ -32,12 +35,12 @@ export function UserTable({ users, sort, onSort, onEdit, onDelete }: Readonly<Us
         <tr>
           <th>#</th>
           <th className="sortable" onClick={() => handleSort('name')}>
-            Name <SortIcon field="name" sort={sort} />
+            {t('table.name')} <SortIcon field="name" sort={sort} />
           </th>
           <th className="sortable" onClick={() => handleSort('email')}>
-            Email <SortIcon field="email" sort={sort} />
+            {t('table.email')} <SortIcon field="email" sort={sort} />
           </th>
-          <th>Actions</th>
+          <th>{t('table.actions')}</th>
         </tr>
       </thead>
       <tbody>
@@ -48,8 +51,8 @@ export function UserTable({ users, sort, onSort, onEdit, onDelete }: Readonly<Us
             <td>{user.email}</td>
             <td>
               <div className="row-actions">
-                <button className="btn btn-small" onClick={() => onEdit(user)}>Edit</button>
-                <button className="btn btn-small btn-danger" onClick={() => onDelete(user.id)}>Delete</button>
+                <button className="btn btn-small" onClick={() => onEdit(user)}>{t('common.edit')}</button>
+                <button className="btn btn-small btn-danger" onClick={() => onDelete(user.id)}>{t('common.delete')}</button>
               </div>
             </td>
           </tr>

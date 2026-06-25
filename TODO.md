@@ -1,7 +1,7 @@
 # TODO
 
 ## UI
-- [ ] Add language selector EN/RO (react-i18next, move all UI copy to locales/ro.json + locales/en.json) — **~1–2 days** *(new library, new mental model: translation keys, locale files, provider wiring)*
+- [x] Add language selector EN/RO
 - [x] Add another page
 - [x] Filtering
 - [x] Sorting
@@ -21,9 +21,6 @@
 ## Database
 - [x] Migrate from in-memory to PostgreSQL + Entity Framework Core
 - [ ] Redis (caching) — **~3–5 days** *(install Redis, StackExchange.Redis, caching patterns: aside-cache, TTL, invalidation)*
-
-## Patterns
-- [ ] Mediator pattern (MediatR) — **~3–5 days** *(CQRS concepts, command/query split, handler registration, pipeline behaviors)*
 
 ## Backend
 - [ ] View (virtual table from joins + computed columns) — **~1 day** *(PostgreSQL view SQL + EF Core keyless entity — straightforward)*

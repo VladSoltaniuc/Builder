@@ -1,4 +1,5 @@
 // Presentation layer — list view
+import { useTranslation } from "react-i18next";
 import type { Product } from "../types/product";
 import type { SortState } from "../types/query";
 import { toggleSort } from "../types/query";
@@ -20,12 +21,14 @@ function SortIcon({ field, sort }: Readonly<{ field: string; sort: SortState | n
 }
 
 export function ProductTable({ products, sort, onSort, onEdit, onDelete }: Readonly<ProductTableProps>) {
+  const { t } = useTranslation();
+
   function handleSort(field: string) {
     onSort(toggleSort(sort, field));
   }
 
   if (products.length === 0) {
-    return <p className="empty">No products. Add one using the form above.</p>;
+    return <p className="empty">{t('products.empty')}</p>;
   }
 
   return (
@@ -34,18 +37,18 @@ export function ProductTable({ products, sort, onSort, onEdit, onDelete }: Reado
         <tr>
           <th>#</th>
           <th className="sortable" onClick={() => handleSort('name')}>
-            Name <SortIcon field="name" sort={sort} />
+            {t('table.name')} <SortIcon field="name" sort={sort} />
           </th>
           <th className="sortable" onClick={() => handleSort('category')}>
-            Category <SortIcon field="category" sort={sort} />
+            {t('table.category')} <SortIcon field="category" sort={sort} />
           </th>
           <th className="num sortable" onClick={() => handleSort('price')}>
-            Price <SortIcon field="price" sort={sort} />
+            {t('table.price')} <SortIcon field="price" sort={sort} />
           </th>
           <th className="num sortable" onClick={() => handleSort('stock')}>
-            Stock <SortIcon field="stock" sort={sort} />
+            {t('table.stock')} <SortIcon field="stock" sort={sort} />
           </th>
-          <th>Actions</th>
+          <th>{t('table.actions')}</th>
         </tr>
       </thead>
       <tbody>
@@ -58,8 +61,8 @@ export function ProductTable({ products, sort, onSort, onEdit, onDelete }: Reado
             <td className="num">{product.stock}</td>
             <td>
               <div className="row-actions">
-                <button className="btn btn-small" onClick={() => onEdit(product)}>Edit</button>
-                <button className="btn btn-small btn-danger" onClick={() => onDelete(product.id)}>Delete</button>
+                <button className="btn btn-small" onClick={() => onEdit(product)}>{t('common.edit')}</button>
+                <button className="btn btn-small btn-danger" onClick={() => onDelete(product.id)}>{t('common.delete')}</button>
               </div>
             </td>
           </tr>
