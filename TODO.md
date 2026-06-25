@@ -6,8 +6,8 @@
 - [x] Filtering
 - [x] Sorting
 - [x] Search
-- [x] Toast notifications — **~2–4 hours** *(install library, learn 3-method API, wire into pages)*
-- [ ] Theme selector — **~4–8 hours** *(CSS variables + React context — concepts you've touched, just new combo)*
+- [x] Toast notifications
+- [x] Theme selector
 - [ ] Migrate to Material UI (MUI) — **~1–2 weeks** *(full component replacement, theming system, learning MUI's prop patterns)*
 - [ ] Data import/export via Excel — **~2–3 days** *(backend: ClosedXML/EPPlus; frontend: file download trigger)*
 - [ ] Audit trail (who changed what and when, stored in DB) — **~1–2 days** *(new DB table + EF Core interceptors or service-level hooks)*

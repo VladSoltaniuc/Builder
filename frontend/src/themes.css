@@ -1,0 +1,27 @@
+/* ============================================================
+   THEME TOKENS
+   ============================================================ */
+
+[data-theme="dark"] {
+  --bg:             #0f172a;
+  --surface:        #0b1220;
+  --card:           #1e293b;
+  --border:         #334155;
+  --text:           #e2e8f0;
+  --muted:          #94a3b8;
+  --primary:        #3b82f6;
+  --primary-subtle: rgba(59, 130, 246, 0.1);
+  --danger:         #ef4444;
+}
+
+[data-theme="light"] {
+  --bg:             #f8fafc;
+  --surface:        #e2e8f0;
+  --card:           #ffffff;
+  --border:         #cbd5e1;
+  --text:           #0f172a;
+  --muted:          #64748b;
+  --primary:        #3b82f6;
+  --primary-subtle: rgba(59, 130, 246, 0.1);
+  --danger:         #ef4444;
+}

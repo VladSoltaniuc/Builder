@@ -1,11 +1,6 @@
+@import './themes.css';
+
 :root {
-  --bg: #0f172a;
-  --card: #1e293b;
-  --border: #334155;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
-  --primary: #3b82f6;
-  --danger: #ef4444;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -25,6 +20,11 @@ body {
   padding: 1rem 2rem;
   background: var(--card);
   border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+.nav-theme-toggle {
+  margin-left: auto;
 }
 
 .nav-link {
@@ -42,7 +42,7 @@ body {
 
 .nav-link.active {
   color: var(--primary);
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--primary-subtle);
 }
 
 select {
@@ -178,7 +178,7 @@ input:focus {
 }
 
 .table thead th {
-  background: #0b1220;
+  background: var(--surface);
   color: var(--muted);
   font-size: 0.8rem;
   text-transform: uppercase;
