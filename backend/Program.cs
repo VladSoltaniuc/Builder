@@ -1,5 +1,6 @@
 // Composition root
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Data;
 using ProductApi.Services;
@@ -20,6 +21,29 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+var rateLimitSection = builder.Configuration.GetSection("RateLimiting");
+if (rateLimitSection.GetValue<bool>("Enabled"))
+{
+    int permitLimit   = rateLimitSection.GetValue<int>("PermitLimit");
+    int windowSeconds = rateLimitSection.GetValue<int>("WindowSeconds");
+
+    builder.Services.AddRateLimiter(options =>
+    {
+        // One fixed window per client IP — resets every WindowSeconds
+        options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = permitLimit,
+                    Window      = TimeSpan.FromSeconds(windowSeconds),
+                }
+            )
+        );
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    });
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
@@ -37,6 +61,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(FrontendCorsPolicy);
+if (rateLimitSection.GetValue<bool>("Enabled"))
+    app.UseRateLimiter();
 app.MapControllers();
 
 app.Run();

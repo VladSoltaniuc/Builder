@@ -10,9 +10,7 @@
 - [x] Theme selector
 - [x] Migrate to Material UI (MUI)
 - [ ] Data import/export via Excel — **~2–3 days** *(backend: ClosedXML/EPPlus; frontend: file download trigger)*
-- [ ] Audit trail (who changed what and when, stored in DB) — **~1–2 days** *(new DB table + EF Core interceptors or service-level hooks)*
-- [ ] Logging system with IP-based tracking — **~1–2 days** *(ASP.NET Core middleware, Serilog, IP extraction from HttpContext)*
-- [ ] IP-based rate limiter — **~1 day** *(.NET 7+ has built-in rate limiting middleware, mostly config)*
+- [x] IP-based rate limiter
 
 ## Auth
 - [ ] Auth — **~3–5 days** *(JWT tokens, claims, middleware, protected endpoints, frontend token storage)*
