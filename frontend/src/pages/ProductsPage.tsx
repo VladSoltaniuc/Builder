@@ -8,6 +8,7 @@ import { ProductForm } from "../components/ProductForm";
 import { ProductTable } from "../components/ProductTable";
 import type { Product, ProductInput } from "../types/product";
 import { ApiError } from "../api/errors";
+import { Button } from "@mui/material";
 
 const ENTITY = "Product";
 
@@ -85,7 +86,7 @@ export function ProductsPage() {
       </div>
 
       <div className="toolbar">
-        <button className="btn btn-primary" onClick={openCreate}>+ Add Product</button>
+        <Button variant="contained" onClick={openCreate}>+ Add Product</Button>
       </div>
 
       {isLoading ? (

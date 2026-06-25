@@ -8,7 +8,7 @@
 - [x] Search
 - [x] Toast notifications
 - [x] Theme selector
-- [ ] Migrate to Material UI (MUI) — **~1–2 weeks** *(full component replacement, theming system, learning MUI's prop patterns)*
+- [x] Migrate to Material UI (MUI)
 - [ ] Data import/export via Excel — **~2–3 days** *(backend: ClosedXML/EPPlus; frontend: file download trigger)*
 - [ ] Audit trail (who changed what and when, stored in DB) — **~1–2 days** *(new DB table + EF Core interceptors or service-level hooks)*
 - [ ] Logging system with IP-based tracking — **~1–2 days** *(ASP.NET Core middleware, Serilog, IP extraction from HttpContext)*

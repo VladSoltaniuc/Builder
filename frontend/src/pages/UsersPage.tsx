@@ -7,6 +7,7 @@ import { UserForm } from "../components/UserForm";
 import { UserTable } from "../components/UserTable";
 import type { User, UserInput } from "../types/user";
 import { ApiError } from "../api/errors";
+import { Button } from "@mui/material";
 
 const ENTITY = "User";
 
@@ -67,7 +68,7 @@ export function UsersPage() {
       </div>
 
       <div className="toolbar">
-        <button className="btn btn-primary" onClick={openCreate}>+ Add User</button>
+        <Button variant="contained" onClick={openCreate}>+ Add User</Button>
       </div>
 
       {isLoading ? (

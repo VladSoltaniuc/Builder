@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark"; // must match MUI's palette.mode — do not add custom names
 
 interface ThemeContextValue {
   theme: Theme;
@@ -19,11 +19,13 @@ export function ThemeProvider({ children }: Readonly<{ children: React.ReactNode
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  function toggle() {
+  const toggle = useCallback(() => {
     setTheme((t) => (t === "dark" ? "light" : "dark"));
-  }
+  }, []);
 
-  return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
+  const value = useMemo(() => ({ theme, toggle }), [theme]);
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme(): ThemeContextValue {

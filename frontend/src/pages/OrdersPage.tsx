@@ -8,6 +8,7 @@ import { OrderForm } from "../components/OrderForm";
 import { OrderTable } from "../components/OrderTable";
 import type { Order, OrderInput, OrderUpdateInput } from "../types/order";
 import { ApiError } from "../api/errors";
+import { Button } from "@mui/material";
 
 const ENTITY = "Order";
 
@@ -85,7 +86,7 @@ export function OrdersPage() {
       </div>
 
       <div className="toolbar">
-        <button className="btn btn-primary" onClick={openCreate}>+ Create Order</button>
+        <Button variant="contained" onClick={openCreate}>+ Create Order</Button>
       </div>
 
       {isLoading ? (
