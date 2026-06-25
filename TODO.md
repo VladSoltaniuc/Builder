@@ -6,7 +6,7 @@
 - [x] Filtering
 - [x] Sorting
 - [x] Search
-- [ ] Toast notifications — **~2–4 hours** *(install library, learn 3-method API, wire into pages)*
+- [x] Toast notifications — **~2–4 hours** *(install library, learn 3-method API, wire into pages)*
 - [ ] Theme selector — **~4–8 hours** *(CSS variables + React context — concepts you've touched, just new combo)*
 - [ ] Migrate to Material UI (MUI) — **~1–2 weeks** *(full component replacement, theming system, learning MUI's prop patterns)*
 - [ ] Data import/export via Excel — **~2–3 days** *(backend: ClosedXML/EPPlus; frontend: file download trigger)*
@@ -32,9 +32,7 @@
 - [ ] Stored procedure + execution plans — **~2–3 days** *(write SP in Postgres, call from EF Core, read EXPLAIN ANALYZE output)*
 - [ ] Indexes (reindexing, cardinality) — **~2–3 days** *(understanding query planners, index types, when to index)*
 - [ ] Queue — **~1 week** *(.NET Channels for in-process, or RabbitMQ for external — new infra concepts)*
-- [ ] gRPC — **~1 week** *(Protobuf IDL, service definition, generated client/server, streaming)*
 - [ ] WebSocket chat (real-time messaging, like WhatsApp) — **~1 week** *(SignalR hubs, real-time frontend connection, group messaging)*
-- [ ] GraphQL (alternative to REST) — **~1–2 weeks** *(schema-first vs code-first, resolvers, queries/mutations — very different from REST)*
 - [ ] File upload (images, documents) — **~1–2 days** *(`IFormFile`, multipart, storage strategy: disk/S3)*
 - [ ] Email sending (cron job) — **~2–3 days** *(`IHostedService` + cron expression + MailKit/SMTP)*
 - [ ] SMS sending — **~1 day** *(Twilio SDK — mostly just API calls)*

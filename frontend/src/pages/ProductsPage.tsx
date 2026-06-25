@@ -1,11 +1,15 @@
 // Application layer
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import toast from "react-hot-toast";
 import { useProducts } from "../hooks/useProducts";
 import { productsApi } from "../api/products";
 import { ProductForm } from "../components/ProductForm";
 import { ProductTable } from "../components/ProductTable";
 import type { Product, ProductInput } from "../types/product";
+import { ApiError } from "../api/errors";
+
+const ENTITY = "Product";
 
 export function ProductsPage() {
   const {
@@ -37,15 +41,29 @@ export function ProductsPage() {
   }
 
   async function handleSubmit(input: ProductInput) {
-    if (editingProduct) await updateProduct(editingProduct.id, input, editingProduct.version);
-    else await createProduct(input);
-    closeModal();
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, input, editingProduct.version);
+        toast.success(`${ENTITY} updated`);
+      } else {
+        await createProduct(input);
+        toast.success(`${ENTITY} created`);
+      }
+      closeModal();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
   }
 
   async function handleDelete(id: number) {
     if (!globalThis.confirm("Delete this product?")) return;
-    if (editingProduct?.id === id) closeModal();
-    await deleteProduct(id);
+    try {
+      if (editingProduct?.id === id) closeModal();
+      await deleteProduct(id);
+      toast.success(`${ENTITY} deleted`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
   }
 
   return (

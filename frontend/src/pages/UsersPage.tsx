@@ -1,10 +1,14 @@
 // Application layer
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import toast from "react-hot-toast";
 import { useUsers } from "../hooks/useUsers";
 import { UserForm } from "../components/UserForm";
 import { UserTable } from "../components/UserTable";
 import type { User, UserInput } from "../types/user";
+import { ApiError } from "../api/errors";
+
+const ENTITY = "User";
 
 export function UsersPage() {
   const {
@@ -23,15 +27,29 @@ export function UsersPage() {
   function closeModal() { setIsModalOpen(false); setEditingUser(null); }
 
   async function handleSubmit(input: UserInput) {
-    if (editingUser) await updateUser(editingUser.id, input, editingUser.version);
-    else await createUser(input);
-    closeModal();
+    try {
+      if (editingUser) {
+        await updateUser(editingUser.id, input, editingUser.version);
+        toast.success(`${ENTITY} updated`);
+      } else {
+        await createUser(input);
+        toast.success(`${ENTITY} created`);
+      }
+      closeModal();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
   }
 
   async function handleDelete(id: number) {
     if (!globalThis.confirm("Delete this user?")) return;
-    if (editingUser?.id === id) closeModal();
-    await deleteUser(id);
+    try {
+      if (editingUser?.id === id) closeModal();
+      await deleteUser(id);
+      toast.success(`${ENTITY} deleted`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
   }
 
   return (

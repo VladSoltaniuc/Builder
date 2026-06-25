@@ -1,11 +1,15 @@
 // Application layer
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import toast from "react-hot-toast";
 import { useOrders } from "../hooks/useOrders";
 import { ordersApi } from "../api/orders";
 import { OrderForm } from "../components/OrderForm";
 import { OrderTable } from "../components/OrderTable";
 import type { Order, OrderInput, OrderUpdateInput } from "../types/order";
+import { ApiError } from "../api/errors";
+
+const ENTITY = "Order";
 
 export function OrdersPage() {
   const {
@@ -37,15 +41,29 @@ export function OrdersPage() {
   }
 
   async function handleSubmit(input: OrderInput | OrderUpdateInput) {
-    if (editingOrder) await updateOrder(editingOrder.id, input as OrderUpdateInput);
-    else await createOrder(input as OrderInput);
-    closeModal();
+    try {
+      if (editingOrder) {
+        await updateOrder(editingOrder.id, input as OrderUpdateInput);
+        toast.success(`${ENTITY} updated`);
+      } else {
+        await createOrder(input as OrderInput);
+        toast.success(`${ENTITY} created`);
+      }
+      closeModal();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
   }
 
   async function handleDelete(id: number) {
     if (!globalThis.confirm("Delete this order?")) return;
-    if (editingOrder?.id === id) closeModal();
-    await deleteOrder(id);
+    try {
+      if (editingOrder?.id === id) closeModal();
+      await deleteOrder(id);
+      toast.success(`${ENTITY} deleted`);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Something went wrong");
+    }
   }
 
   return (
