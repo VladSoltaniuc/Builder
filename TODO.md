@@ -29,7 +29,8 @@
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
 - [x] File upload (images, documents)
-- [ ] Email sending (cron job)
+- [ ] Audit and Logs
+- [ ] Email sending (cron job) (Audit and Logs daily report of changes)
 - [ ] SMS sending
 
 ## Testing & CI/CD
