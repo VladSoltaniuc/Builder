@@ -65,7 +65,8 @@
       "userId": "ID Utilizator",
       "productId": "ID Produs",
       "quantity": "Cantitate",
-      "status": "Status"
+      "status": "Status",
+      "awb": "AWB"
     },
     "invoice": {
       "upload": "Încarcă PDF",
@@ -103,7 +104,8 @@
     "qty": "Cant.",
     "total": "Total",
     "status": "Status",
-    "date": "Dată"
+    "date": "Dată",
+    "awb": "AWB"
   },
   "form": {
     "saving": "Se salvează...",

@@ -77,6 +77,7 @@ export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInv
             <th className="sortable" onClick={() => handleSort('createdAt')}>
               {t('table.date')} <SortIcon field="createdAt" sort={sort} />
             </th>
+            <th>{t('table.awb')}</th>
             <th>{t('table.actions')}</th>
           </tr>
         </thead>
@@ -90,6 +91,7 @@ export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInv
               <td className="num">{currency.format(order.totalPrice)}</td>
               <td>{order.status}</td>
               <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+              <td>{order.awb ?? '—'}</td>
               <td>
                 <div className="row-actions">
                   <button className="btn btn-small" onClick={() => onEdit(order)}>{t('common.edit')}</button>

@@ -65,7 +65,8 @@
       "userId": "User ID",
       "productId": "Product ID",
       "quantity": "Quantity",
-      "status": "Status"
+      "status": "Status",
+      "awb": "AWB"
     },
     "invoice": {
       "upload": "Upload PDF",
@@ -103,7 +104,8 @@
     "qty": "Qty",
     "total": "Total",
     "status": "Status",
-    "date": "Date"
+    "date": "Date",
+    "awb": "AWB"
   },
   "form": {
     "saving": "Saving...",

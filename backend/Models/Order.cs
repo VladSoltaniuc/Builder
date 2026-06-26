@@ -15,4 +15,5 @@ public class Order
     public int Version { get; set; } = 1;
 
     public string? InvoicePath { get; set; }
+    public string? Awb { get; set; }
 }

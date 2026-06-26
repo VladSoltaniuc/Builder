@@ -17,6 +17,7 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [status, setStatus] = useState("Pending");
+  const [awb, setAwb] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -25,11 +26,13 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
       setProductId(String(order.productId));
       setQuantity(order.quantity);
       setStatus(order.status);
+      setAwb(order.awb ?? "");
     } else {
       setUserId("");
       setProductId("");
       setQuantity(1);
       setStatus("Pending");
+      setAwb("");
     }
   }, [order]);
 
@@ -38,7 +41,7 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
     setIsSubmitting(true);
     try {
       if (order) {
-        await onSubmit({ quantity, status, version: order.version } as OrderUpdateInput);
+        await onSubmit({ quantity, status, version: order.version, awb: awb || undefined } as OrderUpdateInput);
       } else {
         await onSubmit({ userId: Number(userId), productId: Number(productId), quantity } as OrderInput);
       }
@@ -96,14 +99,26 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
         </label>
 
         {order && (
-          <label>
-            {t('orders.form.status')}
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              {STATUSES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </label>
+          <>
+            <label>
+              {t('orders.form.status')}
+              <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {t('orders.form.awb')}
+              <input
+                type="text"
+                value={awb}
+                onChange={(e) => setAwb(e.target.value)}
+                maxLength={50}
+                placeholder=" "
+              />
+            </label>
+          </>
         )}
       </div>
 

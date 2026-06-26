@@ -138,6 +138,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
         order.Quantity = request.Quantity;
         order.TotalPrice = order.Product.Price * request.Quantity;
         order.Status = request.Status;
+        order.Awb = request.Awb;
         order.Version++;
 
         await db.SaveChangesAsync();
@@ -207,5 +208,5 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
 
     private static OrderResponse ToResponse(Order o) =>
         new(o.Id, o.UserId, o.User.Name, o.ProductId, o.Product.Name, o.Quantity, o.TotalPrice, o.Status, o.CreatedAt, o.Version,
-            o.InvoicePath is null ? null : $"/{o.InvoicePath}");
+            o.InvoicePath is null ? null : $"/{o.InvoicePath}", o.Awb);
 }

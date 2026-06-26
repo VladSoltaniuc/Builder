@@ -14,4 +14,7 @@ public class UpdateOrderRequest
 
     [Required]
     public int Version { get; set; }
+
+    [MaxLength(50)]
+    public string? Awb { get; set; }
 }

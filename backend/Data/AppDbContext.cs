@@ -15,5 +15,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Order>()
             .Property(o => o.Status)
             .HasConversion<string>();
+
+        // Partial unique index — AWB must be unique when set, nulls excluded
+        modelBuilder.Entity<Order>()
+            .HasIndex(o => o.Awb)
+            .IsUnique()
+            .HasFilter("\"Awb\" IS NOT NULL");
     }
 }

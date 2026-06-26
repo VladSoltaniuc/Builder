@@ -11,6 +11,7 @@ export interface Order {
   createdAt: string;
   version: number;
   invoiceUrl?: string;
+  awb?: string;
 }
 
 export interface OrderInput {
@@ -23,4 +24,5 @@ export interface OrderUpdateInput {
   quantity: number;
   status: string;
   version: number;
+  awb?: string;
 }
