@@ -75,7 +75,23 @@
       "removed": "Invoice removed"
     }
   },
+  "excel": {
+    "export": "Export Excel",
+    "import": "Import Excel",
+    "exportTitle": "Export Products to Excel",
+    "importTitle": "Import Products from Excel",
+    "selectColumns": "Select columns to include:",
+    "exporting": "Exporting...",
+    "importing": "Importing...",
+    "importHint": "Upload an .xlsx file with columns: Name, Category, Price, Stock",
+    "noFileSelected": "Please select a file.",
+    "importSuccess": "{{count}} product(s) imported successfully.",
+    "importResult": "Imported: {{imported}}, Failed: {{failed}}",
+    "exportError": "Export failed.",
+    "importError": "Import failed."
+  },
   "table": {
+    "id": "ID",
     "name": "Name",
     "category": "Category",
     "price": "Price",
@@ -100,9 +116,13 @@
     "next": "Next",
     "page": "Page {{page}} of {{total}}"
   },
+  "errors": {
+    "MISSING_COLUMNS": "Missing required columns: {{columns}}"
+  },
   "common": {
     "loading": "Loading...",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "close": "Close"
   }
 }

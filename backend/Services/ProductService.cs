@@ -1,4 +1,6 @@
 // Application layer
+using System.Globalization;
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Constants;
 using ProductApi.Contracts;
@@ -176,6 +178,123 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
         product.ImagePath = null;
         await db.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<byte[]> ExportToExcel(IEnumerable<string> columns)
+    {
+        var selected = columns.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var products = await db.Products.AsNoTracking().OrderBy(p => p.Id).ToListAsync();
+
+        var allCols = new (string Key, string Header, Func<Product, object?> Get)[]
+        {
+            ("id",       "ID",       p => (object)p.Id),
+            ("name",     "Name",     p => p.Name),
+            ("category", "Category", p => p.Category),
+            ("price",    "Price",    p => (object)(double)p.Price),
+            ("stock",    "Stock",    p => (object)p.Stock),
+        };
+
+        var cols = allCols.Where(c => selected.Contains(c.Key)).ToArray();
+
+        using var wb = new XLWorkbook();
+        var ws = wb.Worksheets.Add("Products");
+
+        for (int i = 0; i < cols.Length; i++)
+            ws.Cell(1, i + 1).Value = cols[i].Header;
+
+        for (int r = 0; r < products.Count; r++)
+        {
+            var p = products[r];
+            for (int c = 0; c < cols.Length; c++)
+            {
+                var cell = ws.Cell(r + 2, c + 1);
+                switch (cols[c].Get(p))
+                {
+                    case int n:    cell.Value = n; break;
+                    case double d: cell.Value = d; break;
+                    case string s: cell.Value = s; break;
+                }
+            }
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        wb.SaveAs(ms);
+        return ms.ToArray();
+    }
+
+    public async Task<ImportProductResult> ImportFromExcel(IFormFile file)
+    {
+        var errors = new List<string>();
+        int imported = 0, failed = 0;
+
+        using var stream = file.OpenReadStream();
+        using var wb = new XLWorkbook(stream);
+        var ws = wb.Worksheets.First();
+
+        var headers = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var cell in ws.Row(1).CellsUsed())
+            headers[cell.Value.ToString()] = cell.Address.ColumnNumber;
+
+        var required = new[] { "name", "category", "price", "stock" };
+        var missing = required.Where(r => !headers.ContainsKey(r)).ToArray();
+        if (missing.Length > 0)
+            throw new UserFriendlyException(
+                $"Missing required columns: {string.Join(", ", missing)}",
+                "MISSING_COLUMNS",
+                string.Join(", ", missing));
+
+        int lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
+        for (int row = 2; row <= lastRow; row++)
+        {
+            try
+            {
+                var name = CellString(ws.Cell(row, headers["name"])).Trim();
+                var category = CellString(ws.Cell(row, headers["category"])).Trim();
+
+                if (name.Length < 2)
+                { errors.Add($"Row {row}: Name must be at least 2 characters"); failed++; continue; }
+                if (string.IsNullOrEmpty(category))
+                { errors.Add($"Row {row}: Category is required"); failed++; continue; }
+
+                var priceVal = ws.Cell(row, headers["price"]).Value;
+                decimal price = priceVal.IsNumber
+                    ? (decimal)priceVal.GetNumber()
+                    : decimal.TryParse(CellString(ws.Cell(row, headers["price"])), NumberStyles.Any, CultureInfo.InvariantCulture, out var pd) ? pd : -1;
+                if (price <= 0)
+                { errors.Add($"Row {row}: Price must be greater than 0"); failed++; continue; }
+
+                var stockVal = ws.Cell(row, headers["stock"]).Value;
+                int stock = stockVal.IsNumber
+                    ? (int)Math.Round(stockVal.GetNumber())
+                    : int.TryParse(CellString(ws.Cell(row, headers["stock"])), out var si) ? si : -1;
+                if (stock < 0)
+                { errors.Add($"Row {row}: Stock must be a non-negative integer"); failed++; continue; }
+
+                db.Products.Add(new Product { Name = name, Category = category, Price = price, Stock = stock });
+                imported++;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Row {row}: {ex.Message}");
+                failed++;
+            }
+        }
+
+        if (imported > 0)
+            await db.SaveChangesAsync();
+
+        return new ImportProductResult(imported, failed, errors);
+    }
+
+    private static string CellString(IXLCell cell)
+    {
+        var v = cell.Value;
+        if (v.IsBlank) return string.Empty;
+        if (v.IsText) return v.GetText();
+        if (v.IsNumber) return v.GetNumber().ToString(CultureInfo.InvariantCulture);
+        return v.ToString();
     }
 
     private void DeleteFile(string relativePath)

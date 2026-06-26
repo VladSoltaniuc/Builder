@@ -69,6 +69,10 @@ export function useProducts() {
     setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, imageUrl: undefined } : p)));
   }, []);
 
+  const refresh = useCallback(() => {
+    void loadProducts(page, sort, search, filters);
+  }, [loadProducts, page, sort, search, filters]);
+
   useEffect(() => {
     void loadProducts(page, sort, search, filters);
   }, [loadProducts, page, sort, search, filters]);
@@ -80,6 +84,6 @@ export function useProducts() {
     search, setSearch,
     filters, setFilters,
     createProduct, updateProduct, deleteProduct,
-    uploadImage, deleteImage,
+    uploadImage, deleteImage, refresh,
   };
 }

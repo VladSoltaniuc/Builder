@@ -75,7 +75,23 @@
       "removed": "Factură eliminată"
     }
   },
+  "excel": {
+    "export": "Exportă Excel",
+    "import": "Importă Excel",
+    "exportTitle": "Exportă produse în Excel",
+    "importTitle": "Importă produse din Excel",
+    "selectColumns": "Selectează coloanele de inclus:",
+    "exporting": "Se exportă...",
+    "importing": "Se importă...",
+    "importHint": "Încarcă un fișier .xlsx cu coloanele: Name, Category, Price, Stock",
+    "noFileSelected": "Selectează un fișier.",
+    "importSuccess": "{{count}} produs(e) importat(e) cu succes.",
+    "importResult": "Importate: {{imported}}, Eșuate: {{failed}}",
+    "exportError": "Exportul a eșuat.",
+    "importError": "Importul a eșuat."
+  },
   "table": {
+    "id": "ID",
     "name": "Nume",
     "category": "Categorie",
     "price": "Preț",
@@ -100,9 +116,13 @@
     "next": "Următor",
     "page": "Pagina {{page}} din {{total}}"
   },
+  "errors": {
+    "MISSING_COLUMNS": "Coloane obligatorii lipsă: {{columns}}"
+  },
   "common": {
     "loading": "Se încarcă...",
     "edit": "Editează",
-    "delete": "Șterge"
+    "delete": "Șterge",
+    "close": "Închide"
   }
 }

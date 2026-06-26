@@ -9,7 +9,7 @@
 - [x] Toast notifications
 - [x] Theme selector
 - [x] Migrate to Material UI (MUI)
-- [ ] Data import/export via Excel
+- [x] Data import/export via Excel
 - [x] IP-based rate limiter
 
 ## Auth

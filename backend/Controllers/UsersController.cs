@@ -7,7 +7,7 @@ namespace ProductApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(IUserService userService) : ControllerBase
+public class UsersController(IUserService userService) : ApiControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<UserResponse>), StatusCodes.Status200OK)]
@@ -20,7 +20,7 @@ public class UsersController(IUserService userService) : ControllerBase
     public async Task<ActionResult<UserResponse>> GetById(int id)
     {
         var user = await userService.GetById(id);
-        return user is null ? NotFound() : Ok(user);
+        return user is null ? ApiNotFound() : Ok(user);
     }
 
     [HttpPost]
@@ -34,14 +34,13 @@ public class UsersController(IUserService userService) : ControllerBase
 
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<UserResponse>> Update(int id, UpdateUserRequest request)
     {
         var result = await userService.Update(id, request);
-        if (result.IsConflict) return Conflict();
-        return result.User is null ? NotFound() : Ok(result.User);
+        if (result.IsConflict) return ApiConflict();
+        return result.User is null ? ApiNotFound() : Ok(result.User);
     }
 
     [HttpDelete("{id:int}")]
@@ -50,6 +49,6 @@ public class UsersController(IUserService userService) : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await userService.Delete(id);
-        return deleted ? NoContent() : NotFound();
+        return deleted ? NoContent() : ApiNotFound();
     }
 }

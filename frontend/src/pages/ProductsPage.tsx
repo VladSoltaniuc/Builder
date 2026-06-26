@@ -8,6 +8,8 @@ import { useProducts } from "../hooks/useProducts";
 import { productsApi } from "../api/products";
 import { ProductForm } from "../components/ProductForm";
 import { ProductTable } from "../components/ProductTable";
+import { ExcelExportDialog } from "../components/ExcelExportDialog";
+import { ExcelImportDialog } from "../components/ExcelImportDialog";
 import type { Product, ProductInput } from "../types/product";
 import { ApiError } from "../api/errors";
 
@@ -20,11 +22,13 @@ export function ProductsPage() {
     search, setSearch,
     setFilters,
     createProduct, updateProduct, deleteProduct,
-    uploadImage, deleteImage,
+    uploadImage, deleteImage, refresh,
   } = useProducts();
 
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [filterCategory, setFilterCategory] = useState('');
   const [categories, setCategories] = useState<string[]>([]);
 
@@ -108,6 +112,8 @@ export function ProductsPage() {
       </div>
 
       <div className="toolbar">
+        <Button variant="outlined" size="small" onClick={() => setIsImportOpen(true)}>{t('excel.import')}</Button>
+        <Button variant="outlined" size="small" onClick={() => setIsExportOpen(true)}>{t('excel.export')}</Button>
         <Button variant="contained" onClick={openCreate}>{t('products.add')}</Button>
       </div>
 
@@ -122,6 +128,9 @@ export function ProductsPage() {
         <span>{t('pagination.page', { page, total: totalPages })}</span>
         <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>{t('pagination.next')}</button>
       </div>
+
+      {isExportOpen && <ExcelExportDialog onClose={() => setIsExportOpen(false)} />}
+      {isImportOpen && <ExcelImportDialog onClose={() => setIsImportOpen(false)} onImported={refresh} />}
 
       {isModalOpen &&
         createPortal(

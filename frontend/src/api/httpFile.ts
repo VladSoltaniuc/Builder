@@ -1,5 +1,5 @@
 // Transport layer — file API requests
-import { ApiError } from './errors';
+import { ApiError, parseError } from './errors';
 
 async function request<T>(path: string, method: string, file?: File, asBlob = false): Promise<T> {
   let form = new FormData();
@@ -17,8 +17,7 @@ async function request<T>(path: string, method: string, file?: File, asBlob = fa
   }
 
   if (!response.ok) {
-    // 4xx / 5xx - map to user-friendly error
-    throw ApiError.fromStatus(response.status);
+    throw await parseError(response);
   }
 
   // DELETE with no body to return

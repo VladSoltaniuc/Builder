@@ -2,7 +2,7 @@
 import { httpCore } from './httpCore';
 import { httpFile } from './httpFile';
 import { buildPagedParams } from './buildPagedParams';
-import type { Product, ProductInput } from '../types/product';
+import type { Product, ProductInput, ImportProductResult } from '../types/product';
 import type { PagedResponse } from '../types/pagination';
 import type { ProductOptions } from '../types/options';
 
@@ -24,4 +24,10 @@ export const productsApi = {
   uploadImage: (id: number, file: File) => httpFile.upload<Product>(`${RESOURCE}/${id}/image`, file),
 
   deleteImage: (id: number) => httpFile.delete(`${RESOURCE}/${id}/image`),
+
+  exportExcel: (columns: string[]) =>
+    httpFile.download(`${RESOURCE}/export?${columns.map((c) => `columns=${c}`).join('&')}`),
+
+  importExcel: (file: File) =>
+    httpFile.upload<ImportProductResult>(`${RESOURCE}/import`, file),
 };

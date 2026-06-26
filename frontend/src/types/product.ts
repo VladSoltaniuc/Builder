@@ -11,3 +11,9 @@ export interface Product {
 
 // Form fields only — id and version are server-managed
 export type ProductInput = Omit<Product, 'id' | 'version'>;
+
+export interface ImportProductResult {
+  imported: number;
+  failed: number;
+  errors: string[];
+}

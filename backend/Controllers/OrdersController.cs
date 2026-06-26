@@ -7,7 +7,7 @@ namespace ProductApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class OrdersController(IOrderService orderService) : ControllerBase
+public class OrdersController(IOrderService orderService) : ApiControllerBase
 {
     [HttpGet("options")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -24,30 +24,28 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     public async Task<ActionResult<OrderResponse>> GetById(int id)
     {
         var order = await orderService.GetById(id);
-        return order is null ? NotFound() : Ok(order);
+        return order is null ? ApiNotFound() : Ok(order);
     }
 
     [HttpPost]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<OrderResponse>> Create(CreateOrderRequest request)
     {
         var created = await orderService.Create(request);
-        if (created is null) return NotFound();
+        if (created is null) return ApiNotFound();
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<OrderResponse>> Update(int id, UpdateOrderRequest request)
     {
         var result = await orderService.Update(id, request);
-        if (result.IsConflict) return Conflict();
-        return result.Order is null ? NotFound() : Ok(result.Order);
+        if (result.IsConflict) return ApiConflict();
+        return result.Order is null ? ApiNotFound() : Ok(result.Order);
     }
 
     [HttpDelete("{id:int}")]
@@ -56,7 +54,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await orderService.Delete(id);
-        return deleted ? NoContent() : NotFound();
+        return deleted ? NoContent() : ApiNotFound();
     }
 
     [HttpPost("{id:int}/invoice")]
@@ -66,12 +64,12 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     public async Task<ActionResult<OrderResponse>> UploadInvoice(int id, IFormFile file)
     {
         if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
-            return BadRequest("Only PDF files are allowed.");
+            return ApiBadRequest("Only PDF files are allowed.");
         if (file.Length > 10 * 1024 * 1024)
-            return BadRequest("Invoice must be under 10 MB.");
+            return ApiBadRequest("Invoice must be under 10 MB.");
 
         var result = await orderService.UploadInvoice(id, file);
-        return result is null ? NotFound() : Ok(result);
+        return result is null ? ApiNotFound() : Ok(result);
     }
 
     [HttpDelete("{id:int}/invoice")]
@@ -80,7 +78,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     public async Task<IActionResult> DeleteInvoice(int id)
     {
         var deleted = await orderService.DeleteInvoice(id);
-        return deleted ? NoContent() : NotFound();
+        return deleted ? NoContent() : ApiNotFound();
     }
 
     [HttpGet("{id:int}/invoice")]
@@ -89,7 +87,7 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     public async Task<IActionResult> DownloadInvoice(int id)
     {
         var path = await orderService.GetInvoicePath(id);
-        if (path is null) return NotFound();
+        if (path is null) return ApiNotFound();
         return PhysicalFile(path, "application/pdf", $"invoice-{id}.pdf");
     }
 }

@@ -13,4 +13,6 @@ public interface IProductService
     Task<bool> Delete(int id);
     Task<ProductResponse?> UploadImage(int id, IFormFile file);
     Task<bool> DeleteImage(int id);
+    Task<byte[]> ExportToExcel(IEnumerable<string> columns);
+    Task<ImportProductResult> ImportFromExcel(IFormFile file);
 }

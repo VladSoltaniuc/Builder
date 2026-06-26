@@ -1,5 +1,5 @@
 // Transport layer — Core API requests
-import { ApiError } from './errors';
+import { ApiError, parseError } from './errors';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   let response: Response;
@@ -14,8 +14,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (!response.ok) {
-    // 4xx / 5xx - map to user-friendly error
-    throw ApiError.fromStatus(response.status);
+    throw await parseError(response);
   }
 
   // DELETE, PUT, POST with no body to return
