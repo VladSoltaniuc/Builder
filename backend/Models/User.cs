@@ -20,5 +20,8 @@ public class User
     public bool TwoFactorEnabled { get; set; }
     public string? TwoFactorSecret { get; set; }
 
+    // Access level. New accounts are ReadOnly unless bootstrapped as the first Admin.
+    public UserRole Role { get; set; } = UserRole.ReadOnly;
+
     public int Version { get; set; } = 1;
 }

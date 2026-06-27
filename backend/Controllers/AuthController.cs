@@ -79,7 +79,8 @@ public class AuthController(IAuthService authService) : ApiControllerBase
         var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var email = User.FindFirstValue(ClaimTypes.Email);
         var name = User.FindFirstValue("name");
-        return Ok(new { id, name, email });
+        var role = User.FindFirstValue(ClaimTypes.Role);
+        return Ok(new { id, name, email, role });
     }
 
     // The authenticated user's id, parsed from the bearer token's subject claim.

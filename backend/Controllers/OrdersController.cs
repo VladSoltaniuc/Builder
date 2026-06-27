@@ -1,5 +1,7 @@
 // Presentation layer
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProductApi.Auth;
 using ProductApi.Contracts;
 using ProductApi.Services;
 
@@ -7,6 +9,7 @@ namespace ProductApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] // any authenticated user may read; writes additionally require Admin
 public class OrdersController(IOrderService orderService) : ApiControllerBase
 {
     [HttpGet("options")]
@@ -36,6 +39,7 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
         return order is null ? ApiNotFound() : Ok(order);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -46,6 +50,7 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -57,6 +62,7 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
         return result.Order is null ? ApiNotFound() : Ok(result.Order);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -66,6 +72,7 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
         return deleted ? NoContent() : ApiNotFound();
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost("{id:int}/awb")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -75,6 +82,7 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
         return result is null ? ApiNotFound() : Ok(result);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost("{id:int}/invoice")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -90,6 +98,7 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
         return result is null ? ApiNotFound() : Ok(result);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id:int}/invoice")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

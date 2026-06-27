@@ -19,11 +19,18 @@ public class AuthService(AppDbContext db, IJwtTokenService tokens, ITotpService 
         if (await db.Users.AnyAsync(u => u.Email == email))
             throw new UserFriendlyException("A user with this email already exists.", "CONFLICT");
 
+        // Bootstrap: if no admin exists yet, the first person to register becomes one.
+        // Everyone else starts read-only and must be promoted by an admin.
+        var role = await db.Users.AnyAsync(u => u.Role == UserRole.Admin)
+            ? UserRole.ReadOnly
+            : UserRole.Admin;
+
         var user = new User
         {
             Name = request.Name,
             Email = email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Role = role,
         };
         db.Users.Add(user);
         await db.SaveChangesAsync();

@@ -1,5 +1,7 @@
 // Presentation layer
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProductApi.Auth;
 using ProductApi.Contracts;
 using ProductApi.Services;
 
@@ -7,6 +9,7 @@ namespace ProductApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] // any authenticated user may read; writes additionally require Admin
 public class ProductsController(IProductService productService) : ApiControllerBase
 {
     private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
@@ -38,6 +41,7 @@ public class ProductsController(IProductService productService) : ApiControllerB
         return product is null ? ApiNotFound() : Ok(product);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +51,7 @@ public class ProductsController(IProductService productService) : ApiControllerB
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -58,6 +63,7 @@ public class ProductsController(IProductService productService) : ApiControllerB
         return result.Product is null ? ApiNotFound() : Ok(result.Product);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -67,6 +73,7 @@ public class ProductsController(IProductService productService) : ApiControllerB
         return deleted ? NoContent() : ApiNotFound();
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost("{id:int}/image")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -83,6 +90,7 @@ public class ProductsController(IProductService productService) : ApiControllerB
         return result is null ? ApiNotFound() : Ok(result);
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpDelete("{id:int}/image")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -102,6 +110,7 @@ public class ProductsController(IProductService productService) : ApiControllerB
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "products.xlsx");
     }
 
+    [Authorize(Roles = Roles.Admin)]
     [HttpPost("import")]
     [ProducesResponseType(typeof(ImportProductResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

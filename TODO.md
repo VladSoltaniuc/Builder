@@ -16,7 +16,7 @@
 - [x] Auth
 - [x] OAuth
 - [x] 2FA
-- [ ] Roles & permissions (admin vs read-only)
+- [x] Roles & permissions (admin vs read-only)
 
 ## Database
 - [x] Migrate from in-memory to PostgreSQL + Entity Framework Core
