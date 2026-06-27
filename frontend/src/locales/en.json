@@ -130,6 +130,8 @@
     "stock": "Stock",
     "actions": "Actions",
     "email": "Email",
+    "phone": "Phone",
+    "reportChannel": "Report",
     "user": "User",
     "product": "Product",
     "qty": "Qty",

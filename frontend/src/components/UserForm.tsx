@@ -2,6 +2,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { User, UserInput } from "../types/user";
+import { ReportPreferenceFields } from "./ReportPreferenceFields";
 
 interface UserFormProps {
   user: User | null;
@@ -9,7 +10,7 @@ interface UserFormProps {
   onCancel: () => void;
 }
 
-const EMPTY_FORM: UserInput = { name: "", email: "" };
+const EMPTY_FORM: UserInput = { name: "", email: "", phoneNumber: "", reportChannel: "None" };
 
 export function UserForm({ user, onSubmit, onCancel }: Readonly<UserFormProps>) {
   const { t } = useTranslation();
@@ -18,7 +19,12 @@ export function UserForm({ user, onSubmit, onCancel }: Readonly<UserFormProps>) 
 
   useEffect(() => {
     if (user) {
-      setForm({ name: user.name, email: user.email });
+      setForm({
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber ?? "",
+        reportChannel: user.reportChannel,
+      });
     } else {
       setForm(EMPTY_FORM);
     }
@@ -70,6 +76,13 @@ export function UserForm({ user, onSubmit, onCancel }: Readonly<UserFormProps>) 
             placeholder=" "
           />
         </label>
+
+        <ReportPreferenceFields
+          channel={form.reportChannel}
+          phoneNumber={form.phoneNumber ?? ""}
+          onChannelChange={(reportChannel) => setForm((prev) => ({ ...prev, reportChannel }))}
+          onPhoneChange={(phoneNumber) => setForm((prev) => ({ ...prev, phoneNumber }))}
+        />
       </div>
 
       <div className="form-actions">

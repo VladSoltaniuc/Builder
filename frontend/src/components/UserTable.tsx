@@ -40,6 +40,8 @@ export function UserTable({ users, sort, onSort, onEdit, onDelete }: Readonly<Us
           <th className="sortable" onClick={() => handleSort('email')}>
             {t('table.email')} <SortIcon field="email" sort={sort} />
           </th>
+          <th>{t('table.phone')}</th>
+          <th>{t('table.reportChannel')}</th>
           <th>{t('table.actions')}</th>
         </tr>
       </thead>
@@ -49,6 +51,8 @@ export function UserTable({ users, sort, onSort, onEdit, onDelete }: Readonly<Us
             <td>{user.id}</td>
             <td>{user.name}</td>
             <td>{user.email}</td>
+            <td>{user.phoneNumber ?? '—'}</td>
+            <td>{t(`report.channel${user.reportChannel}`)}</td>
             <td>
               <div className="row-actions">
                 <button className="btn btn-small" onClick={() => onEdit(user)}>{t('common.edit')}</button>
