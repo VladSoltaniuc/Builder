@@ -20,6 +20,21 @@
     "loginFailed": "Autentificare eșuată",
     "registerFailed": "Înregistrare eșuată"
   },
+  "profile": {
+    "title": "Profilul meu",
+    "role": "Rol",
+    "reportPrefsTitle": "Livrare raport săptămânal",
+    "saved": "Preferințe salvate",
+    "saveFailed": "Preferințele nu au putut fi salvate"
+  },
+  "report": {
+    "channel": "Trimite raportul săptămânal prin",
+    "channelNone": "Nu trimite",
+    "channelEmail": "Email",
+    "channelSms": "SMS",
+    "phone": "Număr de telefon",
+    "phoneHint": "Include prefixul țării, ex. România +40"
+  },
   "products": {
     "title": "Produse",
     "add": "+ Adaugă Produs",

@@ -384,3 +384,19 @@ dialog.modal .form-grid > * {
   font-weight: 600;
   color: var(--text);
 }
+
+.field-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--muted, #888);
+}
+
+.profile-info {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.profile-info p {
+  margin: 0.25rem 0;
+}

@@ -20,6 +20,21 @@
     "loginFailed": "Login failed",
     "registerFailed": "Registration failed"
   },
+  "profile": {
+    "title": "My Profile",
+    "role": "Role",
+    "reportPrefsTitle": "Weekly report delivery",
+    "saved": "Preferences saved",
+    "saveFailed": "Could not save preferences"
+  },
+  "report": {
+    "channel": "Send weekly report via",
+    "channelNone": "Don't send",
+    "channelEmail": "Email",
+    "channelSms": "SMS",
+    "phone": "Phone number",
+    "phoneHint": "Include the country code, e.g. Romania +40"
+  },
   "products": {
     "title": "Products",
     "add": "+ Add Product",

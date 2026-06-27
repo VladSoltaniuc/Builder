@@ -31,6 +31,7 @@ export function NavBar() {
           <NavLink to="/products" className={linkClass}>{t("nav.products")}</NavLink>
           <NavLink to="/users" className={linkClass}>{t("nav.users")}</NavLink>
           <NavLink to="/orders" className={linkClass}>{t("nav.orders")}</NavLink>
+          <NavLink to="/profile" className={linkClass}>{t("nav.profile")}</NavLink>
         </>
       )}
 

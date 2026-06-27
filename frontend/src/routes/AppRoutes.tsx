@@ -5,6 +5,7 @@ import { UsersPage } from "../pages/UsersPage";
 import { OrdersPage } from "../pages/OrdersPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { ProfilePage } from "../pages/ProfilePage";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 
 export function AppRoutes() {
@@ -17,6 +18,7 @@ export function AppRoutes() {
       <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
       <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
       <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
     </Routes>
   );
 }
