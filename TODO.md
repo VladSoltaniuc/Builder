@@ -28,8 +28,9 @@
 - [X] Reindexing
 - [X] Timezone converter
 - [X] DB level History
-- [X] Postgress Procedure
+- [ ] Postgress Procedure
 - [X] Postgress Functions
+- [X] Postgress Trigger
 - [ ] Execution plan
 - [ ] Middlewares (Error, etc.)
 - [ ] Queue
