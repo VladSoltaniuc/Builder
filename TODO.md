@@ -14,7 +14,7 @@
 
 ## Auth
 - [x] Auth
-- [ ] OAuth
+- [x] OAuth
 - [ ] 2FA
 - [ ] Roles & permissions (admin vs read-only)
 

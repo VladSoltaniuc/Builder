@@ -35,6 +35,7 @@ builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 
 // --- Authentication (JWT bearer) ---
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection("Authentication:Google"));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 

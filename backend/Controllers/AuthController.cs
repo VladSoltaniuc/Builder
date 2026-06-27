@@ -23,6 +23,14 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
         => Ok(await authService.Login(request));
 
+    // Exchanges a Google id_token (from client-side Google Sign-In) for our own JWT,
+    // creating or linking the local account as needed.
+    [HttpPost("google")]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResponse>> Google(GoogleLoginRequest request)
+        => Ok(await authService.LoginWithGoogle(request));
+
     // Echoes the identity carried by the bearer token — handy for the SPA to
     // confirm a session and for verifying the JWT pipeline end to end.
     [Authorize]
