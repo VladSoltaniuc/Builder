@@ -14,7 +14,7 @@
 
 ## Auth
 - [ ] AWB search page with no auth requirement
-- [ ] Registration (only operators, restricted role)
+- [ ] Registration (only operators, restricted role, email verification)
 - [x] Auth
 - [x] OAuth
 - [x] 2FA
@@ -38,7 +38,7 @@
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
 - [x] File upload (images, documents)
-- [-] Audit logs (needs userId after Auth implementation)
+- [x] Audit logs
 - [x] Email sending (cron job) (subscribe to audit logs weekly report)
 - [x] SMS sending
 

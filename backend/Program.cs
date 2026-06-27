@@ -25,8 +25,11 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<AuditUserInterceptor>();
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+           .AddInterceptors(sp.GetRequiredService<AuditUserInterceptor>()));
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
