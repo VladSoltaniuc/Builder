@@ -27,6 +27,7 @@
 - [ ] Stored procedure + execution plans
 - [x] Indexes
 - [X] Reindexing
+- [X] Timezone converter
 - [ ] Middlewares (Error, etc.)
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)

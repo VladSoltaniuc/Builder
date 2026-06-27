@@ -5,6 +5,7 @@ import type { Order } from "../types/order";
 import type { SortState } from "../types/query";
 import { toggleSort } from "../types/query";
 import { sortIcons } from "../constants/ui";
+import { formatDateTime } from "../utils/datetime";
 
 interface OrderTableProps {
   orders: Order[];
@@ -25,7 +26,7 @@ function SortIcon({ field, sort }: Readonly<{ field: string; sort: SortState | n
 }
 
 export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInvoice, onDeleteInvoice, onDownloadInvoice }: Readonly<OrderTableProps>) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingUploadId, setPendingUploadId] = useState<number | null>(null);
 
@@ -90,7 +91,7 @@ export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInv
               <td className="num">{order.quantity}</td>
               <td className="num">{currency.format(order.totalPrice)}</td>
               <td>{order.status}</td>
-              <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+              <td>{formatDateTime(order.createdAt, i18n.language)}</td>
               <td>{order.awb ?? '—'}</td>
               <td>
                 <div className="row-actions">
