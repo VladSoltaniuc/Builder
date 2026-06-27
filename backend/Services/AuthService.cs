@@ -1,19 +1,31 @@
 // Application layer
+using System.Security.Cryptography;
 using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProductApi.Auth;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
+using ProductApi.Reports;
 
 namespace ProductApi.Services;
 
-public class AuthService(AppDbContext db, IJwtTokenService tokens, ITotpService totp, IOptions<GoogleAuthOptions> googleOptions) : IAuthService
+public class AuthService(
+    AppDbContext db,
+    IJwtTokenService tokens,
+    ITotpService totp,
+    IEmailSender emailSender,
+    IOptions<GoogleAuthOptions> googleOptions,
+    IOptions<AppOptions> appOptions,
+    ILogger<AuthService> logger) : IAuthService
 {
     private const string GoogleProvider = "Google";
-    public async Task<AuthResponse> Register(RegisterRequest request)
+    private static readonly TimeSpan VerificationTokenLifetime = TimeSpan.FromHours(24);
+
+    public async Task<RegisterResponse> Register(RegisterRequest request)
     {
         var email = Normalize(request.Email);
         if (await db.Users.AnyAsync(u => u.Email == email))
@@ -25,17 +37,65 @@ public class AuthService(AppDbContext db, IJwtTokenService tokens, ITotpService 
             ? UserRole.ReadOnly
             : UserRole.Admin;
 
+        var token = GenerateVerificationToken();
         var user = new User
         {
             Name = request.Name,
             Email = email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role = role,
+            EmailVerified = false,
+            EmailVerificationToken = token,
+            EmailVerificationTokenExpiresAt = DateTime.UtcNow.Add(VerificationTokenLifetime),
         };
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        return BuildResponse(user);
+        // Fire-and-forget: the user shouldn't wait on SMTP, and a mail hiccup must not
+        // fail registration. Failures are logged inside the queued task.
+        QueueVerificationEmail(user.Name, user.Email, token);
+
+        return new RegisterResponse(email, "Verification email sent. Please check your inbox.");
+    }
+
+    public async Task VerifyEmail(string token)
+    {
+        var user = await db.Users.SingleOrDefaultAsync(u => u.EmailVerificationToken == token);
+        if (user is null || user.EmailVerificationTokenExpiresAt < DateTime.UtcNow)
+            throw new UserFriendlyException("This verification link is invalid or has expired.", "INVALID_ARGUMENT");
+
+        user.EmailVerified = true;
+        user.EmailVerificationToken = null;
+        user.EmailVerificationTokenExpiresAt = null;
+        await db.SaveChangesAsync();
+    }
+
+    // Cryptographically random, URL-safe token (no padding/reserved chars).
+    private static string GenerateVerificationToken() =>
+        Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+
+    private void QueueVerificationEmail(string name, string email, string token)
+    {
+        var link = $"{appOptions.Value.FrontendUrl.TrimEnd('/')}/verify-email?token={token}";
+        var html = $"""
+            <h2>Confirm your email</h2>
+            <p>Hi {name}, thanks for registering. Please confirm your email address to activate your account.</p>
+            <p><a href="{link}" style="display:inline-block;padding:10px 18px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px">Verify email</a></p>
+            <p>Or open this link in your browser:<br>{link}</p>
+            <p>This link expires in 24 hours.</p>
+            """;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await emailSender.SendAsync(email, "Verify your email", html);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send verification email to {Email}.", email);
+            }
+        });
     }
 
     public async Task<LoginResponse> Login(LoginRequest request)
@@ -48,6 +108,10 @@ public class AuthService(AppDbContext db, IJwtTokenService tokens, ITotpService 
         if (user is null || string.IsNullOrEmpty(user.PasswordHash) ||
             !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new UserFriendlyException("Invalid email or password.", "UNAUTHORIZED");
+
+        // Account exists and password matches, but the email must be confirmed first.
+        if (!user.EmailVerified)
+            throw new UserFriendlyException("Please verify your email before signing in.", "EMAIL_NOT_VERIFIED");
 
         // Password is correct, but if 2FA is on we issue only a short-lived pending
         // token and withhold the real one until the TOTP code is verified.
@@ -143,9 +207,11 @@ public class AuthService(AppDbContext db, IJwtTokenService tokens, ITotpService 
             db.Users.Add(user);
         }
 
-        // Link / refresh the external identity on the resolved account.
+        // Link / refresh the external identity on the resolved account. Google has
+        // already verified the address, so the account is verified by definition.
         user.ExternalProvider = GoogleProvider;
         user.ExternalId = payload.Subject;
+        user.EmailVerified = true;
         await db.SaveChangesAsync();
 
         return BuildResponse(user);

@@ -18,7 +18,16 @@
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "loginFailed": "Login failed",
-    "registerFailed": "Registration failed"
+    "registerFailed": "Registration failed",
+    "backToLogin": "Back to sign in",
+    "checkInboxTitle": "Almost there!",
+    "checkInboxMessage": "We sent a verification link to {{email}}. Click it to activate your account.",
+    "verifying": "Verifying your email…",
+    "verifiedTitle": "You have successfully registered!",
+    "verifiedRedirecting": "Redirecting to login…",
+    "verifyFailedTitle": "Verification failed",
+    "verifyFailed": "We couldn't verify your email.",
+    "verifyMissingToken": "This verification link is missing its token."
   },
   "profile": {
     "title": "My Profile",

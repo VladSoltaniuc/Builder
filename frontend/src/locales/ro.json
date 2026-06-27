@@ -18,7 +18,16 @@
     "noAccount": "Nu ai cont?",
     "haveAccount": "Ai deja cont?",
     "loginFailed": "Autentificare eșuată",
-    "registerFailed": "Înregistrare eșuată"
+    "registerFailed": "Înregistrare eșuată",
+    "backToLogin": "Înapoi la autentificare",
+    "checkInboxTitle": "Aproape gata!",
+    "checkInboxMessage": "Am trimis un link de verificare la {{email}}. Apasă-l pentru a-ți activa contul.",
+    "verifying": "Se verifică emailul…",
+    "verifiedTitle": "Te-ai înregistrat cu succes!",
+    "verifiedRedirecting": "Redirecționare către autentificare…",
+    "verifyFailedTitle": "Verificare eșuată",
+    "verifyFailed": "Nu am putut verifica emailul.",
+    "verifyMissingToken": "Acestui link de verificare îi lipsește token-ul."
   },
   "profile": {
     "title": "Profilul meu",

@@ -14,7 +14,7 @@
 
 ## Auth
 - [ ] AWB search page with no auth requirement
-- [ ] Registration (only operators, restricted role, email verification)
+- [ ] Registration (email verification fire and forget)
 - [x] Auth
 - [x] OAuth
 - [x] 2FA
@@ -22,7 +22,7 @@
 
 ## Database
 - [x] Migrate from in-memory to PostgreSQL + Entity Framework Core
-- [ ] Redis (caching for AWB user info) (cache user browser vs server, what actualy is redis?)
+- [ ] Redis (caching for AWB user info) (cache user browser vs server, what actualy is redis?) (YOOO we can use this for permission bitmask yooooo thats fireeee yeaaaa 🔥🔥🔥🔥)
 
 ## Backend
 - [x] View (virtual table from joins + computed columns) (daily, weekly, monthly metrics computed table)

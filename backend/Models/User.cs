@@ -23,6 +23,12 @@ public class User
     // Access level. New accounts are ReadOnly unless bootstrapped as the first Admin.
     public UserRole Role { get; set; } = UserRole.ReadOnly;
 
+    // Email verification. New password registrations start unverified and can't log
+    // in until they click the emailed link. External (Google) logins are pre-verified.
+    public bool EmailVerified { get; set; }
+    public string? EmailVerificationToken { get; set; }
+    public DateTime? EmailVerificationTokenExpiresAt { get; set; }
+
     // Weekly audit report delivery preference. None = not subscribed; Sms also
     // needs PhoneNumber set.
     public PreferredReportChannel ReportChannel { get; set; } = PreferredReportChannel.None;

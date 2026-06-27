@@ -6,7 +6,8 @@ namespace ProductApi.Services;
 public interface IAuthService
 {
     Task<ProfileResponse> GetProfile(int userId);
-    Task<AuthResponse> Register(RegisterRequest request);
+    Task<RegisterResponse> Register(RegisterRequest request);
+    Task VerifyEmail(string token);
     Task<LoginResponse> Login(LoginRequest request);
     Task<AuthResponse> LoginWithGoogle(GoogleLoginRequest request);
     Task<AuthResponse> VerifyTwoFactorLogin(TwoFactorLoginRequest request);

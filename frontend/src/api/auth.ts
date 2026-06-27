@@ -1,12 +1,15 @@
 // API layer — authentication
 import { httpCore } from "./httpCore";
-import type { AuthResult, LoginResult, Profile } from "../types/auth";
+import type { AuthResult, LoginResult, Profile, RegisterResult } from "../types/auth";
 
 const RESOURCE = "/auth";
 
 export const authApi = {
   register: (name: string, email: string, password: string) =>
-    httpCore.post<AuthResult>(`${RESOURCE}/register`, { name, email, password }),
+    httpCore.post<RegisterResult>(`${RESOURCE}/register`, { name, email, password }),
+
+  verifyEmail: (token: string) =>
+    httpCore.post<void>(`${RESOURCE}/verify-email`, { token }),
 
   login: (email: string, password: string) =>
     httpCore.post<LoginResult>(`${RESOURCE}/login`, { email, password }),

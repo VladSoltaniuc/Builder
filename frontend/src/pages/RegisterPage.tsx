@@ -1,6 +1,6 @@
 // Application layer — sign up
 import { useState, type FormEvent } from "react";
-import { Navigate, useNavigate, Link } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { authApi } from "../api/auth";
@@ -9,13 +9,13 @@ import { ApiError } from "../api/errors";
 
 export function RegisterPage() {
   const { t } = useTranslation();
-  const { setSession, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   if (isAuthenticated) return <Navigate to="/products" replace />;
 
@@ -24,13 +24,27 @@ export function RegisterPage() {
     setIsSubmitting(true);
     try {
       const res = await authApi.register(name, email, password);
-      await setSession(res.token);
-      navigate("/products");
+      setSentTo(res.email);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : t("auth.registerFailed"));
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  // After registering we don't log in — we wait for the emailed verification link.
+  if (sentTo) {
+    return (
+      <main className="container">
+        <div className="card auth-card">
+          <h1>{t("auth.checkInboxTitle")}</h1>
+          <p>{t("auth.checkInboxMessage", { email: sentTo })}</p>
+          <p className="auth-switch">
+            <Link to="/login">{t("auth.backToLogin")}</Link>
+          </p>
+        </div>
+      </main>
+    );
   }
 
   return (

@@ -22,7 +22,13 @@ export interface AuthUser {
   version: number;
 }
 
-// POST /api/auth/register and /api/auth/2fa/verify
+// POST /api/auth/register — no token; the user must verify their email first.
+export interface RegisterResult {
+  email: string;
+  message: string;
+}
+
+// POST /api/auth/2fa/verify
 export interface AuthResult {
   token: string;
   expiresAt: string;

@@ -12,10 +12,20 @@ namespace ProductApi.Controllers;
 public class AuthController(IAuthService authService) : ApiControllerBase
 {
     [HttpPost("register")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
+    public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request)
         => Ok(await authService.Register(request));
+
+    // Confirms an emailed verification link, activating the account.
+    [HttpPost("verify-email")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> VerifyEmail(VerifyEmailRequest request)
+    {
+        await authService.VerifyEmail(request.Token);
+        return NoContent();
+    }
 
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
