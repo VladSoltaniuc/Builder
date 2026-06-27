@@ -24,7 +24,8 @@
 
 ## Backend
 - [ ] View (virtual table from joins + computed columns)
-- [ ] Stored procedure + execution plans
+- [ ] Stored procedure
+- [ ] Execution plan
 - [x] Indexes
 - [X] Reindexing
 - [X] Timezone converter

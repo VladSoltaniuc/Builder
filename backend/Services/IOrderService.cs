@@ -9,6 +9,7 @@ public interface IOrderService
     Task<PagedResponse<OrderResponse>> GetAll(OrderQuery query);
     Task<List<OrderResponse>> Search(string term);
     Task<OrderResponse?> GetById(int id);
+    Task<OrderResponse?> AssignGeneratedAwb(int id);
     Task<OrderResponse?> Create(CreateOrderRequest request);
     Task<UpdateOrderResult> Update(int id, UpdateOrderRequest request);
     Task<bool> Delete(int id);

@@ -66,6 +66,15 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
         return deleted ? NoContent() : ApiNotFound();
     }
 
+    [HttpPost("{id:int}/awb")]
+    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<OrderResponse>> GenerateAwb(int id)
+    {
+        var result = await orderService.AssignGeneratedAwb(id);
+        return result is null ? ApiNotFound() : Ok(result);
+    }
+
     [HttpPost("{id:int}/invoice")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
