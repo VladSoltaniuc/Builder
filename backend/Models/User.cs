@@ -23,5 +23,8 @@ public class User
     // Access level. New accounts are ReadOnly unless bootstrapped as the first Admin.
     public UserRole Role { get; set; } = UserRole.ReadOnly;
 
+    // Opt-in for the weekly audit report email. Off by default.
+    public bool WeeklyReportSubscribed { get; set; }
+
     public int Version { get; set; } = 1;
 }

@@ -13,6 +13,7 @@ using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
 using ProductApi.Maintenance;
+using ProductApi.Reports;
 using ProductApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +67,13 @@ builder.Services.AddAuthorization();
 builder.Services.Configure<IndexMaintenanceOptions>(builder.Configuration.GetSection("IndexMaintenance"));
 if (!builder.Environment.IsEnvironment("Testing"))
     builder.Services.AddHostedService<IndexMaintenanceService>();
+
+// Weekly audit-report email cron. Same Testing guard as above.
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<WeeklyReportOptions>(builder.Configuration.GetSection("WeeklyReport"));
+builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+if (!builder.Environment.IsEnvironment("Testing"))
+    builder.Services.AddHostedService<WeeklyReportService>();
 
 // Model validation errors → unified error envelope
 builder.Services.Configure<ApiBehaviorOptions>(options =>

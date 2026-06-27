@@ -37,7 +37,7 @@
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
 - [x] File upload (images, documents)
 - [-] Audit logs (needs userId after Auth implementation)
-- [ ] Email sending (cron job) (subscribe to audit logs weekly report)
+- [X] Email sending (cron job) (subscribe to audit logs weekly report)
 - [ ] SMS sending
 
 ## Testing & CI/CD
