@@ -13,6 +13,8 @@
 - [x] IP-based rate limiter
 
 ## Auth
+- [ ] AWB search page with no auth requirement
+- [ ] Registration (only operators, restricted role)
 - [x] Auth
 - [x] OAuth
 - [x] 2FA
@@ -20,7 +22,7 @@
 
 ## Database
 - [x] Migrate from in-memory to PostgreSQL + Entity Framework Core
-- [ ] Redis (caching)
+- [ ] Redis (caching for AWB user info) (cache user browser vs server, what actualy is redis?)
 
 ## Backend
 - [x] View (virtual table from joins + computed columns) (daily, weekly, monthly metrics computed table)

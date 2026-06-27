@@ -366,3 +366,21 @@ dialog.modal .form-grid > * {
   max-height: 200px;
   overflow-y: auto;
 }
+
+/* --- Auth --- */
+.auth-card {
+  max-width: 420px;
+  margin: 3rem auto 0;
+}
+
+.auth-switch {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.nav-user {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}

@@ -1,19 +1,30 @@
 // Transport layer — file API requests
 import { ApiError, parseError } from './errors';
+import { getToken, clearToken, AUTH_LOGOUT_EVENT } from '../auth/token';
 
 async function request<T>(path: string, method: string, file?: File, asBlob = false): Promise<T> {
   let form = new FormData();
   if (file) form.append('file', file); // wrap file for multipart/form-data transport
+
+  const token = getToken();
 
   let response: Response;
   try {
     response = await fetch(`${import.meta.env.VITE_API_BASE_URL}${path}`, {
       method,
       body: file ? form : undefined, // no body for DELETE/GET
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
   } catch {
     // Server is down or no network
     throw ApiError.fromStatus(0);
+  }
+
+  // Token missing/expired — drop the session and let the AuthProvider redirect.
+  if (response.status === 401) {
+    clearToken();
+    window.dispatchEvent(new Event(AUTH_LOGOUT_EVENT));
+    throw ApiError.fromStatus(401);
   }
 
   if (!response.ok) {
@@ -29,8 +40,8 @@ async function request<T>(path: string, method: string, file?: File, asBlob = fa
 
 // Interface
 export const httpFile = {
-  upload:   <T>(path: string, file: File) => request<T>(path,    'POST',   file), 
+  upload:   <T>(path: string, file: File) => request<T>(path,    'POST',   file),
   replace:  <T>(path: string, file: File) => request<T>(path,    'PUT',    file),
-  download:     (path: string)            => request<Blob>(path,  'GET',   undefined, true), 
+  download:     (path: string)            => request<Blob>(path,  'GET',   undefined, true),
   delete:       (path: string)            => request<void>(path,  'DELETE'),
 };

@@ -1,16 +1,30 @@
 // Transport layer — Core API requests
 import { ApiError, parseError } from './errors';
+import { getToken, clearToken, AUTH_LOGOUT_EVENT } from '../auth/token';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+
   let response: Response;
   try {
     response = await fetch(`${import.meta.env.VITE_API_BASE_URL}${path}`, {
-      headers: { 'Content-Type': 'application/json' },
       ...options, // method, body, etc.
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers ?? {}),
+      },
     });
   } catch {
     // Server is down or no network
     throw ApiError.fromStatus(0);
+  }
+
+  // Token missing/expired — drop the session and let the AuthProvider redirect.
+  if (response.status === 401) {
+    clearToken();
+    window.dispatchEvent(new Event(AUTH_LOGOUT_EVENT));
+    throw ApiError.fromStatus(401);
   }
 
   if (!response.ok) {

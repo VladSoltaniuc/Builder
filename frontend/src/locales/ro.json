@@ -2,7 +2,23 @@
   "nav": {
     "products": "Produse",
     "users": "Utilizatori",
-    "orders": "Comenzi"
+    "orders": "Comenzi",
+    "profile": "Profil"
+  },
+  "auth": {
+    "loginTitle": "Autentificare",
+    "registerTitle": "Creează cont",
+    "name": "Nume",
+    "email": "Email",
+    "password": "Parolă",
+    "code": "Cod de autentificare",
+    "login": "Conectare",
+    "logout": "Deconectare",
+    "register": "Înregistrare",
+    "noAccount": "Nu ai cont?",
+    "haveAccount": "Ai deja cont?",
+    "loginFailed": "Autentificare eșuată",
+    "registerFailed": "Înregistrare eșuată"
   },
   "products": {
     "title": "Produse",

@@ -1,12 +1,15 @@
 // Presentation layer — navigation
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ReactCountryFlag from "react-country-flag";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
 export function NavBar() {
   const { theme, toggle: toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
 
   function toggleLanguage() {
     const next = i18n.language === "en" ? "ro" : "en";
@@ -14,17 +17,22 @@ export function NavBar() {
     localStorage.setItem("language", next);
   }
 
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
+
+  const linkClass = ({ isActive }: { isActive: boolean }) => (isActive ? "nav-link active" : "nav-link");
+
   return (
     <nav className="nav">
-      <NavLink to="/products" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-        {t("nav.products")}
-      </NavLink>
-      <NavLink to="/users" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-        {t("nav.users")}
-      </NavLink>
-      <NavLink to="/orders" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-        {t("nav.orders")}
-      </NavLink>
+      {isAuthenticated && (
+        <>
+          <NavLink to="/products" className={linkClass}>{t("nav.products")}</NavLink>
+          <NavLink to="/users" className={linkClass}>{t("nav.users")}</NavLink>
+          <NavLink to="/orders" className={linkClass}>{t("nav.orders")}</NavLink>
+        </>
+      )}
 
       <div className="nav-controls">
         <button className="btn btn-small nav-btn-flag" onClick={toggleLanguage}>
@@ -46,6 +54,15 @@ export function NavBar() {
           )}
           {theme === "dark" ? "Dark" : "Light"}
         </button>
+
+        {isAuthenticated ? (
+          <>
+            <span className="nav-user">{user?.name}</span>
+            <button className="btn btn-small" onClick={handleLogout}>{t("auth.logout")}</button>
+          </>
+        ) : (
+          <NavLink to="/login" className="btn btn-small">{t("auth.login")}</NavLink>
+        )}
       </div>
     </nav>
   );

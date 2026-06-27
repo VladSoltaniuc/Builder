@@ -2,7 +2,23 @@
   "nav": {
     "products": "Products",
     "users": "Users",
-    "orders": "Orders"
+    "orders": "Orders",
+    "profile": "Profile"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "registerTitle": "Create account",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "code": "Authentication code",
+    "login": "Log in",
+    "logout": "Log out",
+    "register": "Register",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "loginFailed": "Login failed",
+    "registerFailed": "Registration failed"
   },
   "products": {
     "title": "Products",
