@@ -65,6 +65,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(a => a.OldData).HasColumnType("jsonb");
             e.Property(a => a.NewData).HasColumnType("jsonb");
             e.HasIndex(a => new { a.TableName, a.RowId });
+
+            // Range index for the weekly report's "last week" filter. Without it the
+            // report query Seq Scans all of AuditLogs and discards ~99% of rows; the
+            // btree lets it walk straight to the date window.
+            e.HasIndex(a => a.ChangedAt);
         });
 
         // GIN trigram indexes on every searchable column. These coexist with the

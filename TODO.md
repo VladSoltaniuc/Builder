@@ -31,7 +31,7 @@
 - [X] Postgress Procedure
 - [X] Postgress Functions
 - [X] Postgress Trigger
-- [ ] Execution plan
+- [X] Execution plan
 - [ ] Middlewares (Error, etc.)
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
