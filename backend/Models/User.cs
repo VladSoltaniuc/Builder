@@ -15,5 +15,10 @@ public class User
     public string? ExternalProvider { get; set; }
     public string? ExternalId { get; set; }
 
+    // TOTP two-factor. Secret is a base32 string, set once the user opts in and
+    // cleared when they disable. Enabled flips true only after a code is confirmed.
+    public bool TwoFactorEnabled { get; set; }
+    public string? TwoFactorSecret { get; set; }
+
     public int Version { get; set; } = 1;
 }

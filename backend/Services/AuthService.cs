@@ -10,7 +10,7 @@ using ProductApi.Models;
 
 namespace ProductApi.Services;
 
-public class AuthService(AppDbContext db, IJwtTokenService tokens, IOptions<GoogleAuthOptions> googleOptions) : IAuthService
+public class AuthService(AppDbContext db, IJwtTokenService tokens, ITotpService totp, IOptions<GoogleAuthOptions> googleOptions) : IAuthService
 {
     private const string GoogleProvider = "Google";
     public async Task<AuthResponse> Register(RegisterRequest request)
@@ -31,7 +31,7 @@ public class AuthService(AppDbContext db, IJwtTokenService tokens, IOptions<Goog
         return BuildResponse(user);
     }
 
-    public async Task<AuthResponse> Login(LoginRequest request)
+    public async Task<LoginResponse> Login(LoginRequest request)
     {
         var email = Normalize(request.Email);
         var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email);
@@ -42,7 +42,67 @@ public class AuthService(AppDbContext db, IJwtTokenService tokens, IOptions<Goog
             !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new UserFriendlyException("Invalid email or password.", "UNAUTHORIZED");
 
+        // Password is correct, but if 2FA is on we issue only a short-lived pending
+        // token and withhold the real one until the TOTP code is verified.
+        if (user.TwoFactorEnabled)
+            return LoginResponse.TwoFactorRequired(tokens.CreatePendingTwoFactorToken(user));
+
+        return LoginResponse.Authenticated(BuildResponse(user));
+    }
+
+    public async Task<AuthResponse> VerifyTwoFactorLogin(TwoFactorLoginRequest request)
+    {
+        var userId = tokens.ReadPendingTwoFactorUserId(request.TwoFactorToken)
+            ?? throw new UserFriendlyException("Two-factor session expired. Please sign in again.", "UNAUTHORIZED");
+
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new UserFriendlyException("Two-factor session expired. Please sign in again.", "UNAUTHORIZED");
+
+        if (!user.TwoFactorEnabled || !totp.Verify(user.TwoFactorSecret!, request.Code))
+            throw new UserFriendlyException("Invalid authentication code.", "UNAUTHORIZED");
+
         return BuildResponse(user);
+    }
+
+    public async Task<TwoFactorSetupResponse> SetupTwoFactor(int userId)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
+
+        // Store the candidate secret but leave 2FA disabled until a code confirms it.
+        var secret = totp.GenerateSecret();
+        user.TwoFactorSecret = secret;
+        user.TwoFactorEnabled = false;
+        await db.SaveChangesAsync();
+
+        return new TwoFactorSetupResponse(secret, totp.BuildOtpAuthUri(secret, user.Email));
+    }
+
+    public async Task EnableTwoFactor(int userId, string code)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
+
+        if (string.IsNullOrEmpty(user.TwoFactorSecret))
+            throw new UserFriendlyException("Start two-factor setup first.", "INVALID_ARGUMENT");
+        if (!totp.Verify(user.TwoFactorSecret, code))
+            throw new UserFriendlyException("Invalid authentication code.", "UNAUTHORIZED");
+
+        user.TwoFactorEnabled = true;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task DisableTwoFactor(int userId, string code)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
+
+        if (!user.TwoFactorEnabled || !totp.Verify(user.TwoFactorSecret!, code))
+            throw new UserFriendlyException("Invalid authentication code.", "UNAUTHORIZED");
+
+        user.TwoFactorEnabled = false;
+        user.TwoFactorSecret = null;
+        await db.SaveChangesAsync();
     }
 
     public async Task<AuthResponse> LoginWithGoogle(GoogleLoginRequest request)

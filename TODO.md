@@ -15,7 +15,7 @@
 ## Auth
 - [x] Auth
 - [x] OAuth
-- [ ] 2FA
+- [x] 2FA
 - [ ] Roles & permissions (admin vs read-only)
 
 ## Database
