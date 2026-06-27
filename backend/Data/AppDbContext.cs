@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<WeeklyAuditReportRow> WeeklyAuditReport => Set<WeeklyAuditReportRow>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +49,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // pgstattuple measures index bloat for the maintenance/reindex job.
         modelBuilder.HasPostgresExtension("pgstattuple");
+
+        // Read-only projection over the weekly audit metrics materialized view.
+        // The view itself is created by raw SQL in the AddWeeklyAuditReportView
+        // migration, so EF maps reads to it but never emits DDL for it.
+        modelBuilder.Entity<WeeklyAuditReportRow>()
+            .HasNoKey()
+            .ToView("mv_weekly_audit_report");
 
         // Audit trail — JSONB snapshots of the row before/after each change.
         // Rows are inserted only by DB triggers (see the AddAuditTrail migration),

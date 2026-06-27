@@ -31,6 +31,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 
 // --- Authentication (JWT bearer) ---
