@@ -13,7 +13,7 @@
 - [x] IP-based rate limiter
 
 ## Auth
-- [ ] Auth
+- [x] Auth
 - [ ] OAuth
 - [ ] 2FA
 - [ ] Roles & permissions (admin vs read-only)
@@ -36,7 +36,7 @@
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
 - [x] File upload (images, documents)
-- [ ] Audit and Logs
+- [ ] Audit logs (needs userId after Auth implementation)
 - [ ] Email sending (cron job) (subscribe to audit logs weekly report)
 - [ ] SMS sending
 
