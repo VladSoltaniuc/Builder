@@ -4,6 +4,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
@@ -87,6 +88,17 @@ app.UseExceptionHandler(err => err.Run(async ctx =>
     string? detail = null;
     if (ex is UserFriendlyException ufe)
         (code, status, message, detail) = (400, ufe.ErrorCode, ufe.Message, ufe.Detail);
+    // Someone else changed the row between our read and write (optimistic concurrency).
+    else if (ex is DbUpdateConcurrencyException)
+        (code, status, message) = (409, "CONFLICT", "This record was changed by another request. Please refresh and try again.");
+    // A unique index rejected a duplicate value. Map the index to a friendly message.
+    else if (ex is DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pg })
+        (code, status, message) = (409, "CONFLICT", pg.ConstraintName switch
+        {
+            "IX_Orders_Awb"        => "Another order already uses this AWB.",
+            "IX_Users_Email_Unique" => "A user with this email already exists.",
+            _ => "That value conflicts with an existing record."
+        });
     else
         (code, status, message) = (500, "INTERNAL", "An unexpected error occurred.");
     ctx.Response.StatusCode = code;

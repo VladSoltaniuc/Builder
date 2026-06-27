@@ -1,5 +1,6 @@
 // Application layer
 using Microsoft.EntityFrameworkCore;
+using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
@@ -72,6 +73,19 @@ public class UserService(AppDbContext db) : IUserService
         return new PagedResponse<UserResponse>(items, total, q.Page, q.PageSize);
     }
 
+    // Substring search over Name and Email, backed by pg_trgm GIN indexes (ILIKE '%term%').
+    public async Task<List<UserResponse>> Search(string term)
+    {
+        var pattern = $"%{term}%";
+        return await db.Users
+            .AsNoTracking()
+            .Where(u => EF.Functions.ILike(u.Name, pattern) || EF.Functions.ILike(u.Email, pattern))
+            .OrderBy(u => u.Id)
+            .Take(SearchDefaults.MaxResults)
+            .Select(u => ToResponse(u))
+            .ToListAsync();
+    }
+
     public async Task<UserResponse?> GetById(int id)
     {
         var user = await db.Users.FindAsync(id);
@@ -80,7 +94,7 @@ public class UserService(AppDbContext db) : IUserService
 
     public async Task<UserResponse> Create(CreateUserRequest request)
     {
-        var user = new User { Name = request.Name, Email = request.Email };
+        var user = new User { Name = request.Name, Email = Normalize(request.Email) };
         db.Users.Add(user);
         await db.SaveChangesAsync();
         return ToResponse(user);
@@ -93,7 +107,7 @@ public class UserService(AppDbContext db) : IUserService
         if (user.Version != request.Version) return UpdateUserResult.Conflict();
 
         user.Name = request.Name;
-        user.Email = request.Email;
+        user.Email = Normalize(request.Email);
         user.Version++;
 
         await db.SaveChangesAsync();
@@ -108,6 +122,9 @@ public class UserService(AppDbContext db) : IUserService
         await db.SaveChangesAsync();
         return true;
     }
+
+    // Trim + lower-case so "Alice@X.com" and "alice@x.com" can't both exist.
+    private static string Normalize(string email) => email.Trim().ToLowerInvariant();
 
     private static UserResponse ToResponse(User u) => new(u.Id, u.Name, u.Email, u.Version);
 }

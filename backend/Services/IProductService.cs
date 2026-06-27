@@ -7,6 +7,7 @@ public interface IProductService
 {
     ProductOptionsResponse GetOptions();
     Task<PagedResponse<ProductResponse>> GetAll(ProductQuery query);
+    Task<List<ProductResponse>> Search(string term);
     Task<ProductResponse?> GetById(int id);
     Task<ProductResponse> Create(CreateProductRequest request);
     Task<UpdateProductResult> Update(int id, UpdateProductRequest request);

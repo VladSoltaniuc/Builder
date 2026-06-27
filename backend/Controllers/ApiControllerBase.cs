@@ -1,11 +1,22 @@
 // Presentation layer
 using Microsoft.AspNetCore.Mvc;
+using ProductApi.Constants;
 using ProductApi.Contracts;
 
 namespace ProductApi.Controllers;
 
 public abstract class ApiControllerBase : ControllerBase
 {
+    // Enforces the minimum search length before any query fires. Returns a 400
+    // ActionResult when too short, or null with the trimmed term when valid.
+    protected ActionResult? ValidateSearchTerm(string? term, out string trimmed)
+    {
+        trimmed = term?.Trim() ?? string.Empty;
+        return trimmed.Length < SearchDefaults.MinTermLength
+            ? ApiBadRequest($"Search term must be at least {SearchDefaults.MinTermLength} characters.")
+            : null;
+    }
+
     protected ActionResult ApiNotFound(string message = "The requested resource does not exist.")
         => NotFound(Err(404, "NOT_FOUND", message));
 

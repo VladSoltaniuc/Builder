@@ -20,6 +20,15 @@ public class ProductsController(IProductService productService) : ApiControllerB
     public async Task<ActionResult<PagedResponse<ProductResponse>>> GetAll([FromQuery] ProductQuery query)
         => Ok(await productService.GetAll(query));
 
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(List<ProductResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<List<ProductResponse>>> Search([FromQuery] string term)
+    {
+        if (ValidateSearchTerm(term, out var trimmed) is { } error) return error;
+        return Ok(await productService.Search(trimmed));
+    }
+
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

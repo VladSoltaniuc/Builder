@@ -87,6 +87,25 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
         return new PagedResponse<OrderResponse>(items, total, q.Page, q.PageSize);
     }
 
+    // Substring search across the user's name, the product's name, and the AWB.
+    // User/Product names are matched via their own pg_trgm GIN indexes through the
+    // joins; Awb is matched directly against its trigram index.
+    public async Task<List<OrderResponse>> Search(string term)
+    {
+        var pattern = $"%{term}%";
+        return await db.Orders
+            .AsNoTracking()
+            .Include(o => o.User)
+            .Include(o => o.Product)
+            .Where(o => EF.Functions.ILike(o.User.Name, pattern)
+                     || EF.Functions.ILike(o.Product.Name, pattern)
+                     || (o.Awb != null && EF.Functions.ILike(o.Awb, pattern)))
+            .OrderBy(o => o.Id)
+            .Take(SearchDefaults.MaxResults)
+            .Select(o => ToResponse(o))
+            .ToListAsync();
+    }
+
     public async Task<OrderResponse?> GetById(int id)
     {
         var order = await db.Orders

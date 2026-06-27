@@ -18,6 +18,15 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
     public async Task<ActionResult<PagedResponse<OrderResponse>>> GetAll([FromQuery] OrderQuery query)
         => Ok(await orderService.GetAll(query));
 
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(List<OrderResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<List<OrderResponse>>> Search([FromQuery] string term)
+    {
+        if (ValidateSearchTerm(term, out var trimmed) is { } error) return error;
+        return Ok(await orderService.Search(trimmed));
+    }
+
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

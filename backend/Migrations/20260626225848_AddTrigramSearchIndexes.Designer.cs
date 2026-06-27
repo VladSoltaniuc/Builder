@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProductApi.Data;
@@ -11,9 +12,11 @@ using ProductApi.Data;
 namespace ProductApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260626225848_AddTrigramSearchIndexes")]
+    partial class AddTrigramSearchIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,7 +60,6 @@ namespace ProductApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Version")
-                        .IsConcurrencyToken()
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -104,7 +106,6 @@ namespace ProductApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Version")
-                        .IsConcurrencyToken()
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -134,7 +135,6 @@ namespace ProductApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("Version")
-                        .IsConcurrencyToken()
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -148,9 +148,6 @@ namespace ProductApi.Migrations
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Name"), "gin");
                     NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Name"), new[] { "gin_trgm_ops" });
-
-                    b.HasIndex(new[] { "Email" }, "IX_Users_Email_Unique")
-                        .IsUnique();
 
                     b.ToTable("Users");
                 });

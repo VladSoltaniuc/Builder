@@ -14,6 +14,15 @@ public class UsersController(IUserService userService) : ApiControllerBase
     public async Task<ActionResult<PagedResponse<UserResponse>>> GetAll([FromQuery] PageQuery query)
         => Ok(await userService.GetAll(query));
 
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(List<UserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<List<UserResponse>>> Search([FromQuery] string term)
+    {
+        if (ValidateSearchTerm(term, out var trimmed) is { } error) return error;
+        return Ok(await userService.Search(trimmed));
+    }
+
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

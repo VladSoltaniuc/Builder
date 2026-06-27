@@ -95,6 +95,19 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
         return new PagedResponse<ProductResponse>(items, total, q.Page, q.PageSize);
     }
 
+    // Substring search over Name, backed by the pg_trgm GIN index (ILIKE '%term%').
+    public async Task<List<ProductResponse>> Search(string term)
+    {
+        var pattern = $"%{term}%";
+        return await db.Products
+            .AsNoTracking()
+            .Where(p => EF.Functions.ILike(p.Name, pattern))
+            .OrderBy(p => p.Id)
+            .Take(SearchDefaults.MaxResults)
+            .Select(p => ToResponse(p))
+            .ToListAsync();
+    }
+
     public async Task<ProductResponse?> GetById(int id)
     {
         var product = await db.Products.FindAsync(id);
