@@ -26,6 +26,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
 
 // Background index maintenance (bloat-gated REINDEX CONCURRENTLY).
 // Skipped under integration tests so it never touches the test DB.

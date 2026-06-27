@@ -24,12 +24,13 @@
 
 ## Backend
 - [ ] View (virtual table from joins + computed columns) (daily, weekly, monthly metrics computed table)
-- [ ] Stored procedure
-- [ ] Execution plan
 - [x] Indexes
 - [X] Reindexing
 - [X] Timezone converter
-- [ ] DB level History
+- [X] DB level History
+- [X] Postgress Procedure
+- [X] Postgress Functions
+- [ ] Execution plan
 - [ ] Middlewares (Error, etc.)
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)

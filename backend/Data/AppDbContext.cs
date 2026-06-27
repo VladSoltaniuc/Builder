@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +43,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         // pgstattuple measures index bloat for the maintenance/reindex job.
         modelBuilder.HasPostgresExtension("pgstattuple");
+
+        // Audit trail — JSONB snapshots of the row before/after each change.
+        // Rows are inserted only by DB triggers (see the AddAuditTrail migration),
+        // so the app treats this table as read-only.
+        modelBuilder.Entity<AuditLog>(e =>
+        {
+            e.Property(a => a.OldData).HasColumnType("jsonb");
+            e.Property(a => a.NewData).HasColumnType("jsonb");
+            e.HasIndex(a => new { a.TableName, a.RowId });
+        });
 
         // GIN trigram indexes on every searchable column. These coexist with the
         // partial unique btree index on Awb above — different access methods.

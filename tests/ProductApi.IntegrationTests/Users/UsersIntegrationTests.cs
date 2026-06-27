@@ -41,6 +41,23 @@ public class UsersIntegrationTests(IntegrationTestFactory factory) : Integration
         await DeleteAsync($"/api/users/{created.Id}");
     }
 
+    // --- Unique email (case-insensitive) ---
+
+    [Fact]
+    public async Task Create_DuplicateEmail_DifferentCase_Returns409()
+    {
+        var email = $"{Guid.NewGuid():N}@dup.com";
+        var first = await PostAsync("/api/users", new { Name = "First", Email = email });
+        first.StatusCode.Should().Be(HttpStatusCode.Created);
+        var created = await first.Content.ReadFromJsonAsync<UserResponse>();
+
+        // Same email, different casing → still a duplicate (stored lower-cased)
+        var dup = await PostAsync("/api/users", new { Name = "Second", Email = email.ToUpperInvariant() });
+        dup.StatusCode.Should().Be(HttpStatusCode.Conflict);
+
+        await DeleteAsync($"/api/users/{created!.Id}");
+    }
+
     // --- Delete ---
 
     [Fact]
