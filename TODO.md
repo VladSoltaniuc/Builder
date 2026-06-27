@@ -33,7 +33,7 @@
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
 - [x] File upload (images, documents)
 - [ ] Audit and Logs
-- [ ] Email sending (cron job) (Audit and Logs daily report of changes)
+- [ ] Email sending (cron job) (subscribe to audit logs weekly report)
 - [ ] SMS sending
 
 ## Testing & CI/CD
