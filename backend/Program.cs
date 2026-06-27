@@ -70,8 +70,10 @@ if (!builder.Environment.IsEnvironment("Testing"))
 
 // Weekly audit-report email cron. Same Testing guard as above.
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<SmsOptions>(builder.Configuration.GetSection("Sms"));
 builder.Services.Configure<WeeklyReportOptions>(builder.Configuration.GetSection("WeeklyReport"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+builder.Services.AddSingleton<ISmsSender, TwilioSmsSender>();
 if (!builder.Environment.IsEnvironment("Testing"))
     builder.Services.AddHostedService<WeeklyReportService>();
 

@@ -12,6 +12,6 @@ public interface IReportService
     // weekly cron just before the report goes out.
     Task RefreshWeeklyAuditReport();
 
-    // Opts a user in or out of the weekly report email.
-    Task SetSubscription(int userId, bool subscribed);
+    // Sets a user's weekly report delivery preferences across both channels.
+    Task SetSubscription(int userId, bool email, bool sms, string? phoneNumber);
 }

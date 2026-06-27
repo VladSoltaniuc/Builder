@@ -17,11 +17,21 @@ public class ReportService(AppDbContext db) : IReportService
     public Task RefreshWeeklyAuditReport()
         => db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW mv_weekly_audit_report;");
 
-    public async Task SetSubscription(int userId, bool subscribed)
+    public async Task SetSubscription(int userId, bool email, bool sms, string? phoneNumber)
     {
         var user = await db.Users.FindAsync(userId)
             ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
-        user.WeeklyReportSubscribed = subscribed;
+
+        // Can't text someone without a number — require one when enabling SMS.
+        var phone = phoneNumber?.Trim();
+        if (sms && string.IsNullOrWhiteSpace(phone) && string.IsNullOrWhiteSpace(user.PhoneNumber))
+            throw new UserFriendlyException("A phone number is required for SMS reports.", "INVALID_ARGUMENT");
+
+        user.WeeklyReportSubscribed = email;
+        user.WeeklyReportSmsSubscribed = sms;
+        if (!string.IsNullOrWhiteSpace(phone))
+            user.PhoneNumber = phone;
+
         await db.SaveChangesAsync();
     }
 }

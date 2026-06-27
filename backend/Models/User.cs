@@ -23,8 +23,11 @@ public class User
     // Access level. New accounts are ReadOnly unless bootstrapped as the first Admin.
     public UserRole Role { get; set; } = UserRole.ReadOnly;
 
-    // Opt-in for the weekly audit report email. Off by default.
-    public bool WeeklyReportSubscribed { get; set; }
+    // Weekly audit report delivery preferences — independent channels, both off by
+    // default. SMS also needs PhoneNumber set. A user may pick email, SMS, both, or none.
+    public bool WeeklyReportSubscribed { get; set; }        // email
+    public bool WeeklyReportSmsSubscribed { get; set; }     // SMS
+    public string? PhoneNumber { get; set; }                // E.164, e.g. +14155552671
 
     public int Version { get; set; } = 1;
 }

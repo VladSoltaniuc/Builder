@@ -17,6 +17,7 @@ namespace ProductApi.Reports;
 public sealed class WeeklyReportService(
     IServiceScopeFactory scopeFactory,
     IEmailSender emailSender,
+    ISmsSender smsSender,
     IOptions<WeeklyReportOptions> options,
     ILogger<WeeklyReportService> logger) : BackgroundService
 {
@@ -80,9 +81,16 @@ public sealed class WeeklyReportService(
         await reports.RefreshWeeklyAuditReport();
         var rows = await reports.GetWeeklyAuditReport();
 
+        // Anyone opted into at least one channel.
         var subscribers = await db.Users
-            .Where(u => u.WeeklyReportSubscribed)
-            .Select(u => new { u.Name, u.Email })
+            .Where(u => u.WeeklyReportSubscribed || u.WeeklyReportSmsSubscribed)
+            .Select(u => new
+            {
+                u.Email,
+                u.PhoneNumber,
+                WantsEmail = u.WeeklyReportSubscribed,
+                WantsSms = u.WeeklyReportSmsSubscribed,
+            })
             .ToListAsync(ct);
 
         if (subscribers.Count == 0)
@@ -91,26 +99,41 @@ public sealed class WeeklyReportService(
             return;
         }
 
-        var subject = $"Weekly audit report — week of {LastWeekLabel()}";
-        var body = RenderHtml(rows);
+        var label = LastWeekLabel();
+        var subject = $"Weekly audit report — week of {label}";
+        var html = RenderHtml(rows);
+        var sms = RenderSms(rows, label);
 
-        int sent = 0;
+        int emailSent = 0, smsSent = 0;
         foreach (var s in subscribers)
         {
             ct.ThrowIfCancellationRequested();
-            try
-            {
-                await emailSender.SendAsync(s.Email, subject, body, ct);
-                sent++;
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                // One bad address shouldn't stop the rest of the batch.
-                logger.LogError(ex, "Failed to send weekly report to {Email}.", s.Email);
-            }
+
+            if (s.WantsEmail)
+                emailSent += await TrySend(() => emailSender.SendAsync(s.Email, subject, html, ct), "email", s.Email);
+
+            // SMS needs a phone number; skip (don't fail) if they opted in without one.
+            if (s.WantsSms && !string.IsNullOrWhiteSpace(s.PhoneNumber))
+                smsSent += await TrySend(() => smsSender.SendAsync(s.PhoneNumber!, sms, ct), "SMS", s.PhoneNumber!);
         }
 
-        logger.LogInformation("Weekly report sent to {Sent}/{Total} subscribers.", sent, subscribers.Count);
+        logger.LogInformation("Weekly report delivered: {Email} emails, {Sms} texts.", emailSent, smsSent);
+    }
+
+    // Sends one message, isolating failures so one bad recipient never stops the batch.
+    // Returns 1 on success, 0 on a logged failure.
+    private async Task<int> TrySend(Func<Task> send, string channel, string recipient)
+    {
+        try
+        {
+            await send();
+            return 1;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Failed to send weekly report {Channel} to {Recipient}.", channel, recipient);
+            return 0;
+        }
     }
 
     // Monday of last week, the start of the reporting window the view covers.
@@ -131,6 +154,15 @@ public sealed class WeeklyReportService(
         foreach (var r in rows)
             sb.Append($"<tr><td>{r.TableName}</td><td>{r.Created}</td><td>{r.Updated}</td><td>{r.Deleted}</td></tr>");
         sb.Append("</table>");
+        return sb.ToString();
+    }
+
+    // Compact plain-text summary for SMS — one line per table, created/updated/deleted.
+    private static string RenderSms(List<WeeklyAuditReportResponse> rows, string weekLabel)
+    {
+        var sb = new StringBuilder();
+        sb.Append($"Weekly audit (week of {weekLabel}) created/updated/deleted: ");
+        sb.Append(string.Join("; ", rows.Select(r => $"{r.TableName} {r.Created}/{r.Updated}/{r.Deleted}")));
         return sb.ToString();
     }
 }

@@ -23,22 +23,22 @@
 - [ ] Redis (caching)
 
 ## Backend
-- [X] View (virtual table from joins + computed columns) (daily, weekly, monthly metrics computed table)
+- [x] View (virtual table from joins + computed columns) (daily, weekly, monthly metrics computed table)
 - [x] Indexes
-- [X] Reindexing
-- [X] Timezone converter
-- [X] DB level History
-- [X] Postgress Procedure
-- [X] Postgress Functions
-- [X] Postgress Trigger
-- [X] Execution plan
+- [x] Reindexing
+- [x] Timezone converter
+- [x] DB level History
+- [x] Postgress Procedure
+- [x] Postgress Functions
+- [x] Postgress Trigger
+- [x] Execution plan
 - [ ] Middlewares (Error, etc.)
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
 - [x] File upload (images, documents)
 - [-] Audit logs (needs userId after Auth implementation)
-- [X] Email sending (cron job) (subscribe to audit logs weekly report)
-- [ ] SMS sending
+- [x] Email sending (cron job) (subscribe to audit logs weekly report)
+- [x] SMS sending
 
 ## Testing & CI/CD
 - [x] Unit tests
