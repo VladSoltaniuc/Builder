@@ -8,6 +8,7 @@ using Npgsql;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
+using ProductApi.Maintenance;
 using ProductApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+// Background index maintenance (bloat-gated REINDEX CONCURRENTLY).
+// Skipped under integration tests so it never touches the test DB.
+builder.Services.Configure<IndexMaintenanceOptions>(builder.Configuration.GetSection("IndexMaintenance"));
+if (!builder.Environment.IsEnvironment("Testing"))
+    builder.Services.AddHostedService<IndexMaintenanceService>();
 
 // Model validation errors → unified error envelope
 builder.Services.Configure<ApiBehaviorOptions>(options =>

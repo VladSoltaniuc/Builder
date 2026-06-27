@@ -40,6 +40,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // The pg_trgm extension lets GIN indexes accelerate ILIKE '%term%' lookups.
         modelBuilder.HasPostgresExtension("pg_trgm");
 
+        // pgstattuple measures index bloat for the maintenance/reindex job.
+        modelBuilder.HasPostgresExtension("pgstattuple");
+
         // GIN trigram indexes on every searchable column. These coexist with the
         // partial unique btree index on Awb above — different access methods.
         const string Gin = "gin";

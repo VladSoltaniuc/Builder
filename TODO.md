@@ -25,7 +25,9 @@
 ## Backend
 - [ ] View (virtual table from joins + computed columns)
 - [ ] Stored procedure + execution plans
-- [ ] Indexes (reindexing, cardinality)
+- [x] Indexes
+- [X] Reindexing
+- [ ] Middlewares (Error, etc.)
 - [ ] Queue
 - [ ] WebSocket chat (real-time messaging, like WhatsApp)
 - [x] File upload (images, documents)
