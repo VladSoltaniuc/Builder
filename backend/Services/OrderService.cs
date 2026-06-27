@@ -153,30 +153,28 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
     private static string GenerateAwb() =>
         $"SIM-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(0, 1_000_000):D6}";
 
+    // Placing an order is delegated to the place_order() stored function: it locks the
+    // product row, verifies stock, decrements it, and inserts the order — all atomically
+    // in the DB, so concurrent orders can't oversell. We just call it and map its errors.
     public async Task<OrderResponse?> Create(CreateOrderRequest request)
     {
-        var user = await db.Users.FindAsync(request.UserId);
-        var product = await db.Products.FindAsync(request.ProductId);
-
-        if (user is null || product is null)
-            return null;
-
-        var order = new Order
+        try
         {
-            UserId = request.UserId,
-            ProductId = request.ProductId,
-            Quantity = request.Quantity,
-            TotalPrice = product.Price * request.Quantity,
-            Status = OrderStatus.Pending,
-            CreatedAt = DateTime.UtcNow,
-        };
+            var newId = await db.Database
+                .SqlQuery<int>(
+                    $"""SELECT place_order({request.UserId}, {request.ProductId}, {request.Quantity}) AS "Value" """)
+                .SingleAsync();
 
-        db.Orders.Add(order);
-        await db.SaveChangesAsync();
-
-        order.User = user;
-        order.Product = product;
-        return ToResponse(order);
+            return await GetById(newId);
+        }
+        catch (PostgresException ex) when (ex.MessageText is "USER_NOT_FOUND" or "PRODUCT_NOT_FOUND")
+        {
+            return null; // -> 404
+        }
+        catch (PostgresException ex) when (ex.MessageText is "INSUFFICIENT_STOCK")
+        {
+            throw new UserFriendlyException("Not enough stock to fulfil this order.", "INSUFFICIENT_STOCK");
+        }
     }
 
     public async Task<UpdateOrderResult> Update(int id, UpdateOrderRequest request)
