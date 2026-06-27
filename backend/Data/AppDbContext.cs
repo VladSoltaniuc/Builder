@@ -23,6 +23,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(u => u.Role)
             .HasConversion<string>();
 
+        // Persist the report channel as its name ("None"/"Email"/"Sms").
+        modelBuilder.Entity<User>()
+            .Property(u => u.ReportChannel)
+            .HasConversion<string>();
+
         // Partial unique index — AWB must be unique when set, nulls excluded
         modelBuilder.Entity<Order>()
             .HasIndex(o => o.Awb)

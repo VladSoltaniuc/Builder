@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
+using ProductApi.Models;
 
 namespace ProductApi.Services;
 
@@ -17,18 +18,18 @@ public class ReportService(AppDbContext db) : IReportService
     public Task RefreshWeeklyAuditReport()
         => db.Database.ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW mv_weekly_audit_report;");
 
-    public async Task SetSubscription(int userId, bool email, bool sms, string? phoneNumber)
+    public async Task SetSubscription(int userId, PreferredReportChannel channel, string? phoneNumber)
     {
         var user = await db.Users.FindAsync(userId)
             ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
 
-        // Can't text someone without a number — require one when enabling SMS.
+        // Can't text someone without a number — require one when choosing SMS.
         var phone = phoneNumber?.Trim();
-        if (sms && string.IsNullOrWhiteSpace(phone) && string.IsNullOrWhiteSpace(user.PhoneNumber))
+        if (channel == PreferredReportChannel.Sms
+            && string.IsNullOrWhiteSpace(phone) && string.IsNullOrWhiteSpace(user.PhoneNumber))
             throw new UserFriendlyException("A phone number is required for SMS reports.", "INVALID_ARGUMENT");
 
-        user.WeeklyReportSubscribed = email;
-        user.WeeklyReportSmsSubscribed = sms;
+        user.ReportChannel = channel;
         if (!string.IsNullOrWhiteSpace(phone))
             user.PhoneNumber = phone;
 

@@ -23,10 +23,9 @@ public class User
     // Access level. New accounts are ReadOnly unless bootstrapped as the first Admin.
     public UserRole Role { get; set; } = UserRole.ReadOnly;
 
-    // Weekly audit report delivery preferences — independent channels, both off by
-    // default. SMS also needs PhoneNumber set. A user may pick email, SMS, both, or none.
-    public bool WeeklyReportSubscribed { get; set; }        // email
-    public bool WeeklyReportSmsSubscribed { get; set; }     // SMS
+    // Weekly audit report delivery preference. None = not subscribed; Sms also
+    // needs PhoneNumber set.
+    public PreferredReportChannel ReportChannel { get; set; } = PreferredReportChannel.None;
     public string? PhoneNumber { get; set; }                // E.164, e.g. +14155552671
 
     public int Version { get; set; } = 1;

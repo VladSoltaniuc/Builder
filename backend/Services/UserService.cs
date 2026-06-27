@@ -94,7 +94,16 @@ public class UserService(AppDbContext db) : IUserService
 
     public async Task<UserResponse> Create(CreateUserRequest request)
     {
-        var user = new User { Name = request.Name, Email = Normalize(request.Email) };
+        var phone = request.PhoneNumber?.Trim();
+        ValidateChannel(request.ReportChannel, phone);
+
+        var user = new User
+        {
+            Name = request.Name,
+            Email = Normalize(request.Email),
+            PhoneNumber = string.IsNullOrWhiteSpace(phone) ? null : phone,
+            ReportChannel = request.ReportChannel,
+        };
         db.Users.Add(user);
         await db.SaveChangesAsync();
         return ToResponse(user);
@@ -106,8 +115,13 @@ public class UserService(AppDbContext db) : IUserService
         if (user is null) return UpdateUserResult.NotFound();
         if (user.Version != request.Version) return UpdateUserResult.Conflict();
 
+        var phone = request.PhoneNumber?.Trim();
+        ValidateChannel(request.ReportChannel, phone);
+
         user.Name = request.Name;
         user.Email = Normalize(request.Email);
+        user.PhoneNumber = string.IsNullOrWhiteSpace(phone) ? null : phone;
+        user.ReportChannel = request.ReportChannel;
         user.Version++;
 
         await db.SaveChangesAsync();
@@ -126,5 +140,13 @@ public class UserService(AppDbContext db) : IUserService
     // Trim + lower-case so "Alice@X.com" and "alice@x.com" can't both exist.
     private static string Normalize(string email) => email.Trim().ToLowerInvariant();
 
-    private static UserResponse ToResponse(User u) => new(u.Id, u.Name, u.Email, u.Version);
+    // SMS delivery needs somewhere to send to.
+    private static void ValidateChannel(PreferredReportChannel channel, string? phone)
+    {
+        if (channel == PreferredReportChannel.Sms && string.IsNullOrWhiteSpace(phone))
+            throw new UserFriendlyException("A phone number is required for SMS reports.", "INVALID_ARGUMENT");
+    }
+
+    private static UserResponse ToResponse(User u) =>
+        new(u.Id, u.Name, u.Email, u.PhoneNumber, u.ReportChannel, u.Version);
 }

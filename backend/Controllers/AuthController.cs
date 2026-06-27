@@ -68,20 +68,14 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     public async Task<ActionResult<AuthResponse>> Google(GoogleLoginRequest request)
         => Ok(await authService.LoginWithGoogle(request));
 
-    // Echoes the identity carried by the bearer token — handy for the SPA to
-    // confirm a session and for verifying the JWT pipeline end to end.
+    // The signed-in user's full profile (identity + report preferences), loaded
+    // from the DB rather than just echoing claims, so the SPA can render settings.
     [Authorize]
     [HttpGet("me")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult Me()
-    {
-        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var email = User.FindFirstValue(ClaimTypes.Email);
-        var name = User.FindFirstValue("name");
-        var role = User.FindFirstValue(ClaimTypes.Role);
-        return Ok(new { id, name, email, role });
-    }
+    public async Task<ActionResult<ProfileResponse>> Me()
+        => Ok(await authService.GetProfile(CurrentUserId()));
 
     // The authenticated user's id, parsed from the bearer token's subject claim.
     private int CurrentUserId()

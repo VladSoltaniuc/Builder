@@ -1,5 +1,6 @@
 // Application layer
 using ProductApi.Contracts;
+using ProductApi.Models;
 
 namespace ProductApi.Services;
 
@@ -12,6 +13,6 @@ public interface IReportService
     // weekly cron just before the report goes out.
     Task RefreshWeeklyAuditReport();
 
-    // Sets a user's weekly report delivery preferences across both channels.
-    Task SetSubscription(int userId, bool email, bool sms, string? phoneNumber);
+    // Sets a user's weekly report delivery channel (and phone number for SMS).
+    Task SetSubscription(int userId, PreferredReportChannel channel, string? phoneNumber);
 }

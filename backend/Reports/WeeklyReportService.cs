@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Models;
 using ProductApi.Services;
 
 namespace ProductApi.Reports;
@@ -81,16 +82,10 @@ public sealed class WeeklyReportService(
         await reports.RefreshWeeklyAuditReport();
         var rows = await reports.GetWeeklyAuditReport();
 
-        // Anyone opted into at least one channel.
+        // Anyone with a delivery channel selected.
         var subscribers = await db.Users
-            .Where(u => u.WeeklyReportSubscribed || u.WeeklyReportSmsSubscribed)
-            .Select(u => new
-            {
-                u.Email,
-                u.PhoneNumber,
-                WantsEmail = u.WeeklyReportSubscribed,
-                WantsSms = u.WeeklyReportSmsSubscribed,
-            })
+            .Where(u => u.ReportChannel != PreferredReportChannel.None)
+            .Select(u => new { u.Email, u.PhoneNumber, u.ReportChannel })
             .ToListAsync(ct);
 
         if (subscribers.Count == 0)
@@ -109,11 +104,11 @@ public sealed class WeeklyReportService(
         {
             ct.ThrowIfCancellationRequested();
 
-            if (s.WantsEmail)
+            if (s.ReportChannel == PreferredReportChannel.Email)
                 emailSent += await TrySend(() => emailSender.SendAsync(s.Email, subject, html, ct), "email", s.Email);
 
-            // SMS needs a phone number; skip (don't fail) if they opted in without one.
-            if (s.WantsSms && !string.IsNullOrWhiteSpace(s.PhoneNumber))
+            // SMS needs a phone number; skip (don't fail) if it's missing.
+            else if (s.ReportChannel == PreferredReportChannel.Sms && !string.IsNullOrWhiteSpace(s.PhoneNumber))
                 smsSent += await TrySend(() => smsSender.SendAsync(s.PhoneNumber!, sms, ct), "SMS", s.PhoneNumber!);
         }
 

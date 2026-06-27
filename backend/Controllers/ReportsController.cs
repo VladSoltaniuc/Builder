@@ -26,7 +26,7 @@ public class ReportsController(IReportService reportService) : ApiControllerBase
     public async Task<IActionResult> SetSubscription(ReportSubscriptionRequest request)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        await reportService.SetSubscription(userId, request.Email, request.Sms, request.PhoneNumber);
+        await reportService.SetSubscription(userId, request.Channel, request.PhoneNumber);
         return NoContent();
     }
 }

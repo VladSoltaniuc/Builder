@@ -151,10 +151,18 @@ public class AuthService(AppDbContext db, IJwtTokenService tokens, ITotpService 
         return BuildResponse(user);
     }
 
+    public async Task<ProfileResponse> GetProfile(int userId)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
+        return new ProfileResponse(user.Id, user.Name, user.Email, user.Role, user.PhoneNumber, user.ReportChannel);
+    }
+
     private AuthResponse BuildResponse(User user)
     {
         var (token, expiresAt) = tokens.CreateToken(user);
-        return new AuthResponse(token, expiresAt, new UserResponse(user.Id, user.Name, user.Email, user.Version));
+        return new AuthResponse(token, expiresAt,
+            new UserResponse(user.Id, user.Name, user.Email, user.PhoneNumber, user.ReportChannel, user.Version));
     }
 
     private static string Normalize(string email) => email.Trim().ToLowerInvariant();
