@@ -79,6 +79,11 @@ builder.Services.Configure<SmsOptions>(builder.Configuration.GetSection("Sms"));
 builder.Services.Configure<WeeklyReportOptions>(builder.Configuration.GetSection("WeeklyReport"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 builder.Services.AddSingleton<ISmsSender, TwilioSmsSender>();
+
+// In-process email queue + its background consumer (consumer skipped under tests).
+builder.Services.AddSingleton<IEmailQueue, EmailQueue>();
+if (!builder.Environment.IsEnvironment("Testing"))
+    builder.Services.AddHostedService<EmailQueueProcessor>();
 if (!builder.Environment.IsEnvironment("Testing"))
     builder.Services.AddHostedService<WeeklyReportService>();
 

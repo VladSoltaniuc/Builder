@@ -2,7 +2,6 @@
 using System.Security.Cryptography;
 using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProductApi.Auth;
 using ProductApi.Contracts;
@@ -17,10 +16,9 @@ public class AuthService(
     AppDbContext db,
     IJwtTokenService tokens,
     ITotpService totp,
-    IEmailSender emailSender,
+    IEmailQueue emailQueue,
     IOptions<GoogleAuthOptions> googleOptions,
-    IOptions<AppOptions> appOptions,
-    ILogger<AuthService> logger) : IAuthService
+    IOptions<AppOptions> appOptions) : IAuthService
 {
     private const string GoogleProvider = "Google";
     private static readonly TimeSpan VerificationTokenLifetime = TimeSpan.FromHours(24);
@@ -82,17 +80,8 @@ public class AuthService(
             <p>This link expires in 24 hours.</p>
             """;
 
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await emailSender.SendAsync(email, "Verify your email", html);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to send verification email to {Email}.", email);
-            }
-        });
+        // Hand off to the queue and return — a background worker sends it, with retry.
+        emailQueue.Enqueue(new EmailJob(email, "Verify your email", html));
     }
 
     public async Task<LoginResponse> Login(LoginRequest request)

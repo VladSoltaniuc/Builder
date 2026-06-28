@@ -33,13 +33,13 @@
 - [x] Postgress Functions
 - [x] Postgress Trigger
 - [x] Execution plan
-- [ ] Middlewares (Error, etc.)
-- [ ] Queue
-- [ ] WebSocket chat (real-time messaging, like WhatsApp)
+- [x] Middlewares (Error, etc.)
 - [x] File upload (images, documents)
 - [x] Audit logs
 - [x] Email sending (cron job) (subscribe to audit logs weekly report)
 - [x] SMS sending
+- [ ] WebSocket chat (real-time messaging, support chat operator to coordinator, depending on their team member alocation, one coordinator per team)
+- [x] Queue
 
 ## Testing & CI/CD
 - [x] Unit tests
