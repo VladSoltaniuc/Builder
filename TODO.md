@@ -1,5 +1,10 @@
 # TODO
 
+## Docs
+- [-] README.md
+- [ ] PULL_REQUESTS.md
+- [X] Why I made this project.md
+
 ## UI
 - [x] Add language selector EN/RO
 - [x] Add another page
@@ -49,4 +54,4 @@
 ## Performance & Concurrency
 - [x] Parallel programming
 - [x] Multithreading
-- [ ] 10,000 record stress test
+- [x] 10,000 record stress test
