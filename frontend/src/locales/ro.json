@@ -7,7 +7,7 @@
   },
   "auth": {
     "loginTitle": "Autentificare",
-    "registerTitle": "Creează cont",
+    "registerTitle": "Înregistrare ca operator",
     "name": "Nume",
     "email": "Email",
     "password": "Parolă",

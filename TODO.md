@@ -13,8 +13,7 @@
 - [x] IP-based rate limiter
 
 ## Auth
-- [ ] AWB search page with no auth requirement
-- [ ] Registration (email verification fire and forget)
+- [x] Registration (email verification fire and forget)
 - [x] Auth
 - [x] OAuth
 - [x] 2FA

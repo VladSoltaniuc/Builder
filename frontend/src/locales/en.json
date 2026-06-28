@@ -7,7 +7,7 @@
   },
   "auth": {
     "loginTitle": "Sign in",
-    "registerTitle": "Create account",
+    "registerTitle": "Register as Operator",
     "name": "Name",
     "email": "Email",
     "password": "Password",

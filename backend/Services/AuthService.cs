@@ -31,10 +31,11 @@ public class AuthService(
         if (await db.Users.AnyAsync(u => u.Email == email))
             throw new UserFriendlyException("A user with this email already exists.", "CONFLICT");
 
-        // Bootstrap: if no admin exists yet, the first person to register becomes one.
-        // Everyone else starts read-only and must be promoted by an admin.
-        var role = await db.Users.AnyAsync(u => u.Role == UserRole.Admin)
-            ? UserRole.ReadOnly
+        // Self-registration always creates an Operator. The sole exception is the very
+        // first account on an empty system, which becomes the founder Admin so there's
+        // someone who can later promote others. (Promotion handling comes later.)
+        var role = await db.Users.AnyAsync()
+            ? UserRole.Operator
             : UserRole.Admin;
 
         var token = GenerateVerificationToken();

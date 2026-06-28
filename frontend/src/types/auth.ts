@@ -1,5 +1,5 @@
 // Shared layer — auth contract types
-export type Role = "Admin" | "ReadOnly";
+export type Role = "Admin" | "Operator";
 export type ReportChannel = "None" | "Email" | "Sms";
 
 // GET /api/auth/me

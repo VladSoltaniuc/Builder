@@ -18,7 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(o => o.Status)
             .HasConversion<string>();
 
-        // Persist the role as its name ("Admin"/"ReadOnly") rather than an int.
+        // Persist the role as its name ("Admin"/"Operator") rather than an int.
         modelBuilder.Entity<User>()
             .Property(u => u.Role)
             .HasConversion<string>();

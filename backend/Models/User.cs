@@ -20,8 +20,8 @@ public class User
     public bool TwoFactorEnabled { get; set; }
     public string? TwoFactorSecret { get; set; }
 
-    // Access level. New accounts are ReadOnly unless bootstrapped as the first Admin.
-    public UserRole Role { get; set; } = UserRole.ReadOnly;
+    // Access level. New accounts are Operator unless bootstrapped as the founder Admin.
+    public UserRole Role { get; set; } = UserRole.Operator;
 
     // Email verification. New password registrations start unverified and can't log
     // in until they click the emailed link. External (Google) logins are pre-verified.
