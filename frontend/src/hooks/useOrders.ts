@@ -51,6 +51,10 @@ export function useOrders() {
     setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
   }, []);
 
+  const patchOrder = useCallback((updated: Order) => {
+    setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+  }, []);
+
   const deleteOrder = useCallback(async function deleteOrder(id: number) {
     await ordersApi.remove(id);
     const newPage = orders.length === 1 && page > 1 ? page - 1 : page;
@@ -90,7 +94,7 @@ export function useOrders() {
     sort, setSort,
     search, setSearch,
     filters, setFilters,
-    createOrder, updateOrder, deleteOrder,
+    createOrder, updateOrder, patchOrder, deleteOrder,
     uploadInvoice, deleteInvoice, downloadInvoice,
   };
 }

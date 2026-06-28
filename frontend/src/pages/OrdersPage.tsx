@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@mui/material";
 import { useOrders } from "../hooks/useOrders";
+import { useOrderHub } from "../hooks/useOrderHub";
 import { ordersApi } from "../api/orders";
 import { OrderForm } from "../components/OrderForm";
 import { OrderTable } from "../components/OrderTable";
@@ -19,9 +20,20 @@ export function OrdersPage() {
     sort, setSort,
     search, setSearch,
     setFilters,
-    createOrder, updateOrder, deleteOrder,
+    createOrder, updateOrder, patchOrder, deleteOrder,
     uploadInvoice, deleteInvoice, downloadInvoice,
   } = useOrders();
+
+  // Live order-status updates pushed from the server over SignalR.
+  // If an order visible on this page is updated by another session, we patch
+  // it in-place and show a brief toast so the user notices without refreshing.
+  useOrderHub((updated) => {
+    const current = orders.find((o) => o.id === updated.id);
+    if (current && current.version < updated.version) {
+      toast(`Live: Order #${updated.id} → ${updated.status}`, { id: `hub-order-${updated.id}` });
+    }
+    patchOrder(updated);
+  });
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

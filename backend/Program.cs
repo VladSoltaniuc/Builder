@@ -11,6 +11,7 @@ using Npgsql;
 using ProductApi.Auth;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Hubs;
 using ProductApi.Infrastructure;
 using ProductApi.Maintenance;
 using ProductApi.Reports;
@@ -22,6 +23,9 @@ const string FrontendCorsPolicy = "AllowFrontend";
 
 builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+builder.Services.AddSignalR()
+    .AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -53,6 +57,18 @@ var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // SignalR WebSocket handshakes can't set Authorization headers, so the JS client
+        // sends the JWT as ?access_token= in the query string instead.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var token = ctx.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(token) && ctx.Request.Path.StartsWithSegments("/hubs"))
+                    ctx.Token = token;
+                return Task.CompletedTask;
+            }
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -129,7 +145,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy(FrontendCorsPolicy, policy =>
         policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials()); // required for SignalR WebSocket upgrade handshake
 });
 
 var app = builder.Build();
@@ -176,6 +193,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<OrderHub>("/hubs/orders");
 
 // Provision the configured founder Admin (no-op unless AdminSeed is set).
 await app.Services.SeedAdminAsync();

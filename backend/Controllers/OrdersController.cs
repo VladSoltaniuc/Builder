@@ -1,8 +1,10 @@
 // Presentation layer
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using ProductApi.Auth;
 using ProductApi.Contracts;
+using ProductApi.Hubs;
 using ProductApi.Services;
 
 namespace ProductApi.Controllers;
@@ -10,7 +12,7 @@ namespace ProductApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize] // any authenticated user may read; writes additionally require Admin
-public class OrdersController(IOrderService orderService) : ApiControllerBase
+public class OrdersController(IOrderService orderService, IHubContext<OrderHub> hub) : ApiControllerBase
 {
     [HttpGet("options")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -59,7 +61,9 @@ public class OrdersController(IOrderService orderService) : ApiControllerBase
     {
         var result = await orderService.Update(id, request);
         if (result.IsConflict) return ApiConflict();
-        return result.Order is null ? ApiNotFound() : Ok(result.Order);
+        if (result.Order is null) return ApiNotFound();
+        await hub.Clients.All.SendAsync("OrderStatusChanged", result.Order);
+        return Ok(result.Order);
     }
 
     [Authorize(Roles = Roles.Admin)]
