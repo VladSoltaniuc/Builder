@@ -31,20 +31,16 @@ public class AuthService(
         if (await db.Users.AnyAsync(u => u.Email == email))
             throw new UserFriendlyException("A user with this email already exists.", "CONFLICT");
 
-        // Self-registration always creates an Operator. The sole exception is the very
-        // first account on an empty system, which becomes the founder Admin so there's
-        // someone who can later promote others. (Promotion handling comes later.)
-        var role = await db.Users.AnyAsync()
-            ? UserRole.Operator
-            : UserRole.Admin;
-
+        // Self-registration NEVER mints an Admin — it always creates an Operator. The
+        // founder Admin is provisioned from trusted config (see AdminSeed in Program),
+        // not by whoever happens to register first.
         var token = GenerateVerificationToken();
         var user = new User
         {
             Name = request.Name,
             Email = email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role = role,
+            Role = UserRole.Operator,
             EmailVerified = false,
             EmailVerificationToken = token,
             EmailVerificationTokenExpiresAt = DateTime.UtcNow.Add(VerificationTokenLifetime),
