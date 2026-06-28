@@ -44,7 +44,7 @@
 ## Testing & CI/CD
 - [x] Unit tests
 - [x] Integration tests
-- [ ] CI (GitHub Actions)
+- [x] CI (GitHub Actions)
 
 ## Performance & Concurrency
 - [ ] Parallel programming

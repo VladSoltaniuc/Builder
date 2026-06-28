@@ -23,9 +23,10 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["AdminSeed:Email"]    = AdminEmail,
-                ["AdminSeed:Password"] = AdminPassword,
-                ["AdminSeed:Name"]     = "CI Admin",
+                ["AdminSeed:Email"]       = AdminEmail,
+                ["AdminSeed:Password"]    = AdminPassword,
+                ["AdminSeed:Name"]        = "CI Admin",
+                ["RateLimiting:Enabled"]  = "false",
             });
         });
 

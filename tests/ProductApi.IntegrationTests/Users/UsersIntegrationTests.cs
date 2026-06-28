@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using FluentAssertions;
 using ProductApi.Contracts;
 
@@ -27,12 +26,12 @@ public class UsersIntegrationTests(IntegrationTestFactory factory) : Integration
     [Fact]
     public async Task Create_WithValidInput_Returns201()
     {
-        var input = new { Name = "Integration Test User", Email = "integration@test.com" };
+        var input = new { Name = "Integration Test User", Email = $"{Guid.NewGuid():N}@test.com" };
 
         var createResponse = await PostAsync("/api/users", input);
 
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-        var created = await createResponse.Content.ReadFromJsonAsync<UserResponse>();
+        var created = await ReadAsync<UserResponse>(createResponse);
         created.Should().NotBeNull();
         created!.Name.Should().Be(input.Name);
         created.Email.Should().Be(input.Email);
@@ -49,7 +48,7 @@ public class UsersIntegrationTests(IntegrationTestFactory factory) : Integration
         var email = $"{Guid.NewGuid():N}@dup.com";
         var first = await PostAsync("/api/users", new { Name = "First", Email = email });
         first.StatusCode.Should().Be(HttpStatusCode.Created);
-        var created = await first.Content.ReadFromJsonAsync<UserResponse>();
+        var created = await ReadAsync<UserResponse>(first);
 
         // Same email, different casing → still a duplicate (stored lower-cased)
         var dup = await PostAsync("/api/users", new { Name = "Second", Email = email.ToUpperInvariant() });
