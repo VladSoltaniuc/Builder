@@ -1,4 +1,5 @@
 // Infrastructure — shared setup for all integration test classes
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -19,6 +20,28 @@ public abstract class IntegrationTestBase
     protected IntegrationTestBase(IntegrationTestFactory factory)
     {
         Client = factory.CreateClient();
+        AuthorizeAsAdmin();
+    }
+
+    // Logs in with the factory's seeded admin and attaches the Bearer token to all
+    // subsequent requests on Client. All write endpoints require Admin — this avoids
+    // copy-pasting auth setup into every test class.
+    private void AuthorizeAsAdmin()
+    {
+        var resp = Client.PostAsJsonAsync("/api/auth/login", new
+        {
+            Email    = IntegrationTestFactory.AdminEmail,
+            Password = IntegrationTestFactory.AdminPassword,
+        }).GetAwaiter().GetResult();
+
+        resp.EnsureSuccessStatusCode();
+
+        var result = resp.Content
+            .ReadFromJsonAsync<LoginResponse>(Json)
+            .GetAwaiter().GetResult()!;
+
+        Client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", result.Auth!.Token);
     }
 
     protected Task<T?> GetAsync<T>(string url) =>

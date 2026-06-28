@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: productapi_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Unit tests
+        run: dotnet test tests/ProductApi.UnitTests --no-build -c Release --logger "console;verbosity=normal"
+
+      - name: Integration tests
+        env:
+          TEST_CONNECTION_STRING: "Host=localhost;Port=5432;Database=productapi_test;Username=postgres;Password=postgres"
+        run: dotnet test tests/ProductApi.IntegrationTests --no-build -c Release --logger "console;verbosity=normal"

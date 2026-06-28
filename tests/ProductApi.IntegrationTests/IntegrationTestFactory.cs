@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProductApi.Data;
 
@@ -9,9 +10,24 @@ namespace ProductApi.IntegrationTests;
 
 public class IntegrationTestFactory : WebApplicationFactory<Program>
 {
+    // Stable test credentials used by IntegrationTestBase to obtain an admin token.
+    public const string AdminEmail    = "ci-admin@test.local";
+    public const string AdminPassword = "CiAdmin12345!";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+
+        // Inject test-only config before services are built.
+        builder.ConfigureAppConfiguration((_, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AdminSeed:Email"]    = AdminEmail,
+                ["AdminSeed:Password"] = AdminPassword,
+                ["AdminSeed:Name"]     = "CI Admin",
+            });
+        });
 
         builder.ConfigureServices(services =>
         {
