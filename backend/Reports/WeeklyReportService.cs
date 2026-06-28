@@ -99,18 +99,18 @@ public sealed class WeeklyReportService(
         var html = RenderHtml(rows);
         var sms = RenderSms(rows, label);
 
-        int emailSent = 0, smsSent = 0;
-        foreach (var s in subscribers)
-        {
-            ct.ThrowIfCancellationRequested();
+        // Fire all sends concurrently — each subscriber's network I/O overlaps instead
+        // of queuing behind the previous one. TrySend isolates failures per recipient.
+        var emailTasks = subscribers
+            .Where(s => s.ReportChannel == PreferredReportChannel.Email)
+            .Select(s => TrySend(() => emailSender.SendAsync(s.Email, subject, html, ct), "email", s.Email));
 
-            if (s.ReportChannel == PreferredReportChannel.Email)
-                emailSent += await TrySend(() => emailSender.SendAsync(s.Email, subject, html, ct), "email", s.Email);
+        var smsTasks = subscribers
+            .Where(s => s.ReportChannel == PreferredReportChannel.Sms && !string.IsNullOrWhiteSpace(s.PhoneNumber))
+            .Select(s => TrySend(() => smsSender.SendAsync(s.PhoneNumber!, sms, ct), "SMS", s.PhoneNumber!));
 
-            // SMS needs a phone number; skip (don't fail) if it's missing.
-            else if (s.ReportChannel == PreferredReportChannel.Sms && !string.IsNullOrWhiteSpace(s.PhoneNumber))
-                smsSent += await TrySend(() => smsSender.SendAsync(s.PhoneNumber!, sms, ct), "SMS", s.PhoneNumber!);
-        }
+        var emailSent = (await Task.WhenAll(emailTasks)).Sum();
+        var smsSent   = (await Task.WhenAll(smsTasks)).Sum();
 
         logger.LogInformation("Weekly report delivered: {Email} emails, {Sms} texts.", emailSent, smsSent);
     }

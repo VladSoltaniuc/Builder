@@ -47,6 +47,6 @@
 - [x] CI (GitHub Actions)
 
 ## Performance & Concurrency
-- [ ] Parallel programming
+- [x] Parallel programming
 - [ ] Multithreading
 - [ ] 10,000 record stress test
