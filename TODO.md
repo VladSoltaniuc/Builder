@@ -48,5 +48,5 @@
 
 ## Performance & Concurrency
 - [x] Parallel programming
-- [ ] Multithreading
+- [x] Multithreading
 - [ ] 10,000 record stress test

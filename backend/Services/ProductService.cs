@@ -239,9 +239,6 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
 
     public async Task<ImportProductResult> ImportFromExcel(IFormFile file)
     {
-        var errors = new List<string>();
-        int imported = 0, failed = 0;
-
         using var stream = file.OpenReadStream();
         using var wb = new XLWorkbook(stream);
         var ws = wb.Worksheets.First();
@@ -259,46 +256,73 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
                 string.Join(", ", missing));
 
         int lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
-        for (int row = 2; row <= lastRow; row++)
+
+        // Read all cell values into plain structs on a single thread — ClosedXML is not thread-safe.
+        var rawRows = Enumerable.Range(2, Math.Max(0, lastRow - 1))
+            .Select(row => (
+                Row:      row,
+                Name:     CellString(ws.Cell(row, headers["name"])).Trim(),
+                Category: CellString(ws.Cell(row, headers["category"])).Trim(),
+                PriceVal: ws.Cell(row, headers["price"]).Value,
+                PriceStr: CellString(ws.Cell(row, headers["price"])),
+                StockVal: ws.Cell(row, headers["stock"]).Value,
+                StockStr: CellString(ws.Cell(row, headers["stock"]))
+            ))
+            .ToList();
+
+        // Validate and parse rows in parallel across all CPU cores.
+        // Each row is independent, so no synchronization is needed here.
+        var results = rawRows
+            .AsParallel()
+            .AsOrdered()
+            .Select(r => ValidateRow(r.Row, r.Name, r.Category, r.PriceVal, r.PriceStr, r.StockVal, r.StockStr))
+            .ToList();
+
+        int imported = 0, failed = 0;
+        var errors = new List<string>();
+
+        foreach (var (product, error) in results)
         {
-            try
-            {
-                var name = CellString(ws.Cell(row, headers["name"])).Trim();
-                var category = CellString(ws.Cell(row, headers["category"])).Trim();
-
-                if (name.Length < 2)
-                { errors.Add($"Row {row}: Name must be at least 2 characters"); failed++; continue; }
-                if (string.IsNullOrEmpty(category))
-                { errors.Add($"Row {row}: Category is required"); failed++; continue; }
-
-                var priceVal = ws.Cell(row, headers["price"]).Value;
-                decimal price = priceVal.IsNumber
-                    ? (decimal)priceVal.GetNumber()
-                    : decimal.TryParse(CellString(ws.Cell(row, headers["price"])), NumberStyles.Any, CultureInfo.InvariantCulture, out var pd) ? pd : -1;
-                if (price <= 0)
-                { errors.Add($"Row {row}: Price must be greater than 0"); failed++; continue; }
-
-                var stockVal = ws.Cell(row, headers["stock"]).Value;
-                int stock = stockVal.IsNumber
-                    ? (int)Math.Round(stockVal.GetNumber())
-                    : int.TryParse(CellString(ws.Cell(row, headers["stock"])), out var si) ? si : -1;
-                if (stock < 0)
-                { errors.Add($"Row {row}: Stock must be a non-negative integer"); failed++; continue; }
-
-                db.Products.Add(new Product { Name = name, Category = category, Price = price, Stock = stock });
-                imported++;
-            }
-            catch (Exception ex)
-            {
-                errors.Add($"Row {row}: {ex.Message}");
-                failed++;
-            }
+            if (product is not null) { db.Products.Add(product); imported++; }
+            else                     { errors.Add(error!);       failed++;   }
         }
 
         if (imported > 0)
             await db.SaveChangesAsync();
 
         return new ImportProductResult(imported, failed, errors);
+    }
+
+    private static (Product? Product, string? Error) ValidateRow(
+        int row, string name, string category,
+        XLCellValue priceVal, string priceStr,
+        XLCellValue stockVal, string stockStr)
+    {
+        try
+        {
+            if (name.Length < 2)
+                return (null, $"Row {row}: Name must be at least 2 characters");
+            if (string.IsNullOrEmpty(category))
+                return (null, $"Row {row}: Category is required");
+
+            decimal price = priceVal.IsNumber
+                ? (decimal)priceVal.GetNumber()
+                : decimal.TryParse(priceStr, NumberStyles.Any, CultureInfo.InvariantCulture, out var pd) ? pd : -1;
+            if (price <= 0)
+                return (null, $"Row {row}: Price must be greater than 0");
+
+            int stock = stockVal.IsNumber
+                ? (int)Math.Round(stockVal.GetNumber())
+                : int.TryParse(stockStr, out var si) ? si : -1;
+            if (stock < 0)
+                return (null, $"Row {row}: Stock must be a non-negative integer");
+
+            return (new Product { Name = name, Category = category, Price = price, Stock = stock }, null);
+        }
+        catch (Exception ex)
+        {
+            return (null, $"Row {row}: {ex.Message}");
+        }
     }
 
     private static string CellString(IXLCell cell)
