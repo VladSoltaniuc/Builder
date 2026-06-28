@@ -26,6 +26,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
                 ["AdminSeed:Email"]       = AdminEmail,
                 ["AdminSeed:Password"]    = AdminPassword,
                 ["AdminSeed:Name"]        = "CI Admin",
+                // Disabled so rapid back-to-back test requests don't hit the 429 limit.
                 ["RateLimiting:Enabled"]  = "false",
             });
         });

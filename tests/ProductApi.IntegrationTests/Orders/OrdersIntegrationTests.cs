@@ -14,14 +14,18 @@ public class OrdersIntegrationTests(IntegrationTestFactory factory) : Integratio
     {
         var user = await CreateUserAsync();
         var product = await CreateProductAsync(stock: 10);
+        try
+        {
+            await CreateOrderAsync(user.Id, product.Id, quantity: 3);
 
-        await CreateOrderAsync(user.Id, product.Id, quantity: 3);
-
-        var after = await GetAsync<ProductResponse>($"/api/products/{product.Id}");
-        after!.Stock.Should().Be(7); // 10 - 3, decremented atomically by place_order()
-
-        await DeleteAsync($"/api/products/{product.Id}"); // cascades the order
-        await DeleteAsync($"/api/users/{user.Id}");
+            var after = await GetAsync<ProductResponse>($"/api/products/{product.Id}");
+            after!.Stock.Should().Be(7); // 10 - 3, decremented atomically by place_order()
+        }
+        finally
+        {
+            await DeleteAsync($"/api/products/{product.Id}"); // cascades the order
+            await DeleteAsync($"/api/users/{user.Id}");
+        }
     }
 
     [Fact]
@@ -29,28 +33,36 @@ public class OrdersIntegrationTests(IntegrationTestFactory factory) : Integratio
     {
         var user = await CreateUserAsync();
         var product = await CreateProductAsync(stock: 1);
+        try
+        {
+            var resp = await PostAsync("/api/orders", new { UserId = user.Id, ProductId = product.Id, Quantity = 5 });
 
-        var resp = await PostAsync("/api/orders", new { UserId = user.Id, ProductId = product.Id, Quantity = 5 });
+            resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-        resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        var after = await GetAsync<ProductResponse>($"/api/products/{product.Id}");
-        after!.Stock.Should().Be(1); // unchanged — the function rejected and rolled back
-
-        await DeleteAsync($"/api/products/{product.Id}");
-        await DeleteAsync($"/api/users/{user.Id}");
+            var after = await GetAsync<ProductResponse>($"/api/products/{product.Id}");
+            after!.Stock.Should().Be(1); // unchanged — the function rejected and rolled back
+        }
+        finally
+        {
+            await DeleteAsync($"/api/products/{product.Id}");
+            await DeleteAsync($"/api/users/{user.Id}");
+        }
     }
 
     [Fact]
     public async Task Create_NonExistentProduct_Returns404()
     {
         var user = await CreateUserAsync();
+        try
+        {
+            var resp = await PostAsync("/api/orders", new { UserId = user.Id, ProductId = 999999, Quantity = 1 });
 
-        var resp = await PostAsync("/api/orders", new { UserId = user.Id, ProductId = 999999, Quantity = 1 });
-
-        resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
-
-        await DeleteAsync($"/api/users/{user.Id}");
+            resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+        finally
+        {
+            await DeleteAsync($"/api/users/{user.Id}");
+        }
     }
 
     // --- AWB generation ---
@@ -60,16 +72,20 @@ public class OrdersIntegrationTests(IntegrationTestFactory factory) : Integratio
     {
         var user = await CreateUserAsync();
         var product = await CreateProductAsync(stock: 5);
-        var order = await CreateOrderAsync(user.Id, product.Id, 1);
+        try
+        {
+            var order = await CreateOrderAsync(user.Id, product.Id, 1);
+            var resp = await Client.PostAsync($"/api/orders/{order.Id}/awb", null);
 
-        var resp = await Client.PostAsync($"/api/orders/{order.Id}/awb", null);
-
-        resp.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updated = await ReadAsync<OrderResponse>(resp);
-        updated!.Awb.Should().NotBeNullOrEmpty();
-
-        await DeleteAsync($"/api/products/{product.Id}");
-        await DeleteAsync($"/api/users/{user.Id}");
+            resp.StatusCode.Should().Be(HttpStatusCode.OK);
+            var updated = await ReadAsync<OrderResponse>(resp);
+            updated!.Awb.Should().NotBeNullOrEmpty();
+        }
+        finally
+        {
+            await DeleteAsync($"/api/products/{product.Id}");
+            await DeleteAsync($"/api/users/{user.Id}");
+        }
     }
 
     [Fact]
@@ -87,18 +103,23 @@ public class OrdersIntegrationTests(IntegrationTestFactory factory) : Integratio
     {
         var user = await CreateUserAsync();
         var product = await CreateProductAsync(stock: 10);
-        var o1 = await CreateOrderAsync(user.Id, product.Id, 1);
-        var o2 = await CreateOrderAsync(user.Id, product.Id, 1);
-        var awb = $"AWB{Guid.NewGuid():N}"[..20];
+        try
+        {
+            var o1 = await CreateOrderAsync(user.Id, product.Id, 1);
+            var o2 = await CreateOrderAsync(user.Id, product.Id, 1);
+            var awb = $"AWB{Guid.NewGuid():N}"[..20];
 
-        var put1 = await PutAsync($"/api/orders/{o1.Id}", new { Quantity = 1, Status = "Pending", Version = o1.Version, Awb = awb });
-        put1.StatusCode.Should().Be(HttpStatusCode.OK);
+            var put1 = await PutAsync($"/api/orders/{o1.Id}", new { Quantity = 1, Status = "Pending", Version = o1.Version, Awb = awb });
+            put1.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var put2 = await PutAsync($"/api/orders/{o2.Id}", new { Quantity = 1, Status = "Pending", Version = o2.Version, Awb = awb });
-        put2.StatusCode.Should().Be(HttpStatusCode.Conflict);
-
-        await DeleteAsync($"/api/products/{product.Id}");
-        await DeleteAsync($"/api/users/{user.Id}");
+            var put2 = await PutAsync($"/api/orders/{o2.Id}", new { Quantity = 1, Status = "Pending", Version = o2.Version, Awb = awb });
+            put2.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+        finally
+        {
+            await DeleteAsync($"/api/products/{product.Id}");
+            await DeleteAsync($"/api/users/{user.Id}");
+        }
     }
 
     [Fact]
@@ -106,15 +127,20 @@ public class OrdersIntegrationTests(IntegrationTestFactory factory) : Integratio
     {
         var user = await CreateUserAsync();
         var product = await CreateProductAsync(stock: 10);
-        var order = await CreateOrderAsync(user.Id, product.Id, 1);
+        try
+        {
+            var order = await CreateOrderAsync(user.Id, product.Id, 1);
 
-        var resp = await PutAsync($"/api/orders/{order.Id}",
-            new { Quantity = 2, Status = "Pending", Version = 999, Awb = (string?)null });
+            var resp = await PutAsync($"/api/orders/{order.Id}",
+                new { Quantity = 2, Status = "Pending", Version = 999, Awb = (string?)null });
 
-        resp.StatusCode.Should().Be(HttpStatusCode.Conflict);
-
-        await DeleteAsync($"/api/products/{product.Id}");
-        await DeleteAsync($"/api/users/{user.Id}");
+            resp.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        }
+        finally
+        {
+            await DeleteAsync($"/api/products/{product.Id}");
+            await DeleteAsync($"/api/users/{user.Id}");
+        }
     }
 
     // --- Options ---

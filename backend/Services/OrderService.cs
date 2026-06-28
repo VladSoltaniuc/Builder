@@ -11,54 +11,14 @@ namespace ProductApi.Services;
 
 public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderService
 {
-    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<Order, object>>> SortColumns = new()
-    {
-        ["status"]     = o => o.Status,
-        ["totalPrice"] = o => o.TotalPrice,
-        ["quantity"]   = o => o.Quantity,
-        ["createdAt"]  = o => o.CreatedAt,
-    };
-
-    private static readonly Dictionary<string, Func<IQueryable<Order>, string, string, IQueryable<Order>>> FilterColumns = new()
-    {
-        ["status"] = (q, op, val) =>
-        {
-            if (!Enum.TryParse<OrderStatus>(val, ignoreCase: true, out var status)) return q;
-            return op switch
-            {
-                "$eq"  => q.Where(o => o.Status == status),
-                "$not" => q.Where(o => o.Status != status),
-                _ => q
-            };
-        },
-        ["totalPrice"] = (q, op, val) =>
-        {
-            if (op == "$btw") { var r = FilterHelper.ParseBtw(val); return r is null ? q : q.Where(o => o.TotalPrice >= r.Value.Min && o.TotalPrice <= r.Value.Max); }
-            if (!decimal.TryParse(val, out var d)) return q;
-            return op switch
-            {
-                "$eq"  => q.Where(o => o.TotalPrice == d),
-                "$gt"  => q.Where(o => o.TotalPrice > d),
-                "$gte" => q.Where(o => o.TotalPrice >= d),
-                "$lt"  => q.Where(o => o.TotalPrice < d),
-                "$lte" => q.Where(o => o.TotalPrice <= d),
-                _ => q
-            };
-        },
-        ["quantity"] = (q, op, val) =>
-        {
-            if (!int.TryParse(val, out var n)) return q;
-            return op switch
-            {
-                "$eq"  => q.Where(o => o.Quantity == n),
-                "$gt"  => q.Where(o => o.Quantity > n),
-                "$gte" => q.Where(o => o.Quantity >= n),
-                "$lt"  => q.Where(o => o.Quantity < n),
-                "$lte" => q.Where(o => o.Quantity <= n),
-                _ => q
-            };
-        },
-    };
+    private static readonly EntityFilter<Order> Filter = new EntityFilter<Order>()
+        .Enum<OrderStatus>("status",    o => o.Status)
+        .Decimal("totalPrice",          o => o.TotalPrice)
+        .Int("quantity",                o => o.Quantity)
+        .Sort("status",                 o => o.Status)
+        .Sort("totalPrice",             o => o.TotalPrice)
+        .Sort("quantity",               o => o.Quantity)
+        .Sort("createdAt",              o => o.CreatedAt);
 
     public OrderOptionsResponse GetOptions() => new(OrderOptions.Statuses);
 
@@ -70,22 +30,16 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
             .AsQueryable();
 
         // --- Filter ---
-        query = query.ApplyFilters(q.Filters, FilterColumns);
+        query = Filter.Apply(query, q.Filters);
 
         // --- Search ---
         if (!string.IsNullOrWhiteSpace(q.Search))
             query = query.Where(o => EF.Functions.ILike(o.User.Name, $"%{q.Search}%") || EF.Functions.ILike(o.Product.Name, $"%{q.Search}%"));
 
         // --- Sort ---
-        query = query.ApplySort(q.SortBy, SortColumns);
+        query = Filter.ApplySort(query, q.SortBy);
 
-        var total = await query.CountAsync();
-        var items = await query
-            .Skip((q.Page - 1) * q.PageSize)
-            .Take(q.PageSize)
-            .Select(o => ToResponse(o))
-            .ToListAsync();
-        return new PagedResponse<OrderResponse>(items, total, q.Page, q.PageSize);
+        return await query.ToPagedResponse(q.Page, q.PageSize, o => ToResponse(o));
     }
 
     // Substring search across the user's name, the product's name, and the AWB.

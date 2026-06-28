@@ -10,67 +10,28 @@ namespace ProductApi.Services;
 
 public class UserService(AppDbContext db) : IUserService
 {
-    private static readonly Dictionary<string, System.Linq.Expressions.Expression<Func<User, object>>> SortColumns = new()
-    {
-        ["name"]  = u => u.Name,
-        ["email"] = u => u.Email,
-    };
-
-    private static readonly Dictionary<string, Func<IQueryable<User>, string, string, IQueryable<User>>> FilterColumns = new()
-    {
-        ["name"] = (q, op, val) => op switch
-        {
-            "$eq"    => q.Where(u => EF.Functions.ILike(u.Name, val)),
-            "$not"   => q.Where(u => !EF.Functions.ILike(u.Name, val)),
-            "$ilike" => q.Where(u => EF.Functions.ILike(u.Name, $"%{val}%")),
-            "$sw"    => q.Where(u => EF.Functions.ILike(u.Name, $"{val}%")),
-            _ => q
-        },
-        ["email"] = (q, op, val) => op switch
-        {
-            "$eq"    => q.Where(u => EF.Functions.ILike(u.Email, val)),
-            "$not"   => q.Where(u => !EF.Functions.ILike(u.Email, val)),
-            "$ilike" => q.Where(u => EF.Functions.ILike(u.Email, $"%{val}%")),
-            "$sw"    => q.Where(u => EF.Functions.ILike(u.Email, $"{val}%")),
-            _ => q
-        },
-        ["id"] = (q, op, val) =>
-        {
-            if (op == "$in") { var ids = FilterHelper.ParseInInt(val); return ids is null ? q : q.Where(u => ids.Contains(u.Id)); }
-            if (!int.TryParse(val, out var n)) return q;
-            return op switch
-            {
-                "$eq"  => q.Where(u => u.Id == n),
-                "$gt"  => q.Where(u => u.Id > n),
-                "$gte" => q.Where(u => u.Id >= n),
-                "$lt"  => q.Where(u => u.Id < n),
-                "$lte" => q.Where(u => u.Id <= n),
-                _ => q
-            };
-        },
-    };
+    private static readonly EntityFilter<User> Filter = new EntityFilter<User>()
+        .String("name",  u => u.Name)
+        .String("email", u => u.Email)
+        .Int("id",       u => u.Id)
+        .Sort("name",    u => u.Name)
+        .Sort("email",   u => u.Email);
 
     public async Task<PagedResponse<UserResponse>> GetAll(PageQuery q)
     {
         var query = db.Users.AsQueryable();
 
         // --- Filter ---
-        query = query.ApplyFilters(q.Filters, FilterColumns);
+        query = Filter.Apply(query, q.Filters);
 
         // --- Search ---
         if (!string.IsNullOrWhiteSpace(q.Search))
             query = query.Where(u => EF.Functions.ILike(u.Name, $"%{q.Search}%") || EF.Functions.ILike(u.Email, $"%{q.Search}%"));
 
         // --- Sort ---
-        query = query.ApplySort(q.SortBy, SortColumns);
+        query = Filter.ApplySort(query, q.SortBy);
 
-        var total = await query.CountAsync();
-        var items = await query
-            .Skip((q.Page - 1) * q.PageSize)
-            .Take(q.PageSize)
-            .Select(u => ToResponse(u))
-            .ToListAsync();
-        return new PagedResponse<UserResponse>(items, total, q.Page, q.PageSize);
+        return await query.ToPagedResponse(q.Page, q.PageSize, u => ToResponse(u));
     }
 
     // Substring search over Name and Email, backed by pg_trgm GIN indexes (ILIKE '%term%').

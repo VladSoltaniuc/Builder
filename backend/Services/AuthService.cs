@@ -37,7 +37,7 @@ public class AuthService(
         {
             Name = request.Name,
             Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password!),
             Role = UserRole.Operator,
             EmailVerified = false,
             EmailVerificationToken = token,
@@ -91,7 +91,7 @@ public class AuthService(
 
         // Same error whether the email is unknown or the password is wrong, so the
         // response can't be used to probe which emails are registered.
-        if (user is null || string.IsNullOrEmpty(user.PasswordHash) ||
+        if (user is null || user.PasswordHash is null ||
             !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new UserFriendlyException("Invalid email or password.", "UNAUTHORIZED");
 

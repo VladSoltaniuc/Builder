@@ -83,25 +83,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Background index maintenance (bloat-gated REINDEX CONCURRENTLY).
-// Skipped under integration tests so it never touches the test DB.
-builder.Services.Configure<IndexMaintenanceOptions>(builder.Configuration.GetSection("IndexMaintenance"));
-if (!builder.Environment.IsEnvironment("Testing"))
-    builder.Services.AddHostedService<IndexMaintenanceService>();
+// Background services are skipped under integration tests so they never touch the test DB.
+var isTesting = builder.Environment.IsEnvironment("Testing");
 
-// Weekly audit-report email cron. Same Testing guard as above.
+builder.Services.Configure<IndexMaintenanceOptions>(builder.Configuration.GetSection("IndexMaintenance"));
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<SmsOptions>(builder.Configuration.GetSection("Sms"));
 builder.Services.Configure<WeeklyReportOptions>(builder.Configuration.GetSection("WeeklyReport"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 builder.Services.AddSingleton<ISmsSender, TwilioSmsSender>();
-
-// In-process email queue + its background consumer (consumer skipped under tests).
 builder.Services.AddSingleton<IEmailQueue, EmailQueue>();
-if (!builder.Environment.IsEnvironment("Testing"))
+
+if (!isTesting)
+{
+    builder.Services.AddHostedService<IndexMaintenanceService>();
     builder.Services.AddHostedService<EmailQueueProcessor>();
-if (!builder.Environment.IsEnvironment("Testing"))
     builder.Services.AddHostedService<WeeklyReportService>();
+}
 
 // Model validation errors → unified error envelope
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -118,7 +116,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 var rateLimitSection = builder.Configuration.GetSection("RateLimiting");
-if (rateLimitSection.GetValue<bool>("Enabled"))
+var isRateLimitEnabled = rateLimitSection.GetValue<bool>("Enabled");
+if (isRateLimitEnabled)
 {
     int permitLimit   = rateLimitSection.GetValue<int>("PermitLimit");
     int windowSeconds = rateLimitSection.GetValue<int>("WindowSeconds");
@@ -140,10 +139,11 @@ if (rateLimitSection.GetValue<bool>("Enabled"))
     });
 }
 
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
-        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+        policy.WithOrigins(corsOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()); // required for SignalR WebSocket upgrade handshake
@@ -185,7 +185,7 @@ app.UseExceptionHandler(err => err.Run(async ctx =>
         new ErrorResponse(new ErrorDetail(code, status, message, detail)));
 }));
 
-if (rateLimitSection.GetValue<bool>("Enabled"))
+if (isRateLimitEnabled)
     app.UseRateLimiter();
 app.UseStaticFiles();
 

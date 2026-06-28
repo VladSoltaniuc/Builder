@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using FluentAssertions;
 using ProductApi.Contracts;
 
@@ -43,7 +42,7 @@ public class ProductsIntegrationTests(IntegrationTestFactory factory) : Integrat
         var createResponse = await PostAsync("/api/products", input);
 
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-        var created = await createResponse.Content.ReadFromJsonAsync<ProductResponse>();
+        var created = await ReadAsync<ProductResponse>(createResponse);
         created.Should().NotBeNull();
         created!.Name.Should().Be(input.Name);
 

@@ -1,5 +1,4 @@
 // Presentation layer
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Contracts;
@@ -46,7 +45,7 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     [ProducesResponseType(typeof(TwoFactorSetupResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<TwoFactorSetupResponse>> SetupTwoFactor()
-        => Ok(await authService.SetupTwoFactor(CurrentUserId()));
+        => Ok(await authService.SetupTwoFactor(GetCurrentUserId()));
 
     // Confirms a code from the authenticator app and turns 2FA on.
     [Authorize]
@@ -55,7 +54,7 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> EnableTwoFactor(TwoFactorCodeRequest request)
     {
-        await authService.EnableTwoFactor(CurrentUserId(), request.Code);
+        await authService.EnableTwoFactor(GetCurrentUserId(), request.Code);
         return NoContent();
     }
 
@@ -66,7 +65,7 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DisableTwoFactor(TwoFactorCodeRequest request)
     {
-        await authService.DisableTwoFactor(CurrentUserId(), request.Code);
+        await authService.DisableTwoFactor(GetCurrentUserId(), request.Code);
         return NoContent();
     }
 
@@ -85,9 +84,6 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ProfileResponse>> Me()
-        => Ok(await authService.GetProfile(CurrentUserId()));
+        => Ok(await authService.GetProfile(GetCurrentUserId()));
 
-    // The authenticated user's id, parsed from the bearer token's subject claim.
-    private int CurrentUserId()
-        => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 }

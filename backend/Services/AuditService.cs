@@ -9,8 +9,11 @@ namespace ProductApi.Services;
 
 public class AuditService(AppDbContext db) : IAuditService
 {
+    private const int MaxLimit = 200;
+
     public async Task<List<AuditLogResponse>> GetHistory(string? table, int? rowId, int limit)
     {
+        limit = Math.Clamp(limit, 1, MaxLimit);
         var query = db.AuditLogs.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(table))

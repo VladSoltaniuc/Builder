@@ -110,6 +110,7 @@ public sealed class WeeklyReportService(
             .Select(s => TrySend(() => smsSender.SendAsync(s.PhoneNumber!, sms, ct), "SMS", s.PhoneNumber!));
 
         var emailSent = (await Task.WhenAll(emailTasks)).Sum();
+        ct.ThrowIfCancellationRequested();
         var smsSent   = (await Task.WhenAll(smsTasks)).Sum();
 
         logger.LogInformation("Weekly report delivered: {Email} emails, {Sms} texts.", emailSent, smsSent);

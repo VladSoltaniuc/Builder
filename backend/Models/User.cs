@@ -7,8 +7,8 @@ public class User
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 
-    // BCrypt hash. Empty for accounts that only sign in via an external provider.
-    public string PasswordHash { get; set; } = string.Empty;
+    // BCrypt hash. Null for accounts that only sign in via an external provider.
+    public string? PasswordHash { get; set; }
 
     // External login (e.g. "Google") and the provider's stable user id. Null for
     // password-only accounts.
