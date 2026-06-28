@@ -207,14 +207,14 @@ public class AuthService(
     {
         var user = await db.Users.FindAsync(userId)
             ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
-        return new ProfileResponse(user.Id, user.Name, user.Email, user.Role, user.PhoneNumber, user.ReportChannel);
+        return new ProfileResponse(user.Id, user.Name, user.Email, user.Role, user.Features, user.PhoneNumber, user.ReportChannel);
     }
 
     private AuthResponse BuildResponse(User user)
     {
         var (token, expiresAt) = tokens.CreateToken(user);
         return new AuthResponse(token, expiresAt,
-            new UserResponse(user.Id, user.Name, user.Email, user.PhoneNumber, user.ReportChannel, user.Version));
+            new UserResponse(user.Id, user.Name, user.Email, user.PhoneNumber, user.ReportChannel, user.Role, user.Features, user.Version));
     }
 
     private static string Normalize(string email) => email.Trim().ToLowerInvariant();

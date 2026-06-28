@@ -9,5 +9,6 @@ public record ProfileResponse(
     string Name,
     string Email,
     UserRole Role,
+    UserFeature Features,
     string? PhoneNumber,
     PreferredReportChannel ReportChannel);

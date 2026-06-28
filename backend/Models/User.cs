@@ -34,5 +34,9 @@ public class User
     public PreferredReportChannel ReportChannel { get; set; } = PreferredReportChannel.None;
     public string? PhoneNumber { get; set; }                // E.164, e.g. +14155552671
 
+    // Optional capability grants layered on top of the Role. Admins ignore this —
+    // the role already grants full access. Only meaningful for Operators.
+    public UserFeature Features { get; set; } = UserFeature.None;
+
     public int Version { get; set; } = 1;
 }

@@ -9,4 +9,6 @@ public record UserResponse(
     string Email,
     string? PhoneNumber,
     PreferredReportChannel ReportChannel,
+    UserRole Role,
+    UserFeature Features,
     int Version);

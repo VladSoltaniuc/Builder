@@ -20,6 +20,10 @@ public class UpdateUserRequest
 
     public PreferredReportChannel ReportChannel { get; set; }
 
+    public UserRole Role { get; set; }
+
+    public UserFeature Features { get; set; }
+
     [Required]
     public int Version { get; set; }
 }

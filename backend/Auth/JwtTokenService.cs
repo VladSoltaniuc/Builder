@@ -26,6 +26,7 @@ public class JwtTokenService(IOptions<JwtOptions> options) : IJwtTokenService
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(JwtRegisteredClaimNames.Name, user.Name),
             new(ClaimTypes.Role, user.Role.ToString()),
+            new("features", ((int)user.Features).ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 

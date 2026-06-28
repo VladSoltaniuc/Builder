@@ -21,10 +21,10 @@
 
 ## Database
 - [x] Migrate from in-memory to PostgreSQL + Entity Framework Core
-- [ ] Redis (caching for AWB user info) (cache user browser vs server, what actualy is redis?) (YOOO we can use this for permission bitmask yooooo thats fireeee yeaaaa 🔥🔥🔥🔥)
+- [x] JWT bitmask for extra permissions
 
 ## Backend
-- [x] View (virtual table from joins + computed columns) (daily, weekly, monthly metrics computed table)
+- [x] View (virtual table from joins + compu1d columns) (daily, weekly, monthly metrics computed table)
 - [x] Indexes
 - [x] Reindexing
 - [x] Timezone converter
@@ -38,13 +38,13 @@
 - [x] Audit logs
 - [x] Email sending (cron job) (subscribe to audit logs weekly report)
 - [x] SMS sending
-- [ ] WebSocket chat (real-time messaging, support chat operator to coordinator, depending on their team member alocation, one coordinator per team)
-- [x] Queue
+- [x] Queue (could also be upgraded to RabbitMQ, moving from RAM to 2nd server)
+- [x] WebSocket (SignalR live order-status)
 
 ## Testing & CI/CD
 - [x] Unit tests
 - [x] Integration tests
-- [ ] CI/CD pipeline (GitHub Actions)
+- [ ] CI (GitHub Actions)
 
 ## Performance & Concurrency
 - [ ] Parallel programming

@@ -8,6 +8,7 @@ export interface Profile {
   name: string;
   email: string;
   role: Role;
+  features: number;
   phoneNumber: string | null;
   reportChannel: ReportChannel;
 }

@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@mui/material";
 import { useUsers } from "../hooks/useUsers";
+import { useAuth } from "../context/AuthContext";
 import { UserForm } from "../components/UserForm";
 import { UserTable } from "../components/UserTable";
 import type { User, UserInput } from "../types/user";
@@ -12,6 +13,7 @@ import { ApiError } from "../api/errors";
 
 export function UsersPage() {
   const { t } = useTranslation();
+  const { user: currentUser } = useAuth();
   const {
     users, isLoading, error,
     page, totalPages, setPage,
@@ -88,7 +90,7 @@ export function UsersPage() {
           <>
             <button className="modal-backdrop" onClick={closeModal} aria-label="Close modal" />
             <dialog className="modal" open>
-              <UserForm user={editingUser} onSubmit={handleSubmit} onCancel={closeModal} />
+              <UserForm user={editingUser} currentUser={currentUser!} onSubmit={handleSubmit} onCancel={closeModal} />
             </dialog>
           </>,
           document.body,

@@ -86,7 +86,14 @@
       "editTitle": "Edit User #{{id}}",
       "addTitle": "Add User",
       "name": "Name",
-      "email": "Email"
+      "email": "Email",
+      "role": "Role",
+      "features": "Extra capabilities",
+      "featuresHint": "Ignored for Admins — role already grants full access.",
+      "canExportExcel": "Export Excel",
+      "canViewAuditLog": "View Audit Log",
+      "canManageInvoices": "Manage Invoices",
+      "selfEditDisabled": "You cannot edit your own account."
     }
   },
   "orders": {

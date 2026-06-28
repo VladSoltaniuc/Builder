@@ -86,7 +86,14 @@
       "editTitle": "Editează utilizatorul #{{id}}",
       "addTitle": "Adaugă utilizator",
       "name": "Nume",
-      "email": "Email"
+      "email": "Email",
+      "role": "Rol",
+      "features": "Capabilități extra",
+      "featuresHint": "Ignorate pentru Admini — rolul acordă deja acces complet.",
+      "canExportExcel": "Export Excel",
+      "canViewAuditLog": "Vizualizare jurnal audit",
+      "canManageInvoices": "Gestionare facturi",
+      "selfEditDisabled": "Nu îți poți edita propriul cont."
     }
   },
   "orders": {

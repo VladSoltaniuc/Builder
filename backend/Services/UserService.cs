@@ -115,6 +115,16 @@ public class UserService(AppDbContext db) : IUserService
         if (user is null) return UpdateUserResult.NotFound();
         if (user.Version != request.Version) return UpdateUserResult.Conflict();
 
+        // Prevent demoting the last Admin — would lock everyone out.
+        if (user.Role == UserRole.Admin && request.Role != UserRole.Admin)
+        {
+            var adminCount = await db.Users.CountAsync(u => u.Role == UserRole.Admin);
+            if (adminCount <= 1)
+                throw new UserFriendlyException(
+                    "Cannot demote the last Admin — the system would have no admins.",
+                    "LAST_ADMIN");
+        }
+
         var phone = request.PhoneNumber?.Trim();
         ValidateChannel(request.ReportChannel, phone);
 
@@ -122,6 +132,10 @@ public class UserService(AppDbContext db) : IUserService
         user.Email = Normalize(request.Email);
         user.PhoneNumber = string.IsNullOrWhiteSpace(phone) ? null : phone;
         user.ReportChannel = request.ReportChannel;
+        user.Role = request.Role;
+        // Admins always have full access — features bits are meaningless for them.
+        // Clear on promotion so the DB stays clean; reset to None on any role change.
+        user.Features = request.Role == UserRole.Admin ? UserFeature.None : request.Features;
         user.Version++;
 
         await db.SaveChangesAsync();
@@ -132,6 +146,16 @@ public class UserService(AppDbContext db) : IUserService
     {
         var user = await db.Users.FindAsync(id);
         if (user is null) return false;
+
+        if (user.Role == UserRole.Admin)
+        {
+            var adminCount = await db.Users.CountAsync(u => u.Role == UserRole.Admin);
+            if (adminCount <= 1)
+                throw new UserFriendlyException(
+                    "Cannot delete the last Admin — the system would have no admins.",
+                    "LAST_ADMIN");
+        }
+
         db.Users.Remove(user);
         await db.SaveChangesAsync();
         return true;
@@ -148,5 +172,5 @@ public class UserService(AppDbContext db) : IUserService
     }
 
     private static UserResponse ToResponse(User u) =>
-        new(u.Id, u.Name, u.Email, u.PhoneNumber, u.ReportChannel, u.Version);
+        new(u.Id, u.Name, u.Email, u.PhoneNumber, u.ReportChannel, u.Role, u.Features, u.Version);
 }

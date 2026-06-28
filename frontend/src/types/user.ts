@@ -1,5 +1,5 @@
 // Shared layer — API contract types
-import type { ReportChannel } from "./auth";
+import type { ReportChannel, Role } from "./auth";
 
 export interface User {
   id: number;
@@ -7,6 +7,8 @@ export interface User {
   email: string;
   phoneNumber: string | null;
   reportChannel: ReportChannel;
+  role: Role;
+  features: number;
   version: number;
 }
 

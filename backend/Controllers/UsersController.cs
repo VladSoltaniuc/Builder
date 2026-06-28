@@ -52,6 +52,8 @@ public class UsersController(IUserService userService) : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<UserResponse>> Update(int id, UpdateUserRequest request)
     {
+        if (id == GetCurrentUserId())
+            return ApiBadRequest("You cannot edit your own account.");
         var result = await userService.Update(id, request);
         if (result.IsConflict) return ApiConflict();
         return result.User is null ? ApiNotFound() : Ok(result.User);
@@ -63,6 +65,8 @@ public class UsersController(IUserService userService) : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
+        if (id == GetCurrentUserId())
+            return ApiBadRequest("You cannot delete your own account.");
         var deleted = await userService.Delete(id);
         return deleted ? NoContent() : ApiNotFound();
     }
