@@ -1,8 +1,8 @@
 # TODO
 
 ## Docs
-- [-] README.md
-- [ ] PULL_REQUESTS.md
+- [x] README.md
+- [x] PULL_REQUESTS.md
 - [X] Why I made this project.md
 
 ## UI
@@ -29,7 +29,7 @@
 - [x] JWT bitmask for extra permissions
 
 ## Backend
-- [x] View (virtual table from joins + compu1d columns) (daily, weekly, monthly metrics computed table)
+- [x] View (virtual table from joins + computed columns) (daily, weekly, monthly metrics computed table)
 - [x] Indexes
 - [x] Reindexing
 - [x] Timezone converter
