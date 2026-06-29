@@ -1,5 +1,6 @@
 // Application layer
 using System.ComponentModel.DataAnnotations;
+using ProductApi.Constants;
 
 namespace ProductApi.Contracts;
 
@@ -10,8 +11,8 @@ public class UpdateProductRequest
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Categoria este obligatorie.")]
-    [StringLength(50)]
-    public string Category { get; set; } = string.Empty;
+    [EnumDataType(typeof(ProductCategory))]
+    public ProductCategory Category { get; set; }
 
     [Range(0.01, 1_000_000, ErrorMessage = "Prețul trebuie să fie mai mare ca 0.")]
     public decimal Price { get; set; }

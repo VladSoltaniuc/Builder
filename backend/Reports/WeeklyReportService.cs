@@ -1,9 +1,10 @@
-// Infrastructure layer — weekly cron that emails the audit report to subscribers
+﻿// Infrastructure layer â€” weekly cron that emails the audit report to subscribers
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Constants;
 using ProductApi.Models;
 using ProductApi.Services;
 
@@ -51,7 +52,7 @@ public sealed class WeeklyReportService(
         }
     }
 
-    // Sleeps until 'target' in capped chunks — a weekly gap exceeds Task.Delay's
+    // Sleeps until 'target' in capped chunks â€” a weekly gap exceeds Task.Delay's
     // ~24.8-day ceiling only for monthly waits, but the chunking also tolerates the
     // machine sleeping and clock drift.
     private static async Task<bool> WaitUntilAsync(DateTime target, CancellationToken ct)
@@ -95,11 +96,11 @@ public sealed class WeeklyReportService(
         }
 
         var label = LastWeekLabel();
-        var subject = $"Weekly audit report — week of {label}";
+        var subject = $"Weekly audit report â€” week of {label}";
         var html = RenderHtml(rows);
         var sms = RenderSms(rows, label);
 
-        // Fire all sends concurrently — each subscriber's network I/O overlaps instead
+        // Fire all sends concurrently â€” each subscriber's network I/O overlaps instead
         // of queuing behind the previous one. TrySend isolates failures per recipient.
         var emailTasks = subscribers
             .Where(s => s.ReportChannel == PreferredReportChannel.Email)
@@ -153,7 +154,7 @@ public sealed class WeeklyReportService(
         return sb.ToString();
     }
 
-    // Compact plain-text summary for SMS — one line per table, created/updated/deleted.
+    // Compact plain-text summary for SMS â€” one line per table, created/updated/deleted.
     private static string RenderSms(List<WeeklyAuditReportResponse> rows, string weekLabel)
     {
         var sb = new StringBuilder();
@@ -162,3 +163,4 @@ public sealed class WeeklyReportService(
         return sb.ToString();
     }
 }
+

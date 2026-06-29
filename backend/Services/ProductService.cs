@@ -14,15 +14,15 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
 {
     private static readonly EntityFilter<Product> Filter = new EntityFilter<Product>()
         .String("name",     p => p.Name)
-        .String("category", p => p.Category)
+        .Enum<ProductCategory>("category", p => p.Category)
         .Decimal("price",   p => p.Price)
         .Int("stock",       p => p.Stock)
         .Sort("name",       p => p.Name)
-        .Sort("category",   p => p.Category)
+        .Sort("category",   p => (object)p.Category)
         .Sort("price",      p => p.Price)
         .Sort("stock",      p => p.Stock);
 
-    public ProductOptionsResponse GetOptions() => new(ProductOptions.Categories);
+    public ProductOptionsResponse GetOptions() => new(Enum.GetValues<ProductCategory>());
 
     public async Task<PagedResponse<ProductResponse>> GetAll(ProductQuery q)
     {
@@ -33,7 +33,7 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
 
         // --- Search ---
         if (!string.IsNullOrWhiteSpace(q.Search))
-            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{q.Search}%") || EF.Functions.ILike(p.Category, $"%{q.Search}%"));
+            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{q.Search}%"));
 
         // --- Sort ---
         query = Filter.ApplySort(query, q.SortBy);
@@ -49,7 +49,7 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
             .AsNoTracking()
             .Where(p => EF.Functions.ILike(p.Name, pattern))
             .OrderBy(p => p.Id)
-            .Take(SearchDefaults.MaxResults)
+            .Take(50)
             .Select(p => ToResponse(p))
             .ToListAsync();
     }
@@ -248,8 +248,8 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
         {
             if (name.Length < 2)
                 return (null, $"Row {row}: Name must be at least 2 characters");
-            if (string.IsNullOrEmpty(category))
-                return (null, $"Row {row}: Category is required");
+            if (!System.Enum.TryParse<ProductCategory>(category, ignoreCase: true, out var parsedCategory))
+                return (null, $"Row {row}: Invalid category '{category}'");
 
             decimal price = priceVal.IsNumber
                 ? (decimal)priceVal.GetNumber()
@@ -263,7 +263,7 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
             if (stock < 0)
                 return (null, $"Row {row}: Stock must be a non-negative integer");
 
-            return (new Product { Name = name, Category = category, Price = price, Stock = stock }, null);
+            return (new Product { Name = name, Category = parsedCategory, Price = price, Stock = stock }, null);
         }
         catch (Exception ex)
         {
@@ -287,6 +287,6 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
     }
 
     private static ProductResponse ToResponse(Product p) =>
-        new(p.Id, p.Name, p.Category, p.Price, p.Stock, p.Version,
+        new(p.Id, p.Name, p.Category.ToString(), p.Price, p.Stock, p.Version,
             p.ImagePath is null ? null : $"/{p.ImagePath}");
 }

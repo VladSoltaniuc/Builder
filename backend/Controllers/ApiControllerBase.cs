@@ -16,8 +16,8 @@ public abstract class ApiControllerBase : ControllerBase
     protected ActionResult? ValidateSearchTerm(string? term, out string trimmed)
     {
         trimmed = term?.Trim() ?? string.Empty;
-        return trimmed.Length < SearchDefaults.MinTermLength
-            ? ApiBadRequest($"Search term must be at least {SearchDefaults.MinTermLength} characters.")
+        return trimmed.Length < PaginationDefaults.MinTermLength
+            ? ApiBadRequest($"Search term must be at least {PaginationDefaults.MinTermLength} characters.")
             : null;
     }
 

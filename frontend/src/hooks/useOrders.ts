@@ -5,13 +5,14 @@ import { ApiError } from '../api/errors';
 import type { Order, OrderInput, OrderUpdateInput } from '../types/order';
 import type { SortState } from '../types/query';
 import { toSortBy } from '../types/query';
-import { PAGE_SIZE } from '../constants/pagination';
+import { DEFAULT_PAGE_SIZE } from '../constants/pagination';
 
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalCount, setTotalCount] = useState(0);
 
   // --- Sorting ---
@@ -23,6 +24,7 @@ export function useOrders() {
 
   const loadOrders = useCallback(async function loadOrders(
     p: number,
+    ps: number,
     s: SortState | null,
     search: string,
     filters: Record<string, string>,
@@ -30,7 +32,7 @@ export function useOrders() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await ordersApi.getAll(p, PAGE_SIZE, toSortBy(s), search || undefined, Object.keys(filters).length ? filters : undefined);
+      const data = await ordersApi.getAll(p, ps, toSortBy(s), search || undefined, Object.keys(filters).length ? filters : undefined);
       setOrders(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
@@ -42,9 +44,9 @@ export function useOrders() {
 
   const createOrder = useCallback(async function createOrder(input: OrderInput) {
     await ordersApi.create(input);
-    if (page === 1) void loadOrders(1, sort, search, filters);
+    if (page === 1) void loadOrders(1, pageSize, sort, search, filters);
     else setPage(1);
-  }, [loadOrders, page, sort, search, filters]);
+  }, [loadOrders, page, pageSize, sort, search, filters]);
 
   const updateOrder = useCallback(async function updateOrder(id: number, input: OrderUpdateInput) {
     const updated = await ordersApi.update(id, input);
@@ -58,9 +60,9 @@ export function useOrders() {
   const deleteOrder = useCallback(async function deleteOrder(id: number) {
     await ordersApi.remove(id);
     const newPage = orders.length === 1 && page > 1 ? page - 1 : page;
-    if (newPage === page) void loadOrders(page, sort, search, filters);
+    if (newPage === page) void loadOrders(page, pageSize, sort, search, filters);
     else setPage(newPage);
-  }, [loadOrders, page, orders.length, sort, search, filters]);
+  }, [loadOrders, page, pageSize, orders.length, sort, search, filters]);
 
   const uploadInvoice = useCallback(async function uploadInvoice(id: number, file: File) {
     const updated = await ordersApi.uploadInvoice(id, file);
@@ -85,12 +87,13 @@ export function useOrders() {
   }, []);
 
   useEffect(() => {
-    void loadOrders(page, sort, search, filters);
-  }, [loadOrders, page, sort, search, filters]);
+    void loadOrders(page, pageSize, sort, search, filters);
+  }, [loadOrders, page, pageSize, sort, search, filters]);
 
   return {
     orders, isLoading, error,
-    page, totalPages: Math.max(1, Math.ceil(totalCount / PAGE_SIZE)), setPage,
+    page, totalPages: Math.max(1, Math.ceil(totalCount / pageSize)), setPage,
+    pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
     filters, setFilters,

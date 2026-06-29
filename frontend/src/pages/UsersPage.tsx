@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@mui/material";
 import { useUsers } from "../hooks/useUsers";
+import { ALLOWED_PAGE_SIZES } from "../constants/pagination";
 import { useAuth } from "../context/AuthContext";
 import { UserForm } from "../components/UserForm";
 import { UserTable } from "../components/UserTable";
@@ -17,6 +18,7 @@ export function UsersPage() {
   const {
     users, isLoading, error,
     page, totalPages, setPage,
+    pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
     createUser, updateUser, deleteUser,
@@ -83,6 +85,9 @@ export function UsersPage() {
         <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>{t('pagination.previous')}</button>
         <span>{t('pagination.page', { page, total: totalPages })}</span>
         <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>{t('pagination.next')}</button>
+        <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}>
+          {ALLOWED_PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
       </div>
 
       {isModalOpen &&

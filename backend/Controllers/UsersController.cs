@@ -1,7 +1,7 @@
 // Presentation layer
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductApi.Auth;
+using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Services;
 
@@ -35,7 +35,7 @@ public class UsersController(IUserService userService) : ApiControllerBase
         return user is null ? ApiNotFound() : Ok(user);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -45,7 +45,7 @@ public class UsersController(IUserService userService) : ApiControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -59,7 +59,7 @@ public class UsersController(IUserService userService) : ApiControllerBase
         return result.User is null ? ApiNotFound() : Ok(result.User);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

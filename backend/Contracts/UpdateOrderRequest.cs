@@ -1,6 +1,6 @@
 // Application layer
 using System.ComponentModel.DataAnnotations;
-using ProductApi.Models;
+using ProductApi.Constants;
 
 namespace ProductApi.Contracts;
 

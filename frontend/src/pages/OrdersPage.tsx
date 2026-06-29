@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@mui/material";
 import { useOrders } from "../hooks/useOrders";
+import { ALLOWED_PAGE_SIZES } from "../constants/pagination";
 import { useOrderHub } from "../hooks/useOrderHub";
 import { ordersApi } from "../api/orders";
 import { OrderForm } from "../components/OrderForm";
@@ -17,6 +18,7 @@ export function OrdersPage() {
   const {
     orders, isLoading, error,
     page, totalPages, setPage,
+    pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
     setFilters,
@@ -147,6 +149,9 @@ export function OrdersPage() {
         <button className="btn" disabled={page === 1} onClick={() => setPage(page - 1)}>{t('pagination.previous')}</button>
         <span>{t('pagination.page', { page, total: totalPages })}</span>
         <button className="btn" disabled={page === totalPages} onClick={() => setPage(page + 1)}>{t('pagination.next')}</button>
+        <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}>
+          {ALLOWED_PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
       </div>
 
       {isModalOpen &&

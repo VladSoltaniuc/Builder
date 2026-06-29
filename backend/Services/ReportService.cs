@@ -1,8 +1,9 @@
-// Application layer — reads/refreshes the weekly audit metrics materialized view
+﻿// Application layer â€” reads/refreshes the weekly audit metrics materialized view
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
+using ProductApi.Constants;
 using ProductApi.Models;
 
 namespace ProductApi.Services;
@@ -23,7 +24,7 @@ public class ReportService(AppDbContext db) : IReportService
         var user = await db.Users.FindAsync(userId)
             ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
 
-        // Can't text someone without a number — require one when choosing SMS.
+        // Can't text someone without a number â€” require one when choosing SMS.
         var phone = phoneNumber?.Trim();
         if (channel == PreferredReportChannel.Sms
             && string.IsNullOrWhiteSpace(phone) && string.IsNullOrWhiteSpace(user.PhoneNumber))
@@ -36,3 +37,4 @@ public class ReportService(AppDbContext db) : IReportService
         await db.SaveChangesAsync();
     }
 }
+

@@ -20,7 +20,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
         .Sort("quantity",               o => o.Quantity)
         .Sort("createdAt",              o => o.CreatedAt);
 
-    public OrderOptionsResponse GetOptions() => new(OrderOptions.Statuses);
+    public OrderOptionsResponse GetOptions() => new(Enum.GetValues<OrderStatus>());
 
     public async Task<PagedResponse<OrderResponse>> GetAll(OrderQuery q)
     {
@@ -56,7 +56,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
                      || EF.Functions.ILike(o.Product.Name, pattern)
                      || (o.Awb != null && EF.Functions.ILike(o.Awb, pattern)))
             .OrderBy(o => o.Id)
-            .Take(SearchDefaults.MaxResults)
+            .Take(50)
             .Select(o => ToResponse(o))
             .ToListAsync();
     }
@@ -75,7 +75,6 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
     // we'd POST the shipment to their API and store the number they return. Here we
     // fake that with a random code; the unique index is still the source of truth,
     // so on the rare collision we just regenerate and retry.
-    private const int AwbRetries = 5;
 
     public async Task<OrderResponse?> AssignGeneratedAwb(int id)
     {
@@ -85,7 +84,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
             .FirstOrDefaultAsync(o => o.Id == id);
         if (order is null) return null;
 
-        for (var attempt = 1; attempt <= AwbRetries; attempt++)
+        for (var attempt = 1; attempt <= OrderDefaults.AwbRetries; attempt++)
         {
             order.Awb = GenerateAwb();
             try
@@ -94,14 +93,14 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
                 return ToResponse(order);
             }
             catch (DbUpdateException ex)
-                when (attempt < AwbRetries &&
+                when (attempt < OrderDefaults.AwbRetries &&
                       ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
             {
                 // Collided with an existing AWB — loop and generate a fresh one.
             }
         }
 
-        throw new InvalidOperationException($"Could not generate a unique AWB after {AwbRetries} attempts.");
+        throw new InvalidOperationException($"Could not generate a unique AWB after {OrderDefaults.AwbRetries} attempts.");
     }
 
     private static string GenerateAwb() =>

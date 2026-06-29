@@ -7,6 +7,7 @@ using ProductApi.Auth;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Infrastructure;
+using ProductApi.Constants;
 using ProductApi.Models;
 using ProductApi.Reports;
 

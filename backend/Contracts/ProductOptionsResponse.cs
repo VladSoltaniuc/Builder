@@ -1,4 +1,6 @@
 // Application layer
+using ProductApi.Constants;
+
 namespace ProductApi.Contracts;
 
-public record ProductOptionsResponse(string[] Categories);
+public record ProductOptionsResponse(ProductCategory[] Categories);

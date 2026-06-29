@@ -1,5 +1,6 @@
-// Application layer
+﻿// Application layer
 using ProductApi.Contracts;
+using ProductApi.Constants;
 using ProductApi.Models;
 
 namespace ProductApi.Services;
@@ -16,3 +17,4 @@ public interface IReportService
     // Sets a user's weekly report delivery channel (and phone number for SMS).
     Task SetSubscription(int userId, PreferredReportChannel channel, string? phoneNumber);
 }
+

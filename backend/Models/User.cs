@@ -40,3 +40,25 @@ public class User
 
     public int Version { get; set; } = 1;
 }
+
+public enum UserRole
+{
+    Operator = 0,
+    Admin    = 1,
+}
+
+[Flags]
+public enum UserFeature
+{
+    None              = 0,
+    CanExportExcel    = 1,
+    CanViewAuditLog   = 2,
+    CanManageInvoices = 4,
+}
+
+public enum PreferredReportChannel
+{
+    None  = 0,
+    Email = 1,
+    Sms   = 2,
+}

@@ -5,13 +5,14 @@ import { ApiError } from '../api/errors';
 import type { User, UserInput } from '../types/user';
 import type { SortState } from '../types/query';
 import { toSortBy } from '../types/query';
-import { PAGE_SIZE } from '../constants/pagination';
+import { DEFAULT_PAGE_SIZE } from '../constants/pagination';
 
 export function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalCount, setTotalCount] = useState(0);
 
   // --- Sorting ---
@@ -23,6 +24,7 @@ export function useUsers() {
 
   const loadUsers = useCallback(async function loadUsers(
     p: number,
+    ps: number,
     s: SortState | null,
     search: string,
     filters: Record<string, string>,
@@ -30,7 +32,7 @@ export function useUsers() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await usersApi.getAll(p, PAGE_SIZE, toSortBy(s), search || undefined, Object.keys(filters).length ? filters : undefined);
+      const data = await usersApi.getAll(p, ps, toSortBy(s), search || undefined, Object.keys(filters).length ? filters : undefined);
       setUsers(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
@@ -42,9 +44,9 @@ export function useUsers() {
 
   const createUser = useCallback(async function createUser(input: UserInput) {
     await usersApi.create(input);
-    if (page === 1) void loadUsers(1, sort, search, filters);
+    if (page === 1) void loadUsers(1, pageSize, sort, search, filters);
     else setPage(1);
-  }, [loadUsers, page, sort, search, filters]);
+  }, [loadUsers, page, pageSize, sort, search, filters]);
 
   const updateUser = useCallback(async function updateUser(id: number, input: UserInput, version: number) {
     const updated = await usersApi.update(id, input, version);
@@ -54,17 +56,18 @@ export function useUsers() {
   const deleteUser = useCallback(async function deleteUser(id: number) {
     await usersApi.remove(id);
     const newPage = users.length === 1 && page > 1 ? page - 1 : page;
-    if (newPage === page) void loadUsers(page, sort, search, filters);
+    if (newPage === page) void loadUsers(page, pageSize, sort, search, filters);
     else setPage(newPage);
-  }, [loadUsers, page, users.length, sort, search, filters]);
+  }, [loadUsers, page, pageSize, users.length, sort, search, filters]);
 
   useEffect(() => {
-    void loadUsers(page, sort, search, filters);
-  }, [loadUsers, page, sort, search, filters]);
+    void loadUsers(page, pageSize, sort, search, filters);
+  }, [loadUsers, page, pageSize, sort, search, filters]);
 
   return {
     users, isLoading, error,
-    page, totalPages: Math.max(1, Math.ceil(totalCount / PAGE_SIZE)), setPage,
+    page, totalPages: Math.max(1, Math.ceil(totalCount / pageSize)), setPage,
+    pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
     filters, setFilters,

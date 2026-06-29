@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProductApi.Auth;
+using ProductApi.Constants;
 using ProductApi.Models;
 
 namespace ProductApi.Data;

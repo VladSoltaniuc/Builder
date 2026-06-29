@@ -2,15 +2,17 @@
 // retry. This is the "something is watching" that a raw fire-and-forget lacks:
 // one worker, controlled rate, and a few retries before giving up (and logging).
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ProductApi.Reports;
 
 public sealed class EmailQueueProcessor(
     IEmailQueue queue,
     IEmailSender sender,
+    IOptions<EmailOptions> options,
     ILogger<EmailQueueProcessor> logger) : BackgroundService
 {
-    private const int MaxAttempts = 3;
+    private readonly int _maxAttempts = options.Value.MaxRetries;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -20,7 +22,7 @@ public sealed class EmailQueueProcessor(
 
     private async Task SendWithRetryAsync(EmailJob job, CancellationToken ct)
     {
-        for (int attempt = 1; attempt <= MaxAttempts; attempt++)
+        for (int attempt = 1; attempt <= _maxAttempts; attempt++)
         {
             try
             {
@@ -29,12 +31,12 @@ public sealed class EmailQueueProcessor(
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                if (attempt == MaxAttempts)
+                if (attempt == _maxAttempts)
                 {
-                    logger.LogError(ex, "Giving up on email to {To} after {Attempts} attempts.", job.To, MaxAttempts);
+                    logger.LogError(ex, "Giving up on email to {To} after {Attempts} attempts.", job.To, _maxAttempts);
                     return;
                 }
-                logger.LogWarning(ex, "Email to {To} failed (attempt {Attempt}/{Max}); retrying.", job.To, attempt, MaxAttempts);
+                logger.LogWarning(ex, "Email to {To} failed (attempt {Attempt}/{Max}); retrying.", job.To, attempt, _maxAttempts);
                 await Task.Delay(TimeSpan.FromSeconds(2 * attempt), ct);
             }
         }

@@ -17,3 +17,10 @@ public class Order
     public string? InvoicePath { get; set; }
     public string? Awb { get; set; }
 }
+
+public enum OrderStatus
+{
+    Pending   = 0,
+    Completed = 1,
+    Cancelled = 2,
+}

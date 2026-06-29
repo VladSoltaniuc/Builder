@@ -42,7 +42,7 @@ public class UserService(AppDbContext db) : IUserService
             .AsNoTracking()
             .Where(u => EF.Functions.ILike(u.Name, pattern) || EF.Functions.ILike(u.Email, pattern))
             .OrderBy(u => u.Id)
-            .Take(SearchDefaults.MaxResults)
+            .Take(50)
             .Select(u => ToResponse(u))
             .ToListAsync();
     }

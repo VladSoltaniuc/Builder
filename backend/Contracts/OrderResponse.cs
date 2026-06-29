@@ -1,5 +1,5 @@
 // Application layer
-using ProductApi.Models;
+using ProductApi.Constants;
 
 namespace ProductApi.Contracts;
 

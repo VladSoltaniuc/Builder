@@ -1,5 +1,6 @@
-// Application layer
+﻿// Application layer
 using System.ComponentModel.DataAnnotations;
+using ProductApi.Constants;
 using ProductApi.Models;
 
 namespace ProductApi.Contracts;
@@ -20,3 +21,4 @@ public class CreateUserRequest
 
     public PreferredReportChannel ReportChannel { get; set; }
 }
+

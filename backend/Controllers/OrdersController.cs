@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using ProductApi.Auth;
+using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Hubs;
 using ProductApi.Services;
@@ -41,7 +41,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
         return order is null ? ApiNotFound() : Ok(order);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -52,7 +52,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -66,7 +66,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
         return Ok(result.Order);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -76,7 +76,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
         return deleted ? NoContent() : ApiNotFound();
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost("{id:int}/awb")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,7 +86,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
         return result is null ? ApiNotFound() : Ok(result);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost("{id:int}/invoice")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -95,14 +95,14 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     {
         if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
             return ApiBadRequest("Only PDF files are allowed.");
-        if (file.Length > 10 * 1024 * 1024)
+        if (file.Length > ImageSettings.MaxInvoiceSizeBytes)
             return ApiBadRequest("Invoice must be under 10 MB.");
 
         var result = await orderService.UploadInvoice(id, file);
         return result is null ? ApiNotFound() : Ok(result);
     }
 
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpDelete("{id:int}/invoice")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

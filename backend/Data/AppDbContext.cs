@@ -18,6 +18,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(o => o.Status)
             .HasConversion<string>();
 
+        modelBuilder.Entity<Product>()
+            .Property(p => p.Category)
+            .HasConversion<string>();
+
         // Persist the role as its name ("Admin"/"Operator") rather than an int.
         modelBuilder.Entity<User>()
             .Property(u => u.Role)
