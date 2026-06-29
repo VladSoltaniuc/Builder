@@ -15,7 +15,7 @@ using ProductApi.Data;
 using ProductApi.Hubs;
 using ProductApi.Exceptions;
 using ProductApi.Infrastructure;
-using ProductApi.Reports;
+using ProductApi.Notifications;
 using ProductApi.Services;
 using ProductApi.Workers;
 
@@ -206,7 +206,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<OrderHub>("/hubs/orders");
 
-// Provision the configured founder Admin (no-op unless AdminSeed is set).
+// Provision the founder Admin
 await app.Services.SeedAdminAsync();
 
 app.Run();

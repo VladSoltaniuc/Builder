@@ -1,6 +1,5 @@
 ﻿// Application layer
 using Microsoft.EntityFrameworkCore;
-using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Exceptions;
@@ -22,14 +21,11 @@ public class UserService(AppDbContext db) : IUserService
     {
         var query = db.Users.AsQueryable();
 
-        // --- Filter ---
         query = Filter.Apply(query, q.Filters);
 
-        // --- Search ---
         if (!string.IsNullOrWhiteSpace(q.Search))
             query = query.Where(u => EF.Functions.ILike(u.Name, $"%{q.Search}%") || EF.Functions.ILike(u.Email, $"%{q.Search}%"));
 
-        // --- Sort ---
         query = Filter.ApplySort(query, q.SortBy);
 
         return await query.ToPagedResponse(q.Page, q.PageSize, u => ToResponse(u));

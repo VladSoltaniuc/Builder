@@ -1,5 +1,5 @@
-// Infrastructure layer — bound from the "Smtp" configuration section.
-namespace ProductApi.Reports;
+// Configuration layer
+namespace ProductApi.Configuration;
 
 public sealed class EmailOptions
 {

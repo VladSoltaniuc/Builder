@@ -1,11 +1,8 @@
-// Infrastructure layer — in-process email queue backed by System.Threading.Channels.
-//
-// Unbounded + single-reader: producers never block, and exactly one background
-// consumer drains it. In-memory only — pending jobs are lost on restart; swap the
-// channel for a durable broker (RabbitMQ/SQS) if that ever matters.
+// Infrastructure layer
+// In-memory channel: unbounded, single-reader, jobs lost on restart.
 using System.Threading.Channels;
 
-namespace ProductApi.Reports;
+namespace ProductApi.Notifications;
 
 public sealed class EmailQueue : IEmailQueue
 {

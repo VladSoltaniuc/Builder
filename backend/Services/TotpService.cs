@@ -1,4 +1,4 @@
-// Application layer
+// Infrastructure layer
 using OtpNet;
 
 namespace ProductApi.Auth;

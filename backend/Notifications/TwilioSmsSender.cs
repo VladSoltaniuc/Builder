@@ -1,10 +1,11 @@
-// Infrastructure layer — SMS delivery via Twilio
+// Infrastructure layer
 using Microsoft.Extensions.Options;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
+using ProductApi.Configuration;
 
-namespace ProductApi.Reports;
+namespace ProductApi.Notifications;
 
 public sealed class TwilioSmsSender(IOptions<SmsOptions> options) : ISmsSender
 {

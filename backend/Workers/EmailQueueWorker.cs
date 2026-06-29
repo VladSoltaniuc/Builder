@@ -1,6 +1,7 @@
 // Infrastructure layer
 using Microsoft.Extensions.Options;
-using ProductApi.Reports;
+using ProductApi.Configuration;
+using ProductApi.Notifications;
 
 namespace ProductApi.Workers;
 

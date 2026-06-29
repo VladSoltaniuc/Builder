@@ -2,11 +2,11 @@
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Models;
-using ProductApi.Reports;
+using ProductApi.Configuration;
+using ProductApi.Notifications;
 using ProductApi.Services;
 
 namespace ProductApi.Workers;

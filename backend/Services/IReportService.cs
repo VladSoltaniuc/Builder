@@ -1,6 +1,5 @@
 ﻿// Application layer
 using ProductApi.Contracts;
-using ProductApi.Constants;
 using ProductApi.Models;
 
 namespace ProductApi.Services;

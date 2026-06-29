@@ -1,4 +1,4 @@
 // Application layer
-namespace ProductApi.Reports;
+namespace ProductApi.Notifications;
 
 public record EmailJob(string To, string Subject, string HtmlBody);

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ProductApi.Contracts;
 
-public record FieldError(string Field, string Code);
+public record ErrorResponse(ErrorDetail Error);
 
 public record ErrorDetail(
     int Code,
@@ -15,4 +15,4 @@ public record ErrorDetail(
     IReadOnlyList<FieldError>? Errors = null
 );
 
-public record ErrorResponse(ErrorDetail Error);
+public record FieldError(string Field, string Code);

@@ -30,14 +30,11 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
             .Include(o => o.Product)
             .AsQueryable();
 
-        // --- Filter ---
         query = Filter.Apply(query, q.Filters);
 
-        // --- Search ---
         if (!string.IsNullOrWhiteSpace(q.Search))
             query = query.Where(o => EF.Functions.ILike(o.User.Name, $"%{q.Search}%") || EF.Functions.ILike(o.Product.Name, $"%{q.Search}%"));
 
-        // --- Sort ---
         query = Filter.ApplySort(query, q.SortBy);
 
         return await query.ToPagedResponse(q.Page, q.PageSize, o => ToResponse(o));

@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Exceptions;
-using ProductApi.Constants;
 using ProductApi.Models;
 
 namespace ProductApi.Services;

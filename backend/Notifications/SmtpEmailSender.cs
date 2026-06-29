@@ -1,10 +1,11 @@
-// Infrastructure layer — SMTP delivery via MailKit
+// Infrastructure layer
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using ProductApi.Configuration;
 
-namespace ProductApi.Reports;
+namespace ProductApi.Notifications;
 
 public sealed class SmtpEmailSender(IOptions<EmailOptions> options) : IEmailSender
 {

@@ -1,12 +1,6 @@
 // Configuration layer
 namespace ProductApi.Configuration;
 
-public enum MaintenanceFrequency
-{
-    Weekly  = 0,
-    Monthly = 1,
-}
-
 public sealed class IndexMaintenanceOptions
 {
     public bool Enabled { get; set; }
@@ -41,4 +35,10 @@ public sealed class IndexMaintenanceOptions
         var monthly = new DateTime(now.Year, now.Month, dom, Hour, Minute, 0, now.Kind);
         return monthly > now ? monthly : monthly.AddMonths(1);
     }
+}
+
+public enum MaintenanceFrequency
+{
+    Weekly  = 0,
+    Monthly = 1,
 }

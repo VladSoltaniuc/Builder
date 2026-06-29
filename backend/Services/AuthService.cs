@@ -8,9 +8,8 @@ using ProductApi.Configuration;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Exceptions;
-using ProductApi.Constants;
 using ProductApi.Models;
-using ProductApi.Reports;
+using ProductApi.Notifications;
 
 namespace ProductApi.Services;
 

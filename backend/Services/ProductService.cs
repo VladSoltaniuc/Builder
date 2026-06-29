@@ -2,7 +2,6 @@
 using System.Globalization;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
-using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Exceptions;
@@ -29,14 +28,11 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
     {
         var query = db.Products.AsQueryable();
 
-        // --- Filter ---
         query = Filter.Apply(query, q.Filters);
 
-        // --- Search ---
         if (!string.IsNullOrWhiteSpace(q.Search))
             query = query.Where(p => EF.Functions.ILike(p.Name, $"%{q.Search}%"));
 
-        // --- Sort ---
         query = Filter.ApplySort(query, q.SortBy);
 
         return await query.ToPagedResponse(q.Page, q.PageSize, p => ToResponse(p));

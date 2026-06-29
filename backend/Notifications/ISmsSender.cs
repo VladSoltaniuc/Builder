@@ -1,5 +1,5 @@
 // Application layer
-namespace ProductApi.Reports;
+namespace ProductApi.Notifications;
 
 public interface ISmsSender
 {

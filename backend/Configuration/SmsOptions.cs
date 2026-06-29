@@ -1,5 +1,5 @@
-// Infrastructure layer — bound from the "Sms" configuration section (Twilio).
-namespace ProductApi.Reports;
+// Configuration layer
+namespace ProductApi.Configuration;
 
 public sealed class SmsOptions
 {
