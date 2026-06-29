@@ -1,4 +1,4 @@
-// Application layer — sign up
+// Application layer
 import { useState, type FormEvent } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -26,7 +26,9 @@ export function RegisterPage() {
       const res = await authApi.register(name, email, password);
       setSentTo(res.email);
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t("auth.registerFailed"));
+      toast.error(
+        err instanceof ApiError ? err.message : t("auth.registerFailed"),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -54,11 +56,25 @@ export function RegisterPage() {
 
         <label>
           {t("auth.name")}
-          <input name="name" value={name} onChange={(e) => setName(e.target.value)} required minLength={2} placeholder=" " />
+          <input
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            minLength={2}
+            placeholder=" "
+          />
         </label>
         <label>
           {t("auth.email")}
-          <input name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder=" " />
+          <input
+            name="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder=" "
+          />
         </label>
         <label>
           {t("auth.password")}
@@ -74,7 +90,11 @@ export function RegisterPage() {
         </label>
 
         <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? t("form.saving") : t("auth.register")}
           </button>
         </div>

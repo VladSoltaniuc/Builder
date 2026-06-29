@@ -1,8 +1,8 @@
-﻿// Application layer â€” reads/refreshes the weekly audit metrics materialized view
+﻿// Application layer
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Contracts;
 using ProductApi.Data;
-using ProductApi.Infrastructure;
+using ProductApi.Exceptions;
 using ProductApi.Constants;
 using ProductApi.Models;
 
@@ -13,7 +13,7 @@ public class ReportService(AppDbContext db) : IReportService
     public async Task<List<WeeklyAuditReportResponse>> GetWeeklyAuditReport()
         => await db.WeeklyAuditReport
             .OrderBy(r => r.TableName)
-            .Select(r => new WeeklyAuditReportResponse(r.TableName, r.Created, r.Updated, r.Deleted))
+            .Select(r => new WeeklyAuditReportResponse(r.TableName, r.Inserts, r.Updates, r.Deletes))
             .ToListAsync();
 
     public Task RefreshWeeklyAuditReport()

@@ -1,3 +1,4 @@
+// Shared layer
 namespace ProductApi.Constants;
 
 public static class ImageSettings

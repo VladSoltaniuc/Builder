@@ -1,8 +1,9 @@
-// Application layer
+﻿// Application layer
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Exceptions;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
 
@@ -76,13 +77,13 @@ public class UserService(AppDbContext db) : IUserService
         if (user is null) return UpdateUserResult.NotFound();
         if (user.Version != request.Version) return UpdateUserResult.Conflict();
 
-        // Prevent demoting the last Admin — would lock everyone out.
+        // Prevent demoting the last Admin â€” would lock everyone out.
         if (user.Role == UserRole.Admin && request.Role != UserRole.Admin)
         {
             var adminCount = await db.Users.CountAsync(u => u.Role == UserRole.Admin);
             if (adminCount <= 1)
                 throw new UserFriendlyException(
-                    "Cannot demote the last Admin — the system would have no admins.",
+                    "Cannot demote the last Admin â€” the system would have no admins.",
                     "LAST_ADMIN");
         }
 
@@ -94,7 +95,7 @@ public class UserService(AppDbContext db) : IUserService
         user.PhoneNumber = string.IsNullOrWhiteSpace(phone) ? null : phone;
         user.ReportChannel = request.ReportChannel;
         user.Role = request.Role;
-        // Admins always have full access — features bits are meaningless for them.
+        // Admins always have full access â€” features bits are meaningless for them.
         // Clear on promotion so the DB stays clean; reset to None on any role change.
         user.Features = request.Role == UserRole.Admin ? UserFeature.None : request.Features;
         user.Version++;
@@ -113,7 +114,7 @@ public class UserService(AppDbContext db) : IUserService
             var adminCount = await db.Users.CountAsync(u => u.Role == UserRole.Admin);
             if (adminCount <= 1)
                 throw new UserFriendlyException(
-                    "Cannot delete the last Admin — the system would have no admins.",
+                    "Cannot delete the last Admin â€” the system would have no admins.",
                     "LAST_ADMIN");
         }
 

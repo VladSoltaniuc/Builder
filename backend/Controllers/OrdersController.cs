@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using ProductApi.Constants;
 using ProductApi.Contracts;
+using ProductApi.Models;
 using ProductApi.Hubs;
 using ProductApi.Services;
 
@@ -11,7 +12,7 @@ namespace ProductApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // any authenticated user may read; writes additionally require Admin
+[Authorize]
 public class OrdersController(IOrderService orderService, IHubContext<OrderHub> hub) : ApiControllerBase
 {
     [HttpGet("options")]
@@ -20,7 +21,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
 
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<OrderResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResponse<OrderResponse>>> GetAll([FromQuery] OrderQuery query)
+    public async Task<ActionResult<PagedResponse<OrderResponse>>> GetAll([FromQuery] PageQuery query)
         => Ok(await orderService.GetAll(query));
 
     [HttpGet("search")]

@@ -9,7 +9,6 @@ namespace ProductApi.Controllers;
 [Route("api/[controller]")]
 public class MaintenanceController(IMaintenanceService maintenanceService) : ApiControllerBase
 {
-    // POST /api/maintenance/purge-audit?olderThanDays=365
     [HttpPost("purge-audit")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

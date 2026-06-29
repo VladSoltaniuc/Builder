@@ -1,13 +1,6 @@
-// Infrastructure layer — stamps the signed-in user's id onto the DB session so the
-// audit triggers can record "who" in AuditLogs.ChangedBy.
-//
-// The triggers read current_setting('app.user_id', true). We set it (session-scoped,
-// is_local=false) on the same open connection EF uses for the save, so it's visible
-// to every INSERT/UPDATE/DELETE in that SaveChanges. Npgsql resets connection state
-// on return to the pool, so the value can't leak into another request.
+// Infrastructure layer
 using System.Data;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 

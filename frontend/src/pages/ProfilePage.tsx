@@ -1,4 +1,4 @@
-// Application layer — self-service profile + report preferences
+// Application layer
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
@@ -34,7 +34,9 @@ export function ProfilePage() {
       await refresh();
       toast.success(t("profile.saved"));
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t("profile.saveFailed"));
+      toast.error(
+        err instanceof ApiError ? err.message : t("profile.saveFailed"),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -46,9 +48,15 @@ export function ProfilePage() {
         <h1>{t("profile.title")}</h1>
 
         <div className="profile-info">
-          <p><strong>{t("auth.name")}:</strong> {user.name}</p>
-          <p><strong>{t("auth.email")}:</strong> {user.email}</p>
-          <p><strong>{t("profile.role")}:</strong> {user.role}</p>
+          <p>
+            <strong>{t("auth.name")}:</strong> {user.name}
+          </p>
+          <p>
+            <strong>{t("auth.email")}:</strong> {user.email}
+          </p>
+          <p>
+            <strong>{t("profile.role")}:</strong> {user.role}
+          </p>
         </div>
 
         <h2>{t("profile.reportPrefsTitle")}</h2>
@@ -60,7 +68,11 @@ export function ProfilePage() {
         />
 
         <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? t("form.saving") : t("form.save")}
           </button>
         </div>

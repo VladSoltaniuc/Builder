@@ -8,8 +8,6 @@ namespace ProductApi.Controllers;
 
 public abstract class ApiControllerBase : ControllerBase
 {
-    // Enforces the minimum search length before any query fires. Returns a 400
-    // ActionResult when too short, or null with the trimmed term when valid.
     protected int GetCurrentUserId() =>
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 

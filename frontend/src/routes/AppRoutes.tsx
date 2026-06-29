@@ -1,4 +1,4 @@
-// Application layer — route definitions
+// Application layer
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ProductsPage } from "../pages/ProductsPage";
 import { UsersPage } from "../pages/UsersPage";
@@ -17,10 +17,38 @@ export function AppRoutes() {
       <Route path="/verify-email" element={<VerifyEmailPage />} />
 
       <Route path="/" element={<Navigate to="/products" replace />} />
-      <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
-      <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
-      <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route
+        path="/products"
+        element={
+          <ProtectedRoute>
+            <ProductsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <UsersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <OrdersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

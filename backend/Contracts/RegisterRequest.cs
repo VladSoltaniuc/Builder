@@ -5,15 +5,15 @@ namespace ProductApi.Contracts;
 
 public class RegisterRequest
 {
-    [Required(ErrorMessage = "Name is required.")]
-    [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters.")]
+    [Required(ErrorMessage = "NAME_REQUIRED")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "NAME_LENGTH")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    [Required(ErrorMessage = "EMAIL_REQUIRED")]
+    [EmailAddress(ErrorMessage = "EMAIL_INVALID")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required.")]
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters.")]
+    [Required(ErrorMessage = "PASSWORD_REQUIRED")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "PASSWORD_LENGTH")]
     public string Password { get; set; } = string.Empty;
 }

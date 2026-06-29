@@ -168,7 +168,30 @@
     "page": "Pagina {{page}} din {{total}}"
   },
   "errors": {
-    "MISSING_COLUMNS": "Coloane obligatorii lipsă: {{columns}}"
+    "MISSING_COLUMNS": "Coloane obligatorii lipsă: {{columns}}",
+    "fields": {
+      "NAME_REQUIRED": "Numele este obligatoriu.",
+      "NAME_LENGTH": "Numele trebuie să aibă între 2 și 100 de caractere.",
+      "EMAIL_REQUIRED": "Emailul este obligatoriu.",
+      "EMAIL_INVALID": "Adresă de email invalidă.",
+      "PASSWORD_REQUIRED": "Parola este obligatorie.",
+      "PASSWORD_LENGTH": "Parola trebuie să aibă cel puțin 8 caractere.",
+      "PHONE_INVALID": "Număr de telefon invalid.",
+      "CATEGORY_REQUIRED": "Categoria este obligatorie.",
+      "CATEGORY_INVALID": "Categorie invalidă.",
+      "PRICE_RANGE": "Prețul trebuie să fie mai mare ca 0.",
+      "STOCK_RANGE": "Stocul nu poate fi negativ.",
+      "QUANTITY_MIN": "Cantitatea trebuie să fie cel puțin 1.",
+      "STATUS_REQUIRED": "Statusul este obligatoriu.",
+      "VERSION_REQUIRED": "Versiunea este obligatorie.",
+      "AWB_LENGTH": "AWB-ul poate avea cel mult 50 de caractere.",
+      "USER_ID_REQUIRED": "ID-ul utilizatorului este obligatoriu.",
+      "PRODUCT_ID_REQUIRED": "ID-ul produsului este obligatoriu.",
+      "GOOGLE_TOKEN_REQUIRED": "Tokenul Google este obligatoriu.",
+      "CODE_REQUIRED": "Codul de autentificare este obligatoriu.",
+      "TWO_FACTOR_TOKEN_REQUIRED": "Tokenul de autentificare în doi pași este obligatoriu.",
+      "VERIFICATION_TOKEN_REQUIRED": "Tokenul de verificare este obligatoriu."
+    }
   },
   "common": {
     "loading": "Se încarcă...",

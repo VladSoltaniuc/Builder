@@ -1,4 +1,4 @@
-// Application layer — sign in
+// Application layer
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -32,7 +32,9 @@ export function LoginPage() {
         navigate("/products");
       }
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t("auth.loginFailed"));
+      toast.error(
+        err instanceof ApiError ? err.message : t("auth.loginFailed"),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -46,7 +48,9 @@ export function LoginPage() {
       await setSession(auth.token);
       navigate("/products");
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t("auth.loginFailed"));
+      toast.error(
+        err instanceof ApiError ? err.message : t("auth.loginFailed"),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -54,7 +58,10 @@ export function LoginPage() {
 
   return (
     <main className="container">
-      <form className="card auth-card" onSubmit={twoFactorToken ? handleVerify : handleLogin}>
+      <form
+        className="card auth-card"
+        onSubmit={twoFactorToken ? handleVerify : handleLogin}
+      >
         <h1>{t("auth.loginTitle")}</h1>
 
         {twoFactorToken ? (
@@ -98,14 +105,19 @@ export function LoginPage() {
         )}
 
         <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? t("form.saving") : t("auth.login")}
           </button>
         </div>
 
         {!twoFactorToken && (
           <p className="auth-switch">
-            {t("auth.noAccount")} <Link to="/register">{t("auth.register")}</Link>
+            {t("auth.noAccount")}{" "}
+            <Link to="/register">{t("auth.register")}</Link>
           </p>
         )}
       </form>

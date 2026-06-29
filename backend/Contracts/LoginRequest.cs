@@ -5,10 +5,10 @@ namespace ProductApi.Contracts;
 
 public class LoginRequest
 {
-    [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    [Required(ErrorMessage = "EMAIL_REQUIRED")]
+    [EmailAddress(ErrorMessage = "EMAIL_INVALID")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required.")]
+    [Required(ErrorMessage = "PASSWORD_REQUIRED")]
     public string Password { get; set; } = string.Empty;
 }

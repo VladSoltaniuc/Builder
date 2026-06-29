@@ -1,4 +1,4 @@
-// Infrastructure layer — filter parsing and dispatch
+// Infrastructure layer
 namespace ProductApi.Infrastructure;
 
 public static class FilterHelper

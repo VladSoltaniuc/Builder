@@ -1,4 +1,4 @@
-// Application layer — invokes the purge_audit stored procedure
+// Application layer
 using Npgsql;
 
 namespace ProductApi.Services;

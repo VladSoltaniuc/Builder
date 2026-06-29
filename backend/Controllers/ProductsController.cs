@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Constants;
 using ProductApi.Contracts;
+using ProductApi.Models;
 using ProductApi.Services;
 
 namespace ProductApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // any authenticated user may read; writes additionally require Admin
+[Authorize]
 public class ProductsController(IProductService productService) : ApiControllerBase
 {
 
@@ -19,7 +20,7 @@ public class ProductsController(IProductService productService) : ApiControllerB
 
     [HttpGet]
     [ProducesResponseType(typeof(PagedResponse<ProductResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PagedResponse<ProductResponse>>> GetAll([FromQuery] ProductQuery query)
+    public async Task<ActionResult<PagedResponse<ProductResponse>>> GetAll([FromQuery] PageQuery query)
         => Ok(await productService.GetAll(query));
 
     [HttpGet("search")]

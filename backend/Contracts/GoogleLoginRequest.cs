@@ -5,7 +5,6 @@ namespace ProductApi.Contracts;
 
 public class GoogleLoginRequest
 {
-    // The id_token returned by Google Sign-In on the client.
-    [Required(ErrorMessage = "Google id token is required.")]
+    [Required(ErrorMessage = "GOOGLE_TOKEN_REQUIRED")]
     public string IdToken { get; set; } = string.Empty;
 }

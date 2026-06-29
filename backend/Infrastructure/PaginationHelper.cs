@@ -1,4 +1,4 @@
-// Infrastructure layer — pagination utility
+// Infrastructure layer
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Contracts;
@@ -7,8 +7,6 @@ namespace ProductApi.Infrastructure;
 
 public static class PaginationHelper
 {
-    // Counts the full result set, then pulls one page and projects each row to a response.
-    // Count and the page query run as two round-trips against the same filtered IQueryable.
     public static async Task<PagedResponse<TResponse>> ToPagedResponse<TEntity, TResponse>(
         this IQueryable<TEntity> query,
         int page,

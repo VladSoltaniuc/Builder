@@ -1,4 +1,4 @@
-// Composition root
+﻿// Composition root
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -9,13 +9,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using ProductApi.Auth;
+using ProductApi.Configuration;
 using ProductApi.Contracts;
 using ProductApi.Data;
 using ProductApi.Hubs;
+using ProductApi.Exceptions;
 using ProductApi.Infrastructure;
-using ProductApi.Maintenance;
 using ProductApi.Reports;
 using ProductApi.Services;
+using ProductApi.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,22 +98,31 @@ builder.Services.AddSingleton<IEmailQueue, EmailQueue>();
 
 if (!isTesting)
 {
-    builder.Services.AddHostedService<IndexMaintenanceService>();
-    builder.Services.AddHostedService<EmailQueueProcessor>();
-    builder.Services.AddHostedService<WeeklyReportService>();
+    builder.Services.AddHostedService<IndexMaintenanceWorker>();
+    builder.Services.AddHostedService<EmailQueueWorker>();
+    builder.Services.AddHostedService<WeeklyReportWorker>();
 }
 
-// Model validation errors → unified error envelope
+// Model validation errors â†’ unified error envelope
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = ctx =>
     {
-        var message = ctx.ModelState
-            .SelectMany(x => x.Value!.Errors)
-            .Select(e => e.ErrorMessage)
-            .FirstOrDefault() ?? "Invalid request.";
+        // One entry per failed field; each carries a stable code (the attribute's
+        // ErrorMessage) the client translates. Field names are camelCased to match
+        // the form fields on the frontend.
+        var errors = ctx.ModelState
+            .Where(kv => kv.Value!.Errors.Count > 0)
+            .SelectMany(kv => kv.Value!.Errors.Select(e => new FieldError(
+                ToCamelCase(kv.Key),
+                e.ErrorMessage)))
+            .ToList();
         return new BadRequestObjectResult(
-            new ErrorResponse(new ErrorDetail(400, "INVALID_ARGUMENT", message)));
+            new ErrorResponse(new ErrorDetail(
+                400, "INVALID_ARGUMENT", "One or more fields are invalid.", null, errors)));
+
+        static string ToCamelCase(string key) =>
+            string.IsNullOrEmpty(key) ? key : char.ToLowerInvariant(key[0]) + key[1..];
     };
 });
 
@@ -124,7 +135,7 @@ if (isRateLimitEnabled)
 
     builder.Services.AddRateLimiter(options =>
     {
-        // One fixed window per client IP — resets every WindowSeconds
+        // One fixed window per client IP â€” resets every WindowSeconds
         options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
             RateLimitPartition.GetFixedWindowLimiter(
                 partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",

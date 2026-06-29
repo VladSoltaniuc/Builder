@@ -69,16 +69,13 @@ public class AuthController(IAuthService authService) : ApiControllerBase
         return NoContent();
     }
 
-    // Exchanges a Google id_token (from client-side Google Sign-In) for our own JWT,
-    // creating or linking the local account as needed.
+    // Exchanges a Google id_token for JWT creating/linking the local account as needed
     [HttpPost("google")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponse>> Google(GoogleLoginRequest request)
         => Ok(await authService.LoginWithGoogle(request));
 
-    // The signed-in user's full profile (identity + report preferences), loaded
-    // from the DB rather than just echoing claims, so the SPA can render settings.
     [Authorize]
     [HttpGet("me")]
     [ProducesResponseType(typeof(ProfileResponse), StatusCodes.Status200OK)]

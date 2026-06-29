@@ -1,9 +1,11 @@
-// Application layer — route guard
+// Application layer
 import { Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
 
-export function ProtectedRoute({ children }: Readonly<{ children: React.ReactNode }>) {
+export function ProtectedRoute({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const { isAuthenticated, isLoading } = useAuth();
   const { t } = useTranslation();
 

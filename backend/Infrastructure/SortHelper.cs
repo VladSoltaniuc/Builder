@@ -1,6 +1,5 @@
-// Infrastructure layer — sorting utility
+// Infrastructure layer
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 
 namespace ProductApi.Infrastructure;
 

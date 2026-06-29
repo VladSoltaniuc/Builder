@@ -1,16 +1,14 @@
-// Infrastructure layer — drains the email queue and sends each job, with bounded
-// retry. This is the "something is watching" that a raw fire-and-forget lacks:
-// one worker, controlled rate, and a few retries before giving up (and logging).
-using Microsoft.Extensions.Logging;
+// Infrastructure layer
 using Microsoft.Extensions.Options;
+using ProductApi.Reports;
 
-namespace ProductApi.Reports;
+namespace ProductApi.Workers;
 
-public sealed class EmailQueueProcessor(
+public sealed class EmailQueueWorker(
     IEmailQueue queue,
     IEmailSender sender,
     IOptions<EmailOptions> options,
-    ILogger<EmailQueueProcessor> logger) : BackgroundService
+    ILogger<EmailQueueWorker> logger) : BackgroundService
 {
     private readonly int _maxAttempts = options.Value.MaxRetries;
 

@@ -1,7 +1,6 @@
-// Presentation layer — read-only history view
+// Presentation layer
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Services;
 
@@ -12,7 +11,6 @@ namespace ProductApi.Controllers;
 [Authorize]
 public class AuditController(IAuditService auditService) : ApiControllerBase
 {
-    // GET /api/audit?table=Orders&rowId=5&limit=50
     [HttpGet]
     [ProducesResponseType(typeof(List<AuditLogResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<AuditLogResponse>>> GetHistory(

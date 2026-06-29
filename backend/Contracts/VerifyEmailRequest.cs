@@ -5,6 +5,6 @@ namespace ProductApi.Contracts;
 
 public class VerifyEmailRequest
 {
-    [Required(ErrorMessage = "Verification token is required.")]
+    [Required(ErrorMessage = "VERIFICATION_TOKEN_REQUIRED")]
     public string Token { get; set; } = string.Empty;
 }

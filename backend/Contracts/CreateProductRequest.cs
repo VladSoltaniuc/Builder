@@ -1,22 +1,22 @@
 // Application layer
 using System.ComponentModel.DataAnnotations;
-using ProductApi.Constants;
+using ProductApi.Models;
 
 namespace ProductApi.Contracts;
 
 public class CreateProductRequest
 {
-    [Required(ErrorMessage = "Numele este obligatoriu.")]
-    [StringLength(100, MinimumLength = 2, ErrorMessage = "Numele trebuie să aibă între 2 și 100 de caractere.")]
+    [Required(ErrorMessage = "NAME_REQUIRED")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "NAME_LENGTH")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Categoria este obligatorie.")]
-    [EnumDataType(typeof(ProductCategory))]
+    [Required(ErrorMessage = "CATEGORY_REQUIRED")]
+    [EnumDataType(typeof(ProductCategory), ErrorMessage = "CATEGORY_INVALID")]
     public ProductCategory Category { get; set; }
 
-    [Range(0.01, 1_000_000, ErrorMessage = "Prețul trebuie să fie mai mare ca 0.")]
+    [Range(0.01, 1_000_000, ErrorMessage = "PRICE_RANGE")]
     public decimal Price { get; set; }
 
-    [Range(0, int.MaxValue, ErrorMessage = "Stocul nu poate fi negativ.")]
+    [Range(0, int.MaxValue, ErrorMessage = "STOCK_RANGE")]
     public int Stock { get; set; }
 }

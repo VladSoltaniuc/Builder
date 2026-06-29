@@ -168,7 +168,30 @@
     "page": "Page {{page}} of {{total}}"
   },
   "errors": {
-    "MISSING_COLUMNS": "Missing required columns: {{columns}}"
+    "MISSING_COLUMNS": "Missing required columns: {{columns}}",
+    "fields": {
+      "NAME_REQUIRED": "Name is required.",
+      "NAME_LENGTH": "Name must be between 2 and 100 characters.",
+      "EMAIL_REQUIRED": "Email is required.",
+      "EMAIL_INVALID": "Invalid email address.",
+      "PASSWORD_REQUIRED": "Password is required.",
+      "PASSWORD_LENGTH": "Password must be at least 8 characters.",
+      "PHONE_INVALID": "Invalid phone number.",
+      "CATEGORY_REQUIRED": "Category is required.",
+      "CATEGORY_INVALID": "Invalid category.",
+      "PRICE_RANGE": "Price must be greater than 0.",
+      "STOCK_RANGE": "Stock cannot be negative.",
+      "QUANTITY_MIN": "Quantity must be at least 1.",
+      "STATUS_REQUIRED": "Status is required.",
+      "VERSION_REQUIRED": "Version is required.",
+      "AWB_LENGTH": "AWB must be at most 50 characters.",
+      "USER_ID_REQUIRED": "User ID is required.",
+      "PRODUCT_ID_REQUIRED": "Product ID is required.",
+      "GOOGLE_TOKEN_REQUIRED": "Google sign-in token is required.",
+      "CODE_REQUIRED": "Authentication code is required.",
+      "TWO_FACTOR_TOKEN_REQUIRED": "Two-factor session token is required.",
+      "VERIFICATION_TOKEN_REQUIRED": "Verification token is required."
+    }
   },
   "common": {
     "loading": "Loading...",

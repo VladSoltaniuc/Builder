@@ -1,12 +1,13 @@
-// Application layer
+﻿// Application layer
 using System.Security.Cryptography;
 using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProductApi.Auth;
+using ProductApi.Configuration;
 using ProductApi.Contracts;
 using ProductApi.Data;
-using ProductApi.Infrastructure;
+using ProductApi.Exceptions;
 using ProductApi.Constants;
 using ProductApi.Models;
 using ProductApi.Reports;
@@ -30,7 +31,7 @@ public class AuthService(
         if (await db.Users.AnyAsync(u => u.Email == email))
             throw new UserFriendlyException("A user with this email already exists.", "CONFLICT");
 
-        // Self-registration NEVER mints an Admin — it always creates an Operator. The
+        // Self-registration NEVER mints an Admin â€” it always creates an Operator. The
         // founder Admin is provisioned from trusted config (see AdminSeed in Program),
         // not by whoever happens to register first.
         var token = GenerateVerificationToken();
@@ -81,7 +82,7 @@ public class AuthService(
             <p>This link expires in 24 hours.</p>
             """;
 
-        // Hand off to the queue and return — a background worker sends it, with retry.
+        // Hand off to the queue and return â€” a background worker sends it, with retry.
         emailQueue.Enqueue(new EmailJob(email, "Verify your email", html));
     }
 

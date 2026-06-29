@@ -12,13 +12,13 @@ namespace ProductApi.Controllers;
 [Authorize]
 public class ReportsController(IReportService reportService) : ApiControllerBase
 {
-    // Last week's audit metrics: creates/updates/deletes per audited table.
+    // Last week's audit metrics
     [HttpGet("weekly-audit")]
     [ProducesResponseType(typeof(List<WeeklyAuditReportResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<WeeklyAuditReportResponse>>> WeeklyAudit()
         => Ok(await reportService.GetWeeklyAuditReport());
 
-    // Set the signed-in user's weekly report delivery preferences (email / SMS).
+    // Set user's weekly report preferences (email / SMS).
     [HttpPut("subscription")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -1,7 +1,7 @@
 // Presentation layer
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProductApi.Constants;
+using ProductApi.Models;
 using ProductApi.Contracts;
 using ProductApi.Services;
 
@@ -9,7 +9,7 @@ namespace ProductApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // any authenticated user may read; writes additionally require Admin
+[Authorize]
 public class UsersController(IUserService userService) : ApiControllerBase
 {
     [HttpGet]

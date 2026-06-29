@@ -1,4 +1,4 @@
-// Application layer — read-only access to the trigger-written audit trail
+// Application layer
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Contracts;

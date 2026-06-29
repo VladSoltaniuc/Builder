@@ -1,4 +1,4 @@
-// Application layer — base query object
+// Application layer
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Constants;
 
@@ -19,7 +19,6 @@ public class PageQuery
     public string? SortBy { get; set; }
     public string? Search { get; set; }
 
-    // Binds filter.field=$op:value from query string
     [FromQuery(Name = "filter")]
     public Dictionary<string, string> Filters { get; set; } = new();
 }

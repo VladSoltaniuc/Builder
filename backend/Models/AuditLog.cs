@@ -1,4 +1,4 @@
-// Domain layer — append-only audit trail, written by DB triggers (never by app code)
+// Domain layer
 namespace ProductApi.Models;
 
 public class AuditLog

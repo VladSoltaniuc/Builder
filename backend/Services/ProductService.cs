@@ -1,10 +1,11 @@
-// Application layer
+﻿// Application layer
 using System.Globalization;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Exceptions;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
 
@@ -24,7 +25,7 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
 
     public ProductOptionsResponse GetOptions() => new(Enum.GetValues<ProductCategory>());
 
-    public async Task<PagedResponse<ProductResponse>> GetAll(ProductQuery q)
+    public async Task<PagedResponse<ProductResponse>> GetAll(PageQuery q)
     {
         var query = db.Products.AsQueryable();
 
@@ -203,7 +204,7 @@ public class ProductService(AppDbContext db, IWebHostEnvironment env) : IProduct
 
         int lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
 
-        // Read all cell values into plain structs on a single thread — ClosedXML is not thread-safe.
+        // Read all cell values into plain structs on a single thread â€” ClosedXML is not thread-safe.
         var rawRows = Enumerable.Range(2, Math.Max(0, lastRow - 1))
             .Select(row => (
                 Row:      row,

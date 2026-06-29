@@ -1,8 +1,9 @@
-// Infrastructure layer — periodic, bloat-gated index reindexing
+// Infrastructure layer
 using Microsoft.Extensions.Options;
 using Npgsql;
+using ProductApi.Configuration;
 
-namespace ProductApi.Maintenance;
+namespace ProductApi.Workers;
 
 // Wakes on a timer, measures index bloat with pgstattuple, and rebuilds ONLY the
 // indexes that have actually bloated.
@@ -11,10 +12,10 @@ namespace ProductApi.Maintenance;
 // transaction block, and that's exactly why it can't live in a stored procedure.
 // We run each REINDEX as a single statement on its own NpgsqlConnection with no
 // explicit transaction (autocommit), which is the one context Postgres allows it in.
-public sealed class IndexMaintenanceService(
+public sealed class IndexMaintenanceWorker(
     IConfiguration config,
     IOptions<IndexMaintenanceOptions> options,
-    ILogger<IndexMaintenanceService> logger) : BackgroundService
+    ILogger<IndexMaintenanceWorker> logger) : BackgroundService
 {
     private readonly IndexMaintenanceOptions _opts = options.Value;
     private readonly string _connectionString =

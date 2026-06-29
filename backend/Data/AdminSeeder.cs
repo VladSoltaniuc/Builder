@@ -1,22 +1,20 @@
-// Infrastructure layer — provisions the configured founder Admin at startup.
+// Infrastructure layer
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using ProductApi.Auth;
-using ProductApi.Constants;
+using ProductApi.Configuration;
 using ProductApi.Models;
 
 namespace ProductApi.Data;
 
 public static class AdminSeeder
 {
-    // Ensures the configured Admin exists. No-ops when AdminSeed isn't configured
-    // (so tests and un-provisioned environments are untouched), and is idempotent —
-    // it only inserts when that email is missing, never overwrites.
+    // Provisions the founder Admin if not already present
+    // Set Enabled = true in appsettings to run
     public static async Task SeedAdminAsync(this IServiceProvider services)
     {
         using var scope = services.CreateScope();
         var options = scope.ServiceProvider.GetRequiredService<IOptions<AdminSeedOptions>>().Value;
-        if (string.IsNullOrWhiteSpace(options.Email) || string.IsNullOrWhiteSpace(options.Password))
+        if (!options.Enabled)
             return;
 
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

@@ -1,27 +1,28 @@
-﻿// Infrastructure layer â€” weekly cron that emails the audit report to subscribers
+// Infrastructure layer
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
-using ProductApi.Constants;
 using ProductApi.Models;
+using ProductApi.Reports;
 using ProductApi.Services;
 
-namespace ProductApi.Reports;
+namespace ProductApi.Workers;
 
 // Wakes once a week (default Monday 08:00 UTC), refreshes the audit metrics
 // materialized view, then emails the report to every opted-in user.
 //
-// Mirrors IndexMaintenanceService's wait-until-next-occurrence loop: after a run
+// Mirrors IndexMaintenanceWorker's wait-until-next-occurrence loop: after a run
 // it computes the following week's slot and sleeps until then, so each scheduled
 // time fires once.
-public sealed class WeeklyReportService(
+public sealed class WeeklyReportWorker(
     IServiceScopeFactory scopeFactory,
     IEmailSender emailSender,
     ISmsSender smsSender,
     IOptions<WeeklyReportOptions> options,
-    ILogger<WeeklyReportService> logger) : BackgroundService
+    ILogger<WeeklyReportWorker> logger) : BackgroundService
 {
     private readonly WeeklyReportOptions _opts = options.Value;
 
@@ -52,7 +53,7 @@ public sealed class WeeklyReportService(
         }
     }
 
-    // Sleeps until 'target' in capped chunks â€” a weekly gap exceeds Task.Delay's
+    // Sleeps until 'target' in capped chunks — a weekly gap exceeds Task.Delay's
     // ~24.8-day ceiling only for monthly waits, but the chunking also tolerates the
     // machine sleeping and clock drift.
     private static async Task<bool> WaitUntilAsync(DateTime target, CancellationToken ct)
@@ -96,11 +97,11 @@ public sealed class WeeklyReportService(
         }
 
         var label = LastWeekLabel();
-        var subject = $"Weekly audit report â€” week of {label}";
+        var subject = $"Weekly audit report — week of {label}";
         var html = RenderHtml(rows);
         var sms = RenderSms(rows, label);
 
-        // Fire all sends concurrently â€” each subscriber's network I/O overlaps instead
+        // Fire all sends concurrently — each subscriber's network I/O overlaps instead
         // of queuing behind the previous one. TrySend isolates failures per recipient.
         var emailTasks = subscribers
             .Where(s => s.ReportChannel == PreferredReportChannel.Email)
@@ -149,18 +150,17 @@ public sealed class WeeklyReportService(
         sb.Append("<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\">");
         sb.Append("<tr><th>Table</th><th>Created</th><th>Updated</th><th>Deleted</th></tr>");
         foreach (var r in rows)
-            sb.Append($"<tr><td>{r.TableName}</td><td>{r.Created}</td><td>{r.Updated}</td><td>{r.Deleted}</td></tr>");
+            sb.Append($"<tr><td>{r.TableName}</td><td>{r.Inserts}</td><td>{r.Updates}</td><td>{r.Deletes}</td></tr>");
         sb.Append("</table>");
         return sb.ToString();
     }
 
-    // Compact plain-text summary for SMS â€” one line per table, created/updated/deleted.
+    // Compact plain-text summary for SMS — one line per table, created/updated/deleted.
     private static string RenderSms(List<WeeklyAuditReportResponse> rows, string weekLabel)
     {
         var sb = new StringBuilder();
         sb.Append($"Weekly audit (week of {weekLabel}) created/updated/deleted: ");
-        sb.Append(string.Join("; ", rows.Select(r => $"{r.TableName} {r.Created}/{r.Updated}/{r.Deleted}")));
+        sb.Append(string.Join("; ", rows.Select(r => $"{r.TableName} {r.Inserts}/{r.Updates}/{r.Deletes}")));
         return sb.ToString();
     }
 }
-

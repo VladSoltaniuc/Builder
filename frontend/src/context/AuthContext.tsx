@@ -1,7 +1,19 @@
-// Application layer — auth session state
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+// Application layer
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { authApi } from "../api/auth";
-import { getToken, setToken, clearToken, AUTH_LOGOUT_EVENT } from "../auth/token";
+import {
+  getToken,
+  setToken,
+  clearToken,
+  AUTH_LOGOUT_EVENT,
+} from "../auth/token";
 import type { Profile } from "../types/auth";
 
 interface AuthContextValue {
@@ -16,7 +28,9 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
+export function AuthProvider({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const [user, setUser] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -52,25 +66,31 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     return () => window.removeEventListener(AUTH_LOGOUT_EVENT, onLogout);
   }, []);
 
-  const setSession = useCallback(async (token: string) => {
-    setToken(token);
-    setIsLoading(true);
-    await loadProfile();
-  }, [loadProfile]);
+  const setSession = useCallback(
+    async (token: string) => {
+      setToken(token);
+      setIsLoading(true);
+      await loadProfile();
+    },
+    [loadProfile],
+  );
 
   const logout = useCallback(() => {
     clearToken();
     setUser(null);
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => ({
-    user,
-    isLoading,
-    isAuthenticated: user !== null,
-    setSession,
-    logout,
-    refresh: loadProfile,
-  }), [user, isLoading, setSession, logout, loadProfile]);
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated: user !== null,
+      setSession,
+      logout,
+      refresh: loadProfile,
+    }),
+    [user, isLoading, setSession, logout, loadProfile],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

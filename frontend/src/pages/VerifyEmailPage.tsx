@@ -1,4 +1,4 @@
-// Application layer — email verification landing page
+// Application layer
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -33,7 +33,9 @@ export function VerifyEmailPage() {
       .then(() => setStatus("success"))
       .catch((err) => {
         setStatus("error");
-        setErrorMessage(err instanceof ApiError ? err.message : t("auth.verifyFailed"));
+        setErrorMessage(
+          err instanceof ApiError ? err.message : t("auth.verifyFailed"),
+        );
       });
   }, [token, t]);
 
@@ -61,7 +63,8 @@ export function VerifyEmailPage() {
             <h1>{t("auth.verifyFailedTitle")}</h1>
             <p className="error">{errorMessage}</p>
             <p className="auth-switch">
-              <Link to="/register">{t("auth.register")}</Link> · <Link to="/login">{t("auth.login")}</Link>
+              <Link to="/register">{t("auth.register")}</Link> ·{" "}
+              <Link to="/login">{t("auth.login")}</Link>
             </p>
           </>
         )}

@@ -1,7 +1,6 @@
-// Infrastructure layer
-namespace ProductApi.Auth;
+// Configuration layer
+namespace ProductApi.Configuration;
 
-// Bound from the "Jwt" configuration section.
 public class JwtOptions
 {
     public string Issuer { get; set; } = string.Empty;

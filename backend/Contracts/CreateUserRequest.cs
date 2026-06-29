@@ -1,24 +1,21 @@
-﻿// Application layer
+// Application layer
 using System.ComponentModel.DataAnnotations;
-using ProductApi.Constants;
 using ProductApi.Models;
 
 namespace ProductApi.Contracts;
 
 public class CreateUserRequest
 {
-    [Required(ErrorMessage = "Name is required.")]
-    [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters.")]
+    [Required(ErrorMessage = "NAME_REQUIRED")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "NAME_LENGTH")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    [Required(ErrorMessage = "EMAIL_REQUIRED")]
+    [EmailAddress(ErrorMessage = "EMAIL_INVALID")]
     public string Email { get; set; } = string.Empty;
 
-    // E.164 phone, e.g. +14155552671. Required when ReportChannel is Sms.
-    [Phone(ErrorMessage = "Invalid phone number.")]
+    [Phone(ErrorMessage = "PHONE_INVALID")]
     public string? PhoneNumber { get; set; }
 
     public PreferredReportChannel ReportChannel { get; set; }
 }
-

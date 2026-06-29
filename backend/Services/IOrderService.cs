@@ -6,7 +6,7 @@ namespace ProductApi.Services;
 public interface IOrderService
 {
     OrderOptionsResponse GetOptions();
-    Task<PagedResponse<OrderResponse>> GetAll(OrderQuery query);
+    Task<PagedResponse<OrderResponse>> GetAll(PageQuery query);
     Task<List<OrderResponse>> Search(string term);
     Task<OrderResponse?> GetById(int id);
     Task<OrderResponse?> AssignGeneratedAwb(int id);

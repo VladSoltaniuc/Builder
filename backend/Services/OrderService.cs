@@ -1,9 +1,10 @@
-// Application layer
+﻿// Application layer
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using ProductApi.Constants;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Exceptions;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
 
@@ -22,7 +23,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
 
     public OrderOptionsResponse GetOptions() => new(Enum.GetValues<OrderStatus>());
 
-    public async Task<PagedResponse<OrderResponse>> GetAll(OrderQuery q)
+    public async Task<PagedResponse<OrderResponse>> GetAll(PageQuery q)
     {
         var query = db.Orders
             .Include(o => o.User)
@@ -71,7 +72,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
     }
 
     // Generates an AWB for the order and saves it.
-    // NOTE: in a real system the AWB is issued by the courier (DHL, FedEx, ...) —
+    // NOTE: in a real system the AWB is issued by the courier (DHL, FedEx, ...) â€”
     // we'd POST the shipment to their API and store the number they return. Here we
     // fake that with a random code; the unique index is still the source of truth,
     // so on the rare collision we just regenerate and retry.
@@ -96,7 +97,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
                 when (attempt < OrderDefaults.AwbRetries &&
                       ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
             {
-                // Collided with an existing AWB — loop and generate a fresh one.
+                // Collided with an existing AWB â€” loop and generate a fresh one.
             }
         }
 
@@ -107,7 +108,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
         $"SIM-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(0, 1_000_000):D6}";
 
     // Placing an order is delegated to the place_order() stored function: it locks the
-    // product row, verifies stock, decrements it, and inserts the order — all atomically
+    // product row, verifies stock, decrements it, and inserts the order â€” all atomically
     // in the DB, so concurrent orders can't oversell. We just call it and map its errors.
     public async Task<OrderResponse?> Create(CreateOrderRequest request)
     {

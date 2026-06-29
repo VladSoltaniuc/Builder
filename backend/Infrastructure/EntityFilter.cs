@@ -1,4 +1,4 @@
-// Infrastructure layer — generic filter/sort builder for EF Core + PostgreSQL
+// Infrastructure layer
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +7,6 @@ namespace ProductApi.Infrastructure;
 
 public sealed class EntityFilter<T>
 {
-    // Capture the ILike method and EF.Functions argument from a seed lambda — avoids raw string-based reflection.
     private static readonly MethodInfo ILikeMethod;
     private static readonly Expression EfFunctionsExpr;
 

@@ -3,12 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProductApi.Contracts;
 
-// Completes a 2FA login: the pending token from /auth/login plus the TOTP code.
 public class TwoFactorLoginRequest
 {
-    [Required(ErrorMessage = "Two-factor token is required.")]
+    [Required(ErrorMessage = "TWO_FACTOR_TOKEN_REQUIRED")]
     public string TwoFactorToken { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Code is required.")]
+    [Required(ErrorMessage = "CODE_REQUIRED")]
     public string Code { get; set; } = string.Empty;
 }
