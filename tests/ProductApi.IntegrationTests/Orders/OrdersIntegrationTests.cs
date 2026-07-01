@@ -1,6 +1,7 @@
 using System.Net;
 using FluentAssertions;
 using ProductApi.Contracts;
+using ProductApi.Models;
 
 namespace ProductApi.IntegrationTests.Orders;
 
@@ -152,9 +153,9 @@ public class OrdersIntegrationTests(IntegrationTestFactory factory) : Integratio
 
         response.Should().NotBeNull();
         response!.Statuses.Should().NotBeEmpty();
-        response.Statuses.Should().Contain("Pending");
-        response.Statuses.Should().Contain("Completed");
-        response.Statuses.Should().Contain("Cancelled");
+        response.Statuses.Should().Contain(OrderStatus.Pending);
+        response.Statuses.Should().Contain(OrderStatus.Completed);
+        response.Statuses.Should().Contain(OrderStatus.Cancelled);
     }
 
     // --- GetAll ---

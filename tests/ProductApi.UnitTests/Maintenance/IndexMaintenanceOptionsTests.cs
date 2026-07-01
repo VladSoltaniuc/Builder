@@ -1,5 +1,5 @@
 using FluentAssertions;
-using ProductApi.Maintenance;
+using ProductApi.Configuration;
 
 namespace ProductApi.UnitTests.Maintenance;
 
