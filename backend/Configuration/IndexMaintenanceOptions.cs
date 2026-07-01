@@ -16,7 +16,7 @@ public sealed class IndexMaintenanceOptions
     // Dead % that triggers reindexing (fresh btree is 10%, keep it above that)
     public double BloatThresholdPercent { get; set; } = 30;
 
-    // Ignore tiny indexes, rebuilding them buys nothing.
+    // Ignore tiny indexes, rebuilding them buys nothing
     public double MinIndexSizeMb { get; set; } = 1;
 
     // UTC based maintenance
@@ -30,7 +30,7 @@ public sealed class IndexMaintenanceOptions
             return candidate > now ? candidate : candidate.AddDays(7);
         }
 
-        // Monthly, Day is capped at 28 so the date is valid in every month.
+        // Monthly, Day is capped at 28 so the date is valid in every month
         var dom = Math.Clamp(Day, 1, 28);
         var monthly = new DateTime(now.Year, now.Month, dom, Hour, Minute, 0, now.Kind);
         return monthly > now ? monthly : monthly.AddMonths(1);

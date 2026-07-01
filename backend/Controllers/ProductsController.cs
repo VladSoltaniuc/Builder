@@ -11,7 +11,7 @@ namespace ProductApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class ProductsController(IProductService productService) : ApiControllerBase
+public class ProductsController(IProductService productService, ProductExcel productExcel) : ApiControllerBase
 {
 
     [HttpGet("options")]
@@ -22,15 +22,6 @@ public class ProductsController(IProductService productService) : ApiControllerB
     [ProducesResponseType(typeof(PagedResponse<ProductResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResponse<ProductResponse>>> GetAll([FromQuery] PageQuery query)
         => Ok(await productService.GetAll(query));
-
-    [HttpGet("search")]
-    [ProducesResponseType(typeof(List<ProductResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<ProductResponse>>> Search([FromQuery] string term)
-    {
-        if (ValidateSearchTerm(term, out var trimmed) is { } error) return error;
-        return Ok(await productService.Search(trimmed));
-    }
 
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
@@ -82,9 +73,9 @@ public class ProductsController(IProductService productService) : ApiControllerB
     {
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!ImageSettings.AllowedExtensions.Contains(ext))
-            return ApiBadRequest("Only JPG, PNG, and WebP images are allowed.");
+            return ApiBadRequest("IMAGE_TYPE_INVALID");
         if (file.Length > ImageSettings.MaxImageSizeBytes)
-            return ApiBadRequest("Image must be under 5 MB.");
+            return ApiBadRequest("IMAGE_TOO_LARGE");
 
         var result = await productService.UploadImage(id, file);
         return result is null ? ApiNotFound() : Ok(result);
@@ -105,8 +96,8 @@ public class ProductsController(IProductService productService) : ApiControllerB
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Export([FromQuery] string[] columns)
     {
-        if (columns.Length == 0) return ApiBadRequest("Specify at least one column.");
-        var bytes = await productService.ExportToExcel(columns);
+        if (columns.Length == 0) return ApiBadRequest("EXPORT_COLUMNS_REQUIRED");
+        var bytes = await productExcel.Export(columns);
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "products.xlsx");
     }
 
@@ -117,9 +108,9 @@ public class ProductsController(IProductService productService) : ApiControllerB
     public async Task<ActionResult<ImportProductResult>> Import(IFormFile file)
     {
         if (file is null || file.Length == 0)
-            return ApiBadRequest("No file provided.");
+            return ApiBadRequest("IMPORT_FILE_REQUIRED");
         if (!Path.GetExtension(file.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
-            return ApiBadRequest("Only .xlsx files are supported.");
-        return Ok(await productService.ImportFromExcel(file));
+            return ApiBadRequest("IMPORT_FILE_TYPE_INVALID");
+        return Ok(await productExcel.Import(file));
     }
 }

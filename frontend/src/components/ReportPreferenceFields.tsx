@@ -1,4 +1,4 @@
-// Presentation layer — shared report-delivery preference inputs
+// Presentation layer - shared report-delivery preference inputs
 import { useTranslation } from "react-i18next";
 import type { ReportChannel } from "../types/auth";
 
@@ -10,7 +10,7 @@ interface ReportPreferenceFieldsProps {
 }
 
 // Channel dropdown (None/Email/SMS) plus a phone field shown only when SMS is the
-// chosen channel — with a country-code hint so users include the prefix.
+// chosen channel - with a country-code hint so users include the prefix
 export function ReportPreferenceFields({
   channel,
   phoneNumber,
@@ -23,7 +23,10 @@ export function ReportPreferenceFields({
     <>
       <label>
         {t("report.channel")}
-        <select value={channel} onChange={(e) => onChannelChange(e.target.value as ReportChannel)}>
+        <select
+          value={channel}
+          onChange={(e) => onChannelChange(e.target.value as ReportChannel)}
+        >
           <option value="None">{t("report.channelNone")}</option>
           <option value="Email">{t("report.channelEmail")}</option>
           <option value="Sms">{t("report.channelSms")}</option>

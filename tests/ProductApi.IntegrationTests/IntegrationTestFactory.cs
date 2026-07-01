@@ -1,4 +1,4 @@
-// Infrastructure — spins up the real app against a test database
+// Infrastructure - spins up the real app against a test database
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,7 @@ namespace ProductApi.IntegrationTests;
 
 public class IntegrationTestFactory : WebApplicationFactory<Program>
 {
-    // Stable test credentials used by IntegrationTestBase to obtain an admin token.
+    // Stable test credentials used by IntegrationTestBase to obtain an admin token
     public const string AdminEmail    = "ci-admin@test.local";
     public const string AdminPassword = "CiAdmin12345!";
 
@@ -18,7 +18,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
     {
         builder.UseEnvironment("Testing");
 
-        // Inject test-only config before services are built.
+        // Inject test-only config before services are built
         builder.ConfigureAppConfiguration((_, config) =>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
@@ -26,7 +26,7 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
                 ["AdminSeed:Email"]       = AdminEmail,
                 ["AdminSeed:Password"]    = AdminPassword,
                 ["AdminSeed:Name"]        = "CI Admin",
-                // Disabled so rapid back-to-back test requests don't hit the 429 limit.
+                // Disabled so rapid back-to-back test requests don't hit the 429 limit
                 ["RateLimiting:Enabled"]  = "false",
             });
         });

@@ -1,19 +1,19 @@
-// Presentation layer — Excel export column picker
-import { useState } from 'react';
-import { createPortal } from 'react-dom';
-import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
-import { productsApi } from '../api/products';
-import { ApiError } from '../api/errors';
+// Presentation layer - Excel export column picker
+import { useState } from "react";
+import { createPortal } from "react-dom";
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import { productsApi } from "../api/products";
+import { ApiError } from "../api/errors";
 
-type ColumnKey = 'id' | 'name' | 'category' | 'price' | 'stock';
+type ColumnKey = "id" | "name" | "category" | "price" | "stock";
 
 const COLUMNS: { key: ColumnKey; labelKey: string }[] = [
-  { key: 'id',       labelKey: 'table.id' },
-  { key: 'name',     labelKey: 'table.name' },
-  { key: 'category', labelKey: 'table.category' },
-  { key: 'price',    labelKey: 'table.price' },
-  { key: 'stock',    labelKey: 'table.stock' },
+  { key: "id", labelKey: "table.id" },
+  { key: "name", labelKey: "table.name" },
+  { key: "category", labelKey: "table.category" },
+  { key: "price", labelKey: "table.price" },
+  { key: "stock", labelKey: "table.stock" },
 ];
 
 interface Props {
@@ -41,14 +41,16 @@ export function ExcelExportDialog({ onClose }: Readonly<Props>) {
       const cols = COLUMNS.filter((c) => selected.has(c.key)).map((c) => c.key);
       const blob = await productsApi.exportExcel(cols);
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'products.xlsx';
+      a.download = "products.xlsx";
       a.click();
       URL.revokeObjectURL(url);
       onClose();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : t('excel.exportError'));
+      toast.error(
+        err instanceof ApiError ? err.message : t("excel.exportError"),
+      );
     } finally {
       setIsExporting(false);
     }
@@ -59,8 +61,8 @@ export function ExcelExportDialog({ onClose }: Readonly<Props>) {
       <button className="modal-backdrop" onClick={onClose} aria-label="Close" />
       <dialog className="modal" open>
         <div className="card">
-          <h2>{t('excel.exportTitle')}</h2>
-          <p className="excel-hint">{t('excel.selectColumns')}</p>
+          <h2>{t("excel.exportTitle")}</h2>
+          <p className="excel-hint">{t("excel.selectColumns")}</p>
           <div className="excel-columns">
             {COLUMNS.map((col) => (
               <div key={col.key} className="excel-col-label">
@@ -75,10 +77,16 @@ export function ExcelExportDialog({ onClose }: Readonly<Props>) {
             ))}
           </div>
           <div className="form-actions">
-            <button className="btn btn-primary" onClick={handleExport} disabled={isExporting || selected.size === 0}>
-              {isExporting ? t('excel.exporting') : t('excel.export')}
+            <button
+              className="btn btn-primary"
+              onClick={handleExport}
+              disabled={isExporting || selected.size === 0}
+            >
+              {isExporting ? t("excel.exporting") : t("excel.export")}
             </button>
-            <button className="btn" onClick={onClose}>{t('form.cancel')}</button>
+            <button className="btn" onClick={onClose}>
+              {t("form.cancel")}
+            </button>
           </div>
         </div>
       </dialog>

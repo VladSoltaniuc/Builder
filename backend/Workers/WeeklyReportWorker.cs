@@ -12,11 +12,11 @@ using ProductApi.Services;
 namespace ProductApi.Workers;
 
 // Wakes once a week (default Monday 08:00 UTC), refreshes the audit metrics
-// materialized view, then emails the report to every opted-in user.
+// materialized view, then emails the report to every opted-in user
 //
 // Mirrors IndexMaintenanceWorker's wait-until-next-occurrence loop: after a run
 // it computes the following week's slot and sleeps until then, so each scheduled
-// time fires once.
+// time fires once
 public sealed class WeeklyReportWorker(
     IServiceScopeFactory scopeFactory,
     IEmailSender emailSender,
@@ -53,9 +53,9 @@ public sealed class WeeklyReportWorker(
         }
     }
 
-    // Sleeps until 'target' in capped chunks — a weekly gap exceeds Task.Delay's
+    // Sleeps until 'target' in capped chunks - a weekly gap exceeds Task.Delay's
     // ~24.8-day ceiling only for monthly waits, but the chunking also tolerates the
-    // machine sleeping and clock drift.
+    // machine sleeping and clock drift
     private static async Task<bool> WaitUntilAsync(DateTime target, CancellationToken ct)
     {
         var maxChunk = TimeSpan.FromHours(1);
@@ -80,11 +80,11 @@ public sealed class WeeklyReportWorker(
         var reports = scope.ServiceProvider.GetRequiredService<IReportService>();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        // Refresh first so subscribers all read the same fresh snapshot of last week.
+        // Refresh first so subscribers all read the same fresh snapshot of last week
         await reports.RefreshWeeklyAuditReport();
         var rows = await reports.GetWeeklyAuditReport();
 
-        // Anyone with a delivery channel selected.
+        // Anyone with a delivery channel selected
         var subscribers = await db.Users
             .Where(u => u.ReportChannel != PreferredReportChannel.None)
             .Select(u => new { u.Email, u.PhoneNumber, u.ReportChannel })
@@ -97,12 +97,12 @@ public sealed class WeeklyReportWorker(
         }
 
         var label = LastWeekLabel();
-        var subject = $"Weekly audit report — week of {label}";
+        var subject = $"Weekly audit report - week of {label}";
         var html = RenderHtml(rows);
         var sms = RenderSms(rows, label);
 
-        // Fire all sends concurrently — each subscriber's network I/O overlaps instead
-        // of queuing behind the previous one. TrySend isolates failures per recipient.
+        // Fire all sends concurrently - each subscriber's network I/O overlaps instead
+        // of queuing behind the previous one. TrySend isolates failures per recipient
         var emailTasks = subscribers
             .Where(s => s.ReportChannel == PreferredReportChannel.Email)
             .Select(s => TrySend(() => emailSender.SendAsync(s.Email, subject, html, ct), "email", s.Email));
@@ -118,8 +118,8 @@ public sealed class WeeklyReportWorker(
         logger.LogInformation("Weekly report delivered: {Email} emails, {Sms} texts.", emailSent, smsSent);
     }
 
-    // Sends one message, isolating failures so one bad recipient never stops the batch.
-    // Returns 1 on success, 0 on a logged failure.
+    // Sends one message, isolating failures so one bad recipient never stops the batch
+    // Returns 1 on success, 0 on a logged failure
     private async Task<int> TrySend(Func<Task> send, string channel, string recipient)
     {
         try
@@ -134,7 +134,7 @@ public sealed class WeeklyReportWorker(
         }
     }
 
-    // Monday of last week, the start of the reporting window the view covers.
+    // Monday of last week, the start of the reporting window the view covers
     private static string LastWeekLabel()
     {
         var today = DateTime.UtcNow.Date;
@@ -155,7 +155,7 @@ public sealed class WeeklyReportWorker(
         return sb.ToString();
     }
 
-    // Compact plain-text summary for SMS — one line per table, created/updated/deleted.
+    // Compact plain-text summary for SMS - one line per table, created/updated/deleted
     private static string RenderSms(List<WeeklyAuditReportResponse> rows, string weekLabel)
     {
         var sb = new StringBuilder();

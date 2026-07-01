@@ -43,10 +43,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(u => u.Email, "IX_Users_Email_Unique")
             .IsUnique();
 
-        // The pg_trgm extension lets GIN indexes accelerate ILIKE '%term%' lookups.
+        // The pg_trgm extension lets GIN indexes accelerate ILIKE '%term%' lookups
         modelBuilder.HasPostgresExtension("pg_trgm");
 
-        // pgstattuple measures index bloat for the maintenance/reindex job.
+        // pgstattuple measures index bloat for the maintenance/reindex job
         modelBuilder.HasPostgresExtension("pgstattuple");
 
         modelBuilder.Entity<WeeklyAuditReportView>()

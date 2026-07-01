@@ -1,4 +1,4 @@
-// Presentation layer — list view
+// Presentation layer - list view
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Order } from "../types/order";
@@ -18,14 +18,34 @@ interface OrderTableProps {
   onDownloadInvoice: (id: number) => Promise<void>;
 }
 
-const currency = new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" });
+const currency = new Intl.NumberFormat("ro-RO", {
+  style: "currency",
+  currency: "RON",
+});
 
-function SortIcon({ field, sort }: Readonly<{ field: string; sort: SortState | null }>) {
-  if (sort?.field !== field) return <span className="sort-icon">{sortIcons.both}</span>;
-  return <span className="sort-icon active">{sort.dir === 'ASC' ? sortIcons.asc : sortIcons.desc}</span>;
+function SortIcon({
+  field,
+  sort,
+}: Readonly<{ field: string; sort: SortState | null }>) {
+  if (sort?.field !== field)
+    return <span className="sort-icon">{sortIcons.both}</span>;
+  return (
+    <span className="sort-icon active">
+      {sort.dir === "ASC" ? sortIcons.asc : sortIcons.desc}
+    </span>
+  );
 }
 
-export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInvoice, onDeleteInvoice, onDownloadInvoice }: Readonly<OrderTableProps>) {
+export function OrderTable({
+  orders,
+  sort,
+  onSort,
+  onEdit,
+  onDelete,
+  onUploadInvoice,
+  onDeleteInvoice,
+  onDownloadInvoice,
+}: Readonly<OrderTableProps>) {
   const { t, i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingUploadId, setPendingUploadId] = useState<number | null>(null);
@@ -48,7 +68,7 @@ export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInv
   }
 
   if (orders.length === 0) {
-    return <p className="empty">{t('orders.empty')}</p>;
+    return <p className="empty">{t("orders.empty")}</p>;
   }
 
   return (
@@ -64,22 +84,25 @@ export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInv
         <thead>
           <tr>
             <th>#</th>
-            <th>{t('table.user')}</th>
-            <th>{t('table.product')}</th>
-            <th className="num sortable" onClick={() => handleSort('quantity')}>
-              {t('table.qty')} <SortIcon field="quantity" sort={sort} />
+            <th>{t("table.user")}</th>
+            <th>{t("table.product")}</th>
+            <th className="num sortable" onClick={() => handleSort("quantity")}>
+              {t("table.qty")} <SortIcon field="quantity" sort={sort} />
             </th>
-            <th className="num sortable" onClick={() => handleSort('totalPrice')}>
-              {t('table.total')} <SortIcon field="totalPrice" sort={sort} />
+            <th
+              className="num sortable"
+              onClick={() => handleSort("totalPrice")}
+            >
+              {t("table.total")} <SortIcon field="totalPrice" sort={sort} />
             </th>
-            <th className="sortable" onClick={() => handleSort('status')}>
-              {t('table.status')} <SortIcon field="status" sort={sort} />
+            <th className="sortable" onClick={() => handleSort("status")}>
+              {t("table.status")} <SortIcon field="status" sort={sort} />
             </th>
-            <th className="sortable" onClick={() => handleSort('createdAt')}>
-              {t('table.date')} <SortIcon field="createdAt" sort={sort} />
+            <th className="sortable" onClick={() => handleSort("createdAt")}>
+              {t("table.date")} <SortIcon field="createdAt" sort={sort} />
             </th>
-            <th>{t('table.awb')}</th>
-            <th>{t('table.actions')}</th>
+            <th>{t("table.awb")}</th>
+            <th>{t("table.actions")}</th>
           </tr>
         </thead>
         <tbody>
@@ -92,18 +115,43 @@ export function OrderTable({ orders, sort, onSort, onEdit, onDelete, onUploadInv
               <td className="num">{currency.format(order.totalPrice)}</td>
               <td>{order.status}</td>
               <td>{formatDateTime(order.createdAt, i18n.language)}</td>
-              <td>{order.awb ?? '—'}</td>
+              <td>{order.awb ?? "-"}</td>
               <td>
                 <div className="row-actions">
-                  <button className="btn btn-small" onClick={() => onEdit(order)}>{t('common.edit')}</button>
-                  <button className="btn btn-small btn-danger" onClick={() => onDelete(order.id)}>{t('common.delete')}</button>
+                  <button
+                    className="btn btn-small"
+                    onClick={() => onEdit(order)}
+                  >
+                    {t("common.edit")}
+                  </button>
+                  <button
+                    className="btn btn-small btn-danger"
+                    onClick={() => onDelete(order.id)}
+                  >
+                    {t("common.delete")}
+                  </button>
                   {order.invoiceUrl ? (
                     <>
-                      <button className="btn btn-small" onClick={() => onDownloadInvoice(order.id)}>{t('orders.invoice.download')}</button>
-                      <button className="btn btn-small btn-danger" onClick={() => onDeleteInvoice(order.id)}>{t('orders.invoice.remove')}</button>
+                      <button
+                        className="btn btn-small"
+                        onClick={() => onDownloadInvoice(order.id)}
+                      >
+                        {t("orders.invoice.download")}
+                      </button>
+                      <button
+                        className="btn btn-small btn-danger"
+                        onClick={() => onDeleteInvoice(order.id)}
+                      >
+                        {t("orders.invoice.remove")}
+                      </button>
                     </>
                   ) : (
-                    <button className="btn btn-small" onClick={() => triggerUpload(order.id)}>{t('orders.invoice.upload')}</button>
+                    <button
+                      className="btn btn-small"
+                      onClick={() => triggerUpload(order.id)}
+                    >
+                      {t("orders.invoice.upload")}
+                    </button>
                   )}
                 </div>
               </td>

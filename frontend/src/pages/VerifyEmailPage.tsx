@@ -15,7 +15,7 @@ export function VerifyEmailPage() {
 
   const [status, setStatus] = useState<Status>("verifying");
   const [errorMessage, setErrorMessage] = useState("");
-  // StrictMode mounts effects twice in dev; guard so we only verify once.
+  // StrictMode mounts effects twice in dev; guard so we only verify once
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function VerifyEmailPage() {
       });
   }, [token, t]);
 
-  // On success, hold the message briefly then send them to login.
+  // On success, hold the message briefly then send them to login
   useEffect(() => {
     if (status !== "success") return;
     const timer = setTimeout(() => navigate("/login"), 3000);

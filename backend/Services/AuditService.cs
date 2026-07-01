@@ -32,7 +32,7 @@ public class AuditService(AppDbContext db) : IAuditService
     private static AuditLogResponse ToResponse(AuditLog a) =>
         new(a.Id, a.TableName, a.Action, a.RowId, Parse(a.OldData), Parse(a.NewData), a.ChangedAt, a.ChangedBy);
 
-    // The JSONB columns come back as text; surface them as real JSON in the response.
+    // The JSONB columns come back as text; surface them as real JSON in the response
     private static JsonElement? Parse(string? json) =>
         json is null ? null : JsonSerializer.Deserialize<JsonElement>(json);
 }

@@ -13,7 +13,7 @@ public sealed class TwilioSmsSender(IOptions<SmsOptions> options) : ISmsSender
 
     public async Task SendAsync(string toNumber, string message, CancellationToken ct = default)
     {
-        // Twilio's client uses a static, per-process credential store.
+        // Twilio's client uses a static, per-process credential store
         TwilioClient.Init(_opts.AccountSid, _opts.AuthToken);
 
         await MessageResource.CreateAsync(

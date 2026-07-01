@@ -1,5 +1,4 @@
 // Application layer
-using Microsoft.AspNetCore.Mvc;
 using ProductApi.Constants;
 
 namespace ProductApi.Contracts;
@@ -18,7 +17,4 @@ public class PageQuery
     }
     public string? SortBy { get; set; }
     public string? Search { get; set; }
-
-    [FromQuery(Name = "filter")]
-    public Dictionary<string, string> Filters { get; set; } = new();
 }

@@ -10,12 +10,10 @@ using ProductApi.Models;
 
 namespace ProductApi.Services;
 
-public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderService
+public class OrderService(AppDbContext db, IFileStorage files) : IOrderService
 {
-    private static readonly EntityFilter<Order> Filter = new EntityFilter<Order>()
-        .Enum<OrderStatus>("status",    o => o.Status)
-        .Decimal("totalPrice",          o => o.TotalPrice)
-        .Int("quantity",                o => o.Quantity)
+    private static readonly QueryShaper<Order> Shaper = new QueryShaper<Order>()
+        .Search(o => o.User.Name)
         .Sort("status",                 o => o.Status)
         .Sort("totalPrice",             o => o.TotalPrice)
         .Sort("quantity",               o => o.Quantity)
@@ -30,33 +28,10 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
             .Include(o => o.Product)
             .AsQueryable();
 
-        query = Filter.Apply(query, q.Filters);
-
-        if (!string.IsNullOrWhiteSpace(q.Search))
-            query = query.Where(o => EF.Functions.ILike(o.User.Name, $"%{q.Search}%") || EF.Functions.ILike(o.Product.Name, $"%{q.Search}%"));
-
-        query = Filter.ApplySort(query, q.SortBy);
+        query = Shaper.ApplySearch(query, q.Search);
+        query = Shaper.ApplySort(query, q.SortBy);
 
         return await query.ToPagedResponse(q.Page, q.PageSize, o => ToResponse(o));
-    }
-
-    // Substring search across the user's name, the product's name, and the AWB.
-    // User/Product names are matched via their own pg_trgm GIN indexes through the
-    // joins; Awb is matched directly against its trigram index.
-    public async Task<List<OrderResponse>> Search(string term)
-    {
-        var pattern = $"%{term}%";
-        return await db.Orders
-            .AsNoTracking()
-            .Include(o => o.User)
-            .Include(o => o.Product)
-            .Where(o => EF.Functions.ILike(o.User.Name, pattern)
-                     || EF.Functions.ILike(o.Product.Name, pattern)
-                     || (o.Awb != null && EF.Functions.ILike(o.Awb, pattern)))
-            .OrderBy(o => o.Id)
-            .Take(50)
-            .Select(o => ToResponse(o))
-            .ToListAsync();
     }
 
     public async Task<OrderResponse?> GetById(int id)
@@ -68,12 +43,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
         return order is null ? null : ToResponse(order);
     }
 
-    // Generates an AWB for the order and saves it.
-    // NOTE: in a real system the AWB is issued by the courier (DHL, FedEx, ...) â€”
-    // we'd POST the shipment to their API and store the number they return. Here we
-    // fake that with a random code; the unique index is still the source of truth,
-    // so on the rare collision we just regenerate and retry.
-
+    // Real systems get the AWB via courier's API. We generate it ourselves
     public async Task<OrderResponse?> AssignGeneratedAwb(int id)
     {
         var order = await db.Orders
@@ -94,7 +64,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
                 when (attempt < OrderDefaults.AwbRetries &&
                       ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
             {
-                // Collided with an existing AWB â€” loop and generate a fresh one.
+                // Collided with an existing AWB loop and generate a fresh one
             }
         }
 
@@ -104,9 +74,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
     private static string GenerateAwb() =>
         $"SIM-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(0, 1_000_000):D6}";
 
-    // Placing an order is delegated to the place_order() stored function: it locks the
-    // product row, verifies stock, decrements it, and inserts the order â€” all atomically
-    // in the DB, so concurrent orders can't oversell. We just call it and map its errors.
+    // Oversell safety  via to the place_order() stored function - lock+check+decrement
     public async Task<OrderResponse?> Create(CreateOrderRequest request)
     {
         try
@@ -157,11 +125,13 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
         if (order is null)
             return false;
 
-        if (order.InvoicePath is not null)
-            DeleteFile(order.InvoicePath);
-
+        var invoicePath = order.InvoicePath;
         db.Orders.Remove(order);
         await db.SaveChangesAsync();
+
+        // Delete the file only after the row is gone, so a failed commit can't strand a row
+        // pointing at a deleted file. Worst case now is a harmless orphaned file.
+        files.DeleteIfPresent(invoicePath);
         return true;
     }
 
@@ -173,18 +143,11 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
             .FirstOrDefaultAsync(o => o.Id == id);
         if (order is null) return null;
 
-        if (order.InvoicePath is not null)
-            DeleteFile(order.InvoicePath);
-
-        var relativePath = $"uploads/invoices/{id}.pdf";
-        var fullPath = Path.Combine(env.WebRootPath, relativePath);
-
-        Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
-        await using var stream = File.Create(fullPath);
-        await file.CopyToAsync(stream);
-
-        order.InvoicePath = relativePath;
+        var previousPath = order.InvoicePath;
+        order.InvoicePath = await files.Save(file, $"uploads/invoices/{id}.pdf");
         await db.SaveChangesAsync();
+
+        files.DeleteReplaced(previousPath, order.InvoicePath);
         return ToResponse(order);
     }
 
@@ -193,9 +156,11 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
         var order = await db.Orders.FindAsync(id);
         if (order is null || order.InvoicePath is null) return false;
 
-        DeleteFile(order.InvoicePath);
+        var invoicePath = order.InvoicePath;
         order.InvoicePath = null;
         await db.SaveChangesAsync();
+
+        files.Delete(invoicePath);
         return true;
     }
 
@@ -203,13 +168,7 @@ public class OrderService(AppDbContext db, IWebHostEnvironment env) : IOrderServ
     {
         var order = await db.Orders.FindAsync(id);
         if (order?.InvoicePath is null) return null;
-        return Path.Combine(env.WebRootPath, order.InvoicePath);
-    }
-
-    private void DeleteFile(string relativePath)
-    {
-        var fullPath = Path.Combine(env.WebRootPath, relativePath);
-        if (File.Exists(fullPath)) File.Delete(fullPath);
+        return files.ResolvePath(order.InvoicePath);
     }
 
     private static OrderResponse ToResponse(Order o) =>

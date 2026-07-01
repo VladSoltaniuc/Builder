@@ -13,7 +13,7 @@ public class MaintenanceService(IConfiguration config) : IMaintenanceService
     {
         // A procedure is invoked with CALL (a function would be SELECT). We run it on a
         // raw connection with no explicit transaction, because the procedure COMMITs
-        // internally — which isn't allowed inside an open transaction.
+        // internally - which isn't allowed inside an open transaction
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync();
 

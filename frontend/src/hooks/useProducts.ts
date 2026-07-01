@@ -1,4 +1,4 @@
-// Service layer — products
+// Service layer - products
 import { useCallback, useEffect, useState } from 'react';
 import { productsApi } from '../api/products';
 import { ApiError } from '../api/errors';
@@ -18,21 +18,19 @@ export function useProducts() {
   // --- Sorting ---
   const [sort, setSort] = useState<SortState | null>(null);
 
-  // --- Filtering ---
+  // --- Search ---
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState<Record<string, string>>({});
 
   const loadProducts = useCallback(async function loadProducts(
     p: number,
     ps: number,
     s: SortState | null,
     search: string,
-    filters: Record<string, string>,
   ) {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await productsApi.getAll(p, ps, toSortBy(s), search || undefined, Object.keys(filters).length ? filters : undefined);
+      const data = await productsApi.getAll(p, ps, toSortBy(s), search || undefined);
       setProducts(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
@@ -44,9 +42,9 @@ export function useProducts() {
 
   const createProduct = useCallback(async function createProduct(input: ProductInput) {
     await productsApi.create(input);
-    if (page === 1) void loadProducts(1, pageSize, sort, search, filters);
+    if (page === 1) void loadProducts(1, pageSize, sort, search);
     else setPage(1);
-  }, [loadProducts, page, pageSize, sort, search, filters]);
+  }, [loadProducts, page, pageSize, sort, search]);
 
   const updateProduct = useCallback(async function updateProduct(id: number, input: ProductInput, version: number) {
     const updated = await productsApi.update(id, input, version);
@@ -56,9 +54,9 @@ export function useProducts() {
   const deleteProduct = useCallback(async function deleteProduct(id: number) {
     await productsApi.remove(id);
     const newPage = products.length === 1 && page > 1 ? page - 1 : page;
-    if (newPage === page) void loadProducts(page, pageSize, sort, search, filters);
+    if (newPage === page) void loadProducts(page, pageSize, sort, search);
     else setPage(newPage);
-  }, [loadProducts, page, pageSize, products.length, sort, search, filters]);
+  }, [loadProducts, page, pageSize, products.length, sort, search]);
 
   const uploadImage = useCallback(async function uploadImage(id: number, file: File) {
     const updated = await productsApi.uploadImage(id, file);
@@ -72,12 +70,12 @@ export function useProducts() {
   }, []);
 
   const refresh = useCallback(() => {
-    void loadProducts(page, pageSize, sort, search, filters);
-  }, [loadProducts, page, pageSize, sort, search, filters]);
+    void loadProducts(page, pageSize, sort, search);
+  }, [loadProducts, page, pageSize, sort, search]);
 
   useEffect(() => {
-    void loadProducts(page, pageSize, sort, search, filters);
-  }, [loadProducts, page, pageSize, sort, search, filters]);
+    void loadProducts(page, pageSize, sort, search);
+  }, [loadProducts, page, pageSize, sort, search]);
 
   return {
     products, isLoading, error,
@@ -85,7 +83,6 @@ export function useProducts() {
     pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
-    filters, setFilters,
     createProduct, updateProduct, deleteProduct,
     uploadImage, deleteImage, refresh,
   };

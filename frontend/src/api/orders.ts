@@ -1,4 +1,4 @@
-// API layer — orders
+// API layer - orders
 import { httpCore } from './httpCore';
 import { httpFile } from './httpFile';
 import { buildPagedParams } from './buildPagedParams';
@@ -11,8 +11,8 @@ const RESOURCE = '/orders';
 export const ordersApi = {
   getOptions: () => httpCore.get<OrderOptions>(`${RESOURCE}/options`),
 
-  getAll: (page: number, pageSize: number, sortBy?: string, search?: string, filters?: Record<string, string>) =>
-    httpCore.get<PagedResponse<Order>>(`${RESOURCE}?${buildPagedParams(page, pageSize, sortBy, search, filters)}`),
+  getAll: (page: number, pageSize: number, sortBy?: string, search?: string) =>
+    httpCore.get<PagedResponse<Order>>(`${RESOURCE}?${buildPagedParams(page, pageSize, sortBy, search)}`),
 
   getById: (id: number) => httpCore.get<Order>(`${RESOURCE}/${id}`),
 

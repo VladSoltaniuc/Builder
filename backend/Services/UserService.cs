@@ -10,10 +10,11 @@ namespace ProductApi.Services;
 
 public class UserService(AppDbContext db) : IUserService
 {
-    private static readonly EntityFilter<User> Filter = new EntityFilter<User>()
-        .String("name",  u => u.Name)
-        .String("email", u => u.Email)
-        .Int("id",       u => u.Id)
+    // Arbitrary application-wide key identifying the "last admin" advisory lock.
+    private const long AdminGuardKey = 0x4C41_5354; // "LAST"
+
+    private static readonly QueryShaper<User> Shaper = new QueryShaper<User>()
+        .Search(u => u.Email)
         .Sort("name",    u => u.Name)
         .Sort("email",   u => u.Email);
 
@@ -21,27 +22,10 @@ public class UserService(AppDbContext db) : IUserService
     {
         var query = db.Users.AsQueryable();
 
-        query = Filter.Apply(query, q.Filters);
-
-        if (!string.IsNullOrWhiteSpace(q.Search))
-            query = query.Where(u => EF.Functions.ILike(u.Name, $"%{q.Search}%") || EF.Functions.ILike(u.Email, $"%{q.Search}%"));
-
-        query = Filter.ApplySort(query, q.SortBy);
+        query = Shaper.ApplySearch(query, q.Search);
+        query = Shaper.ApplySort(query, q.SortBy);
 
         return await query.ToPagedResponse(q.Page, q.PageSize, u => ToResponse(u));
-    }
-
-    // Substring search over Name and Email, backed by pg_trgm GIN indexes (ILIKE '%term%').
-    public async Task<List<UserResponse>> Search(string term)
-    {
-        var pattern = $"%{term}%";
-        return await db.Users
-            .AsNoTracking()
-            .Where(u => EF.Functions.ILike(u.Name, pattern) || EF.Functions.ILike(u.Email, pattern))
-            .OrderBy(u => u.Id)
-            .Take(50)
-            .Select(u => ToResponse(u))
-            .ToListAsync();
     }
 
     public async Task<UserResponse?> GetById(int id)
@@ -53,14 +37,16 @@ public class UserService(AppDbContext db) : IUserService
     public async Task<UserResponse> Create(CreateUserRequest request)
     {
         var phone = request.PhoneNumber?.Trim();
-        ValidateChannel(request.ReportChannel, phone);
+        UserRules.RequirePhoneForSms(request.ReportChannel, phone);
 
         var user = new User
         {
             Name = request.Name,
-            Email = Normalize(request.Email),
+            Email = UserRules.NormalizeEmail(request.Email),
             PhoneNumber = string.IsNullOrWhiteSpace(phone) ? null : phone,
             ReportChannel = request.ReportChannel,
+            // All new Users start as Operators
+            Role = UserRole.Operator,
         };
         db.Users.Add(user);
         await db.SaveChangesAsync();
@@ -69,64 +55,62 @@ public class UserService(AppDbContext db) : IUserService
 
     public async Task<UpdateUserResult> Update(int id, UpdateUserRequest request)
     {
+        await using var tx = await db.Database.BeginTransactionAsync();
+
         var user = await db.Users.FindAsync(id);
         if (user is null) return UpdateUserResult.NotFound();
         if (user.Version != request.Version) return UpdateUserResult.Conflict();
 
-        // Prevent demoting the last Admin â€” would lock everyone out.
         if (user.Role == UserRole.Admin && request.Role != UserRole.Admin)
-        {
-            var adminCount = await db.Users.CountAsync(u => u.Role == UserRole.Admin);
-            if (adminCount <= 1)
-                throw new UserFriendlyException(
-                    "Cannot demote the last Admin â€” the system would have no admins.",
-                    "LAST_ADMIN");
-        }
+            await EnsureNotLastAdmin(
+                "Cannot demote the last Admin the system would have no admins.",
+                "LAST_ADMIN_CANNOT_DEMOTE");
 
         var phone = request.PhoneNumber?.Trim();
-        ValidateChannel(request.ReportChannel, phone);
+        UserRules.RequirePhoneForSms(request.ReportChannel, phone);
 
         user.Name = request.Name;
-        user.Email = Normalize(request.Email);
+        user.Email = UserRules.NormalizeEmail(request.Email);
         user.PhoneNumber = string.IsNullOrWhiteSpace(phone) ? null : phone;
         user.ReportChannel = request.ReportChannel;
         user.Role = request.Role;
-        // Admins always have full access â€” features bits are meaningless for them.
-        // Clear on promotion so the DB stays clean; reset to None on any role change.
+        // Admins always have full access features bits are meaningless for them
+        // Clear on promotion so the DB stays clean; reset to None on any role change
         user.Features = request.Role == UserRole.Admin ? UserFeature.None : request.Features;
         user.Version++;
 
         await db.SaveChangesAsync();
+        await tx.CommitAsync();
         return UpdateUserResult.Success(ToResponse(user));
     }
 
     public async Task<bool> Delete(int id)
     {
+        await using var tx = await db.Database.BeginTransactionAsync();
+
         var user = await db.Users.FindAsync(id);
         if (user is null) return false;
 
         if (user.Role == UserRole.Admin)
-        {
-            var adminCount = await db.Users.CountAsync(u => u.Role == UserRole.Admin);
-            if (adminCount <= 1)
-                throw new UserFriendlyException(
-                    "Cannot delete the last Admin â€” the system would have no admins.",
-                    "LAST_ADMIN");
-        }
+            await EnsureNotLastAdmin(
+                "Cannot delete the last Admin the system would have no admins.",
+                "LAST_ADMIN_CANNOT_DELETE");
 
         db.Users.Remove(user);
         await db.SaveChangesAsync();
+        await tx.CommitAsync();
         return true;
     }
 
-    // Trim + lower-case so "Alice@X.com" and "alice@x.com" can't both exist.
-    private static string Normalize(string email) => email.Trim().ToLowerInvariant();
-
-    // SMS delivery needs somewhere to send to.
-    private static void ValidateChannel(PreferredReportChannel channel, string? phone)
+    // Guards the "system must keep at least one Admin" invariant. The xact-scoped advisory
+    // lock serializes concurrent demotions/deletions so two of them can't both read
+    // count > 1 and commit, leaving zero admins. Held until the surrounding tx commits.
+    private async Task EnsureNotLastAdmin(string message, string code)
     {
-        if (channel == PreferredReportChannel.Sms && string.IsNullOrWhiteSpace(phone))
-            throw new UserFriendlyException("A phone number is required for SMS reports.", "INVALID_ARGUMENT");
+        await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock({0})", AdminGuardKey);
+
+        if (await db.Users.CountAsync(u => u.Role == UserRole.Admin) <= 1)
+            throw new UserFriendlyException(message, code);
     }
 
     private static UserResponse ToResponse(User u) =>

@@ -20,7 +20,7 @@ interface AuthContextValue {
   user: Profile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  // Stores a fresh token, then loads the profile behind it.
+  // Stores a fresh token, then loads the profile behind it
   setSession: (token: string) => Promise<void>;
   logout: () => void;
   refresh: () => Promise<void>;
@@ -43,7 +43,7 @@ export function AuthProvider({
     try {
       setUser(await authApi.me());
     } catch {
-      // Bad/expired token — drop it.
+      // Bad/expired token - drop it
       clearToken();
       setUser(null);
     } finally {
@@ -51,12 +51,12 @@ export function AuthProvider({
     }
   }, []);
 
-  // Initial session restore from a persisted token.
+  // Initial session restore from a persisted token
   useEffect(() => {
     void loadProfile();
   }, [loadProfile]);
 
-  // The transport layer fires this on any 401.
+  // The transport layer fires this on any 401
   useEffect(() => {
     function onLogout() {
       clearToken();

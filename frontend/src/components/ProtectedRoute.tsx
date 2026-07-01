@@ -10,7 +10,7 @@ export function ProtectedRoute({
   const { t } = useTranslation();
 
   // Wait for the initial token check before deciding, so a logged-in user
-  // isn't bounced to /login on a hard refresh.
+  // isn't bounced to /login on a hard refresh
   if (isLoading) return <p className="loading">{t("common.loading")}</p>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <>{children}</>;

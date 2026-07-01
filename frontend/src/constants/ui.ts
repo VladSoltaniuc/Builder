@@ -1,4 +1,4 @@
-// Shared layer — constants
+// Shared layer - constants
 export const sortIcons = {
   both: '↕',
   asc:  '↑',

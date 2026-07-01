@@ -5,7 +5,7 @@ namespace ProductApi.UnitTests.Maintenance;
 
 public class IndexMaintenanceOptionsTests
 {
-    // 2026-06-29 is a Monday.
+    // 2026-06-29 is a Monday
     private static readonly DateTime Monday0900 = new(2026, 6, 29, 9, 0, 0, DateTimeKind.Utc);
 
     [Fact]
@@ -19,7 +19,7 @@ public class IndexMaintenanceOptionsTests
             Minute = 30,
         };
 
-        // From Monday, next Sunday 03:30 is 2026-07-05.
+        // From Monday, next Sunday 03:30 is 2026-07-05
         opts.NextOccurrence(Monday0900)
             .Should().Be(new DateTime(2026, 7, 5, 3, 30, 0, DateTimeKind.Utc));
     }
@@ -76,7 +76,7 @@ public class IndexMaintenanceOptionsTests
             Hour = 3,
         };
 
-        // Capped to the 28th so the date is valid in every month.
+        // Capped to the 28th so the date is valid in every month
         opts.NextOccurrence(new DateTime(2026, 2, 1, 9, 0, 0, DateTimeKind.Utc))
             .Should().Be(new DateTime(2026, 2, 28, 3, 0, 0, DateTimeKind.Utc));
     }

@@ -1,4 +1,4 @@
-// Shared layer — auth contract types
+// Shared layer - auth contract types
 export type Role = "Admin" | "Operator";
 export type ReportChannel = "None" | "Email" | "Sms";
 
@@ -13,7 +13,7 @@ export interface Profile {
   reportChannel: ReportChannel;
 }
 
-// The user payload embedded in an AuthResponse.
+// The user payload embedded in an AuthResponse
 export interface AuthUser {
   id: number;
   name: string;
@@ -23,7 +23,7 @@ export interface AuthUser {
   version: number;
 }
 
-// POST /api/auth/register — no token; the user must verify their email first.
+// POST /api/auth/register - no token; the user must verify their email first
 export interface RegisterResult {
   email: string;
   message: string;
@@ -36,7 +36,7 @@ export interface AuthResult {
   user: AuthUser;
 }
 
-// POST /api/auth/login — may demand a second factor instead of a token.
+// POST /api/auth/login - may demand a second factor instead of a token
 export interface LoginResult {
   requiresTwoFactor: boolean;
   twoFactorToken: string | null;

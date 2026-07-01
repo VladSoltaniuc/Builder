@@ -1,4 +1,4 @@
-// Presentation layer — detail view
+// Presentation layer - detail view
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { Product, ProductInput } from "../types/product";
@@ -24,11 +24,19 @@ function validate(message: string) {
   };
 }
 
-export function ProductForm({ product, onSubmit, onCancel, onUploadImage, onDeleteImage }: Readonly<ProductFormProps>) {
+export function ProductForm({
+  product,
+  onSubmit,
+  onCancel,
+  onUploadImage,
+  onDeleteImage,
+}: Readonly<ProductFormProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<ProductInput>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string | undefined>(product?.imageUrl);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(
+    product?.imageUrl,
+  );
   const [isImageLoading, setIsImageLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,38 +92,42 @@ export function ProductForm({ product, onSubmit, onCancel, onUploadImage, onDele
     }
   }
 
-  const submitLabel = product ? t('form.save') : t('form.add');
+  const submitLabel = product ? t("form.save") : t("form.add");
 
   return (
     <form className="card" onSubmit={handleSubmit}>
-      <h2>{product ? t('products.form.editTitle', { id: product.id }) : t('products.form.addTitle')}</h2>
+      <h2>
+        {product
+          ? t("products.form.editTitle", { id: product.id })
+          : t("products.form.addTitle")}
+      </h2>
 
       <div className="form-grid">
         <label>
-          {t('products.form.name')}
+          {t("products.form.name")}
           <input
             name="name"
             value={form.name}
             onChange={handleChange}
             required
             minLength={2}
-            {...validate(t('products.validation.name'))}
+            {...validate(t("products.validation.name"))}
           />
         </label>
 
         <label>
-          {t('products.form.category')}
+          {t("products.form.category")}
           <input
             name="category"
             value={form.category}
             onChange={handleChange}
             required
-            {...validate(t('products.validation.category'))}
+            {...validate(t("products.validation.category"))}
           />
         </label>
 
         <label>
-          {t('products.form.price')}
+          {t("products.form.price")}
           <input
             name="price"
             type="number"
@@ -124,12 +136,12 @@ export function ProductForm({ product, onSubmit, onCancel, onUploadImage, onDele
             value={form.price}
             onChange={handleChange}
             required
-            {...validate(t('products.validation.price'))}
+            {...validate(t("products.validation.price"))}
           />
         </label>
 
         <label>
-          {t('products.form.stock')}
+          {t("products.form.stock")}
           <input
             name="stock"
             type="number"
@@ -137,14 +149,14 @@ export function ProductForm({ product, onSubmit, onCancel, onUploadImage, onDele
             value={form.stock}
             onChange={handleChange}
             required
-            {...validate(t('products.validation.stock'))}
+            {...validate(t("products.validation.stock"))}
           />
         </label>
       </div>
 
       {product && onUploadImage && (
         <div className="image-section">
-          <p className="image-label">{t('products.form.image')}</p>
+          <p className="image-label">{t("products.form.image")}</p>
           {imageUrl && (
             <img
               src={`${STATIC_BASE}${imageUrl}`}
@@ -153,12 +165,24 @@ export function ProductForm({ product, onSubmit, onCancel, onUploadImage, onDele
             />
           )}
           <div className="row-actions">
-            <button type="button" className="btn btn-small" onClick={() => fileInputRef.current?.click()} disabled={isImageLoading}>
-              {imageUrl ? t('products.form.changeImage') : t('products.form.uploadImage')}
+            <button
+              type="button"
+              className="btn btn-small"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isImageLoading}
+            >
+              {imageUrl
+                ? t("products.form.changeImage")
+                : t("products.form.uploadImage")}
             </button>
             {imageUrl && onDeleteImage && (
-              <button type="button" className="btn btn-small btn-danger" onClick={handleDeleteImage} disabled={isImageLoading}>
-                {t('products.form.removeImage')}
+              <button
+                type="button"
+                className="btn btn-small btn-danger"
+                onClick={handleDeleteImage}
+                disabled={isImageLoading}
+              >
+                {t("products.form.removeImage")}
               </button>
             )}
           </div>
@@ -173,12 +197,21 @@ export function ProductForm({ product, onSubmit, onCancel, onUploadImage, onDele
       )}
 
       <div className="form-actions">
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? t('form.saving') : submitLabel}
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? t("form.saving") : submitLabel}
         </button>
         {product && (
-          <button type="button" className="btn" onClick={onCancel} disabled={isSubmitting}>
-            {t('form.cancel')}
+          <button
+            type="button"
+            className="btn"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            {t("form.cancel")}
           </button>
         )}
       </div>

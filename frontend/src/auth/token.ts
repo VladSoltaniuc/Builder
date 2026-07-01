@@ -1,4 +1,4 @@
-// Auth layer — JWT persistence in localStorage
+// Auth layer - JWT persistence in localStorage
 const TOKEN_KEY = "auth_token";
 
 export function getToken(): string | null {
@@ -13,5 +13,5 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-// Fired by the transport layer on a 401 so the AuthProvider can drop the session.
+// Fired by the transport layer on a 401 so the AuthProvider can drop the session
 export const AUTH_LOGOUT_EVENT = "auth:logout";

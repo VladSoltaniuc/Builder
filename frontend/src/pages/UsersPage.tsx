@@ -63,7 +63,7 @@ export function UsersPage() {
 
       {error && <p className="error">⚠️ {error}</p>}
 
-      <div className="filters">
+      <div className="search-bar">
         <input
           placeholder={t('users.search')}
           value={search}

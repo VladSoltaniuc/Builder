@@ -15,7 +15,7 @@ public class MaintenanceController(IMaintenanceService maintenanceService) : Api
     public async Task<IActionResult> PurgeAudit([FromQuery] int olderThanDays = AuditDefaults.DefaultPurgeDays)
     {
         if (olderThanDays < 0)
-            return ApiBadRequest("olderThanDays must be zero or greater.");
+            return ApiBadRequest("OLDER_THAN_DAYS_INVALID");
 
         await maintenanceService.PurgeAudit(olderThanDays);
         return NoContent();

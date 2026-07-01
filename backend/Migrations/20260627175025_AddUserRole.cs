@@ -10,7 +10,7 @@ namespace ProductApi.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Existing users default to the least-privileged role.
+            // Existing users default to the least-privileged role
             migrationBuilder.AddColumn<string>(
                 name: "Role",
                 table: "Users",

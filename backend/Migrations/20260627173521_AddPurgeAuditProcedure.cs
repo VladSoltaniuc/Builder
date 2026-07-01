@@ -10,9 +10,9 @@ namespace ProductApi.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // A PROCEDURE (not a function) because it COMMITs between batches —
-            // deleting in 10k chunks avoids one huge lock/transaction on a big table.
-            // Only a procedure may issue COMMIT; a function runs in a single transaction.
+            // A PROCEDURE (not a function) because it COMMITs between batches -
+            // deleting in 10k chunks avoids one huge lock/transaction on a big table
+            // Only a procedure may issue COMMIT; a function runs in a single transaction
             migrationBuilder.Sql("""
                 CREATE PROCEDURE purge_audit(older_than_days int)
                 LANGUAGE plpgsql

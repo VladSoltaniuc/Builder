@@ -1,4 +1,4 @@
-// Shared layer — API contract types
+// Shared layer - API contract types
 export interface Product {
   id: number;
   name: string;
@@ -9,7 +9,7 @@ export interface Product {
   imageUrl?: string;
 }
 
-// Form fields only — id and version are server-managed
+// Form fields only - id and version are server-managed
 export type ProductInput = Omit<Product, 'id' | 'version'>;
 
 export interface ImportProductResult {

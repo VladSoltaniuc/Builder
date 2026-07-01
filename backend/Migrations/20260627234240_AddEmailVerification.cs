@@ -30,8 +30,8 @@ namespace ProductApi.Migrations
                 nullable: false,
                 defaultValue: false);
 
-            // Grandfather all accounts that existed before verification was a thing —
-            // they predate this gate and shouldn't be locked out.
+            // Grandfather all accounts that existed before verification was a thing -
+            // they predate this gate and shouldn't be locked out
             migrationBuilder.Sql("UPDATE \"Users\" SET \"EmailVerified\" = true;");
         }
 

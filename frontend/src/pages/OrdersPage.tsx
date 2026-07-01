@@ -1,5 +1,5 @@
 // Application layer
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -7,7 +7,6 @@ import { Button } from "@mui/material";
 import { useOrders } from "../hooks/useOrders";
 import { ALLOWED_PAGE_SIZES } from "../constants/pagination";
 import { useOrderHub } from "../hooks/useOrderHub";
-import { ordersApi } from "../api/orders";
 import { OrderForm } from "../components/OrderForm";
 import { OrderTable } from "../components/OrderTable";
 import type { Order, OrderInput, OrderUpdateInput } from "../types/order";
@@ -21,14 +20,13 @@ export function OrdersPage() {
     pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
-    setFilters,
     createOrder, updateOrder, patchOrder, deleteOrder,
     uploadInvoice, deleteInvoice, downloadInvoice,
   } = useOrders();
 
-  // Live order-status updates pushed from the server over SignalR.
+  // Live order-status updates pushed from the server over SignalR
   // If an order visible on this page is updated by another session, we patch
-  // it in-place and show a brief toast so the user notices without refreshing.
+  // it in-place and show a brief toast so the user notices without refreshing
   useOrderHub((updated) => {
     const current = orders.find((o) => o.id === updated.id);
     if (current && current.version < updated.version) {
@@ -39,22 +37,10 @@ export function OrdersPage() {
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('');
-  const [statuses, setStatuses] = useState<string[]>([]);
-
-  useEffect(() => {
-    ordersApi.getOptions().then((o) => setStatuses(o.statuses));
-  }, []);
 
   function openCreate() { setIsModalOpen(true); setEditingOrder(null); }
   function openEdit(o: Order) { setIsModalOpen(true); setEditingOrder(o); }
   function closeModal() { setIsModalOpen(false); setEditingOrder(null); }
-
-  function handleStatusChange(value: string) {
-    setFilterStatus(value);
-    setFilters(value ? { status: `$eq:${value}` } : {});
-    setPage(1);
-  }
 
   async function handleSubmit(input: OrderInput | OrderUpdateInput) {
     try {
@@ -114,16 +100,12 @@ export function OrdersPage() {
 
       {error && <p className="error">⚠️ {error}</p>}
 
-      <div className="filters">
+      <div className="search-bar">
         <input
           placeholder={t('orders.search')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
-        <select value={filterStatus} onChange={(e) => handleStatusChange(e.target.value)}>
-          <option value="">{t('orders.allStatuses')}</option>
-          {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
       </div>
 
       <div className="toolbar">

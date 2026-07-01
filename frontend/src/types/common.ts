@@ -7,7 +7,6 @@ export interface FieldError {
 export interface ErrorDetail {
   code: number;
   status: string;
-  message: string;
   detail?: string;
   errors?: FieldError[];
 }

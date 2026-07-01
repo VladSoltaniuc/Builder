@@ -1,4 +1,4 @@
-// Presentation layer — detail view
+// Presentation layer - detail view
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { Order, OrderInput, OrderUpdateInput } from "../types/order";
@@ -11,7 +11,11 @@ interface OrderFormProps {
 
 const STATUSES = ["Pending", "Completed", "Cancelled"];
 
-export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps>) {
+export function OrderForm({
+  order,
+  onSubmit,
+  onCancel,
+}: Readonly<OrderFormProps>) {
   const { t } = useTranslation();
   const [userId, setUserId] = useState("");
   const [productId, setProductId] = useState("");
@@ -41,17 +45,28 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
     setIsSubmitting(true);
     try {
       if (order) {
-        await onSubmit({ quantity, status, version: order.version, awb: awb || undefined } as OrderUpdateInput);
+        await onSubmit({
+          quantity,
+          status,
+          version: order.version,
+          awb: awb || undefined,
+        } as OrderUpdateInput);
       } else {
-        await onSubmit({ userId: Number(userId), productId: Number(productId), quantity } as OrderInput);
+        await onSubmit({
+          userId: Number(userId),
+          productId: Number(productId),
+          quantity,
+        } as OrderInput);
       }
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  const formTitle = order ? t('orders.form.editTitle', { id: order.id }) : t('orders.form.addTitle');
-  const submitLabel = order ? t('form.save') : t('orders.form.addTitle');
+  const formTitle = order
+    ? t("orders.form.editTitle", { id: order.id })
+    : t("orders.form.addTitle");
+  const submitLabel = order ? t("form.save") : t("orders.form.addTitle");
 
   return (
     <form className="card" onSubmit={handleSubmit}>
@@ -61,7 +76,7 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
         {!order && (
           <>
             <label>
-              {t('orders.form.userId')}
+              {t("orders.form.userId")}
               <input
                 type="number"
                 min="1"
@@ -73,7 +88,7 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
             </label>
 
             <label>
-              {t('orders.form.productId')}
+              {t("orders.form.productId")}
               <input
                 type="number"
                 min="1"
@@ -87,7 +102,7 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
         )}
 
         <label>
-          {t('orders.form.quantity')}
+          {t("orders.form.quantity")}
           <input
             type="number"
             min="1"
@@ -101,15 +116,20 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
         {order && (
           <>
             <label>
-              {t('orders.form.status')}
-              <select value={status} onChange={(e) => setStatus(e.target.value)}>
+              {t("orders.form.status")}
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
                 {STATUSES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </label>
             <label>
-              {t('orders.form.awb')}
+              {t("orders.form.awb")}
               <input
                 type="text"
                 value={awb}
@@ -123,12 +143,21 @@ export function OrderForm({ order, onSubmit, onCancel }: Readonly<OrderFormProps
       </div>
 
       <div className="form-actions">
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? t('form.saving') : submitLabel}
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? t("form.saving") : submitLabel}
         </button>
         {order && (
-          <button type="button" className="btn" onClick={onCancel} disabled={isSubmitting}>
-            {t('form.cancel')}
+          <button
+            type="button"
+            className="btn"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            {t("form.cancel")}
           </button>
         )}
       </div>

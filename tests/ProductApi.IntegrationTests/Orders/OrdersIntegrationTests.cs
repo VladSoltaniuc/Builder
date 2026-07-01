@@ -40,7 +40,7 @@ public class OrdersIntegrationTests(IntegrationTestFactory factory) : Integratio
             resp.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             var after = await GetAsync<ProductResponse>($"/api/products/{product.Id}");
-            after!.Stock.Should().Be(1); // unchanged — the function rejected and rolled back
+            after!.Stock.Should().Be(1); // unchanged - the function rejected and rolled back
         }
         finally
         {

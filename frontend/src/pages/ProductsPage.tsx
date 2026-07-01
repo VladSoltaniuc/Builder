@@ -1,12 +1,11 @@
 // Application layer
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Button } from "@mui/material";
 import { useProducts } from "../hooks/useProducts";
 import { ALLOWED_PAGE_SIZES } from "../constants/pagination";
-import { productsApi } from "../api/products";
 import { ProductForm } from "../components/ProductForm";
 import { ProductTable } from "../components/ProductTable";
 import { ExcelExportDialog } from "../components/ExcelExportDialog";
@@ -22,7 +21,6 @@ export function ProductsPage() {
     pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
-    setFilters,
     createProduct, updateProduct, deleteProduct,
     uploadImage, deleteImage, refresh,
   } = useProducts();
@@ -31,22 +29,10 @@ export function ProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [filterCategory, setFilterCategory] = useState('');
-  const [categories, setCategories] = useState<string[]>([]);
-
-  useEffect(() => {
-    productsApi.getOptions().then((o) => setCategories(o.categories));
-  }, []);
 
   function openCreate() { setIsModalOpen(true); setEditingProduct(null); }
   function openEdit(p: Product) { setIsModalOpen(true); setEditingProduct(p); }
   function closeModal() { setIsModalOpen(false); setEditingProduct(null); }
-
-  function handleCategoryChange(value: string) {
-    setFilterCategory(value);
-    setFilters(value ? { category: `$eq:${value}` } : {});
-    setPage(1);
-  }
 
   async function handleSubmit(input: ProductInput) {
     try {
@@ -101,16 +87,12 @@ export function ProductsPage() {
 
       {error && <p className="error">⚠️ {error}</p>}
 
-      <div className="filters">
+      <div className="search-bar">
         <input
           placeholder={t('products.search')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
-        <select value={filterCategory} onChange={(e) => handleCategoryChange(e.target.value)}>
-          <option value="">{t('products.allCategories')}</option>
-          {categories.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
       </div>
 
       <div className="toolbar">

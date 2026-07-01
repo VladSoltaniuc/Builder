@@ -6,12 +6,12 @@ using ProductApi.Configuration;
 namespace ProductApi.Workers;
 
 // Wakes on a timer, measures index bloat with pgstattuple, and rebuilds ONLY the
-// indexes that have actually bloated.
+// indexes that have actually bloated
 //
 // Why a raw connection instead of EF: REINDEX ... CONCURRENTLY is illegal inside a
-// transaction block, and that's exactly why it can't live in a stored procedure.
+// transaction block, and that's exactly why it can't live in a stored procedure
 // We run each REINDEX as a single statement on its own NpgsqlConnection with no
-// explicit transaction (autocommit), which is the one context Postgres allows it in.
+// explicit transaction (autocommit), which is the one context Postgres allows it in
 public sealed class IndexMaintenanceWorker(
     IConfiguration config,
     IOptions<IndexMaintenanceOptions> options,
@@ -23,11 +23,11 @@ public sealed class IndexMaintenanceWorker(
         ?? throw new InvalidOperationException("ConnectionStrings:Default is not configured.");
 
     // Read-only bloat report, scoped to our three app tables. pgstattuple scans each
-    // index, so the size gate keeps us from scanning/rebuilding trivially small ones.
+    // index, so the size gate keeps us from scanning/rebuilding trivially small ones
     //
     // btree only: pgstattuple cannot inspect GIN indexes, and GIN doesn't need this kind
-    // of reindexing anyway — its bloat is the "pending list", which autovacuum flushes.
-    // btree is what fragments under churn and what REINDEX actually helps.
+    // of reindexing anyway - its bloat is the "pending list", which autovacuum flushes
+    // btree is what fragments under churn and what REINDEX actually helps
     private const string BloatQuery = """
         SELECT (i.indexrelid::regclass)::text     AS index_name,
                s.free_percent                     AS free_percent,
@@ -72,8 +72,8 @@ public sealed class IndexMaintenanceWorker(
         }
     }
 
-    // Sleeps until 'target' in capped chunks — a monthly gap exceeds Task.Delay's
-    // ~24.8-day ceiling, and short hops also tolerate the machine sleeping/clock drift.
+    // Sleeps until 'target' in capped chunks - a monthly gap exceeds Task.Delay's
+    // ~24.8-day ceiling, and short hops also tolerate the machine sleeping/clock drift
     private static async Task<bool> WaitUntilAsync(DateTime target, CancellationToken ct)
     {
         var maxChunk = TimeSpan.FromHours(1);
@@ -111,7 +111,7 @@ public sealed class IndexMaintenanceWorker(
             {
                 await using var conn = new NpgsqlConnection(_connectionString);
                 await conn.OpenAsync(ct);
-                // No transaction here on purpose — CONCURRENTLY requires autocommit.
+                // No transaction here on purpose - CONCURRENTLY requires autocommit
                 await using var cmd = new NpgsqlCommand($"REINDEX INDEX CONCURRENTLY {name}", conn)
                 {
                     CommandTimeout = 0 // a rebuild can run long; don't impose a timeout
@@ -123,7 +123,7 @@ public sealed class IndexMaintenanceWorker(
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // A failed CONCURRENTLY build can leave an INVALID index behind that
-                // must be dropped/rebuilt by hand — surface it loudly, keep going.
+                // must be dropped/rebuilt by hand - surface it loudly, keep going
                 logger.LogError(ex,
                     "Failed to reindex {Index}; it may be left INVALID and need a manual REINDEX.", name);
             }

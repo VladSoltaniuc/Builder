@@ -24,15 +24,6 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     public async Task<ActionResult<PagedResponse<OrderResponse>>> GetAll([FromQuery] PageQuery query)
         => Ok(await orderService.GetAll(query));
 
-    [HttpGet("search")]
-    [ProducesResponseType(typeof(List<OrderResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<OrderResponse>>> Search([FromQuery] string term)
-    {
-        if (ValidateSearchTerm(term, out var trimmed) is { } error) return error;
-        return Ok(await orderService.Search(trimmed));
-    }
-
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -95,9 +86,9 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     public async Task<ActionResult<OrderResponse>> UploadInvoice(int id, IFormFile file)
     {
         if (!file.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
-            return ApiBadRequest("Only PDF files are allowed.");
+            return ApiBadRequest("INVOICE_TYPE_INVALID");
         if (file.Length > ImageSettings.MaxInvoiceSizeBytes)
-            return ApiBadRequest("Invoice must be under 10 MB.");
+            return ApiBadRequest("INVOICE_TOO_LARGE");
 
         var result = await orderService.UploadInvoice(id, file);
         return result is null ? ApiNotFound() : Ok(result);

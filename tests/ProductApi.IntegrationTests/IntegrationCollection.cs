@@ -1,4 +1,4 @@
-// One factory shared across all integration test classes — migrations run once
+// One factory shared across all integration test classes - migrations run once
 using Xunit;
 
 namespace ProductApi.IntegrationTests;

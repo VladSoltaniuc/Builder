@@ -1,4 +1,4 @@
-// API layer — products
+// API layer - products
 import { httpCore } from './httpCore';
 import { httpFile } from './httpFile';
 import { buildPagedParams } from './buildPagedParams';
@@ -11,8 +11,8 @@ const RESOURCE = '/products';
 export const productsApi = {
   getOptions: () => httpCore.get<ProductOptions>(`${RESOURCE}/options`),
 
-  getAll: (page: number, pageSize: number, sortBy?: string, search?: string, filters?: Record<string, string>) =>
-    httpCore.get<PagedResponse<Product>>(`${RESOURCE}?${buildPagedParams(page, pageSize, sortBy, search, filters)}`),
+  getAll: (page: number, pageSize: number, sortBy?: string, search?: string) =>
+    httpCore.get<PagedResponse<Product>>(`${RESOURCE}?${buildPagedParams(page, pageSize, sortBy, search)}`),
 
   create: (input: ProductInput) => httpCore.post<Product>(RESOURCE, input),
 

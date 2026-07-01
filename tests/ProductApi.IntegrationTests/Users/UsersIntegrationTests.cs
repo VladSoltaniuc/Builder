@@ -70,9 +70,9 @@ public class UsersIntegrationTests(IntegrationTestFactory factory) : Integration
     [Fact]
     public async Task Delete_OwnAccount_Returns400()
     {
-        // An admin cannot delete their own account — the practical guard against the
+        // An admin cannot delete their own account - the practical guard against the
         // last admin deleting themselves. The LAST_ADMIN guard in UserService covers
-        // the multi-session scenario (admin A deletes admin B who is the last admin).
+        // the multi-session scenario (admin A deletes admin B who is the last admin)
         var me = await GetAsync<ProfileResponse>("/api/auth/me");
         var response = await DeleteAsync($"/api/users/{me!.Id}");
 

@@ -12,11 +12,11 @@ namespace ProductApi.Migrations
         {
             // Weekly audit metrics, one row per audited table, counting last week's
             // changes by action. The VALUES list anchors all three tables so each
-            // always appears — the LEFT JOIN yields zero counts for a quiet week.
+            // always appears - the LEFT JOIN yields zero counts for a quiet week
             //
             // "Last week" = the previous full Mon–Sun: from the Monday before this
             // one up to (but not including) this week's Monday. date_trunc('week')
-            // returns Monday 00:00, so it's stable no matter when the view refreshes.
+            // returns Monday 00:00, so it's stable no matter when the view refreshes
             migrationBuilder.Sql("""
                 CREATE MATERIALIZED VIEW mv_weekly_audit_report AS
                 SELECT
@@ -34,7 +34,7 @@ namespace ProductApi.Migrations
                 """);
 
             // Unique index on the single key column: required for REFRESH ...
-            // CONCURRENTLY and keeps lookups cheap.
+            // CONCURRENTLY and keeps lookups cheap
             migrationBuilder.Sql("""
                 CREATE UNIQUE INDEX ix_mv_weekly_audit_report_table
                 ON mv_weekly_audit_report ("TableName");

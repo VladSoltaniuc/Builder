@@ -34,7 +34,7 @@ export function RegisterPage() {
     }
   }
 
-  // After registering we don't log in — we wait for the emailed verification link.
+  // After registering we don't log in - we wait for the emailed verification link
   if (sentTo) {
     return (
       <main className="container">

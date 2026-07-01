@@ -11,7 +11,7 @@ namespace ProductApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Recreate the view with the action counts named for what they are
-            // (Inserts/Updates/Deletes) instead of Created/Updated/Deleted.
+            // (Inserts/Updates/Deletes) instead of Created/Updated/Deleted
             migrationBuilder.Sql("DROP MATERIALIZED VIEW IF EXISTS mv_weekly_audit_report;");
 
             migrationBuilder.Sql("""

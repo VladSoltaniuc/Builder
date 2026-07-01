@@ -1,4 +1,4 @@
-// Infrastructure — shared setup for all integration test classes
+// Infrastructure - shared setup for all integration test classes
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -9,7 +9,7 @@ namespace ProductApi.IntegrationTests;
 
 public abstract class IntegrationTestBase
 {
-    // Match the API's serialization — enums travel as strings ("Pending"), not numbers.
+    // Match the API's serialization - enums travel as strings ("Pending"), not numbers
     protected static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
         Converters = { new JsonStringEnumConverter() }
@@ -24,8 +24,8 @@ public abstract class IntegrationTestBase
     }
 
     // Logs in with the factory's seeded admin and attaches the Bearer token to all
-    // subsequent requests on Client. All write endpoints require Admin — this avoids
-    // copy-pasting auth setup into every test class.
+    // subsequent requests on Client. All write endpoints require Admin - this avoids
+    // copy-pasting auth setup into every test class
     private void AuthorizeAsAdmin()
     {
         var resp = Client.PostAsJsonAsync("/api/auth/login", new

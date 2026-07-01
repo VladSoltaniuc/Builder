@@ -67,7 +67,7 @@
         </hashTree>
 
         <!-- Threads 0–49 → paginated product list (heaviest table after seeding) -->
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Threads 0-49 — Products">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Threads 0-49 - Products">
           <stringProp name="IfController.condition">${__groovy(ctx.getThreadNum() &lt; 50)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
@@ -97,7 +97,7 @@
         </hashTree>
 
         <!-- Threads 50–79 → orders list -->
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Threads 50-79 — Orders">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Threads 50-79 - Orders">
           <stringProp name="IfController.condition">${__groovy(ctx.getThreadNum() &gt;= 50 &amp;&amp; ctx.getThreadNum() &lt; 80)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
@@ -127,7 +127,7 @@
         </hashTree>
 
         <!-- Threads 80–99 → users list (admin-only, exercises role check + pagination) -->
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Threads 80-99 — Users">
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Threads 80-99 - Users">
           <stringProp name="IfController.condition">${__groovy(ctx.getThreadNum() &gt;= 80)}</stringProp>
           <boolProp name="IfController.evaluateAll">false</boolProp>
           <boolProp name="IfController.useExpression">true</boolProp>
@@ -213,7 +213,7 @@
       </CookieManager>
       <hashTree/>
 
-      <!-- Credentials CSV — one row is enough; recycle=true reuses it for all 100 threads -->
+      <!-- Credentials CSV - one row is enough; recycle=true reuses it for all 100 threads -->
       <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
         <stringProp name="delimiter">,</stringProp>
         <stringProp name="filename">users.csv</stringProp>

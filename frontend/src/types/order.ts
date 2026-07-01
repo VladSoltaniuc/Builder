@@ -1,4 +1,4 @@
-// Shared layer — API contract types
+// Shared layer - API contract types
 export interface Order {
   id: number;
   userId: number;

@@ -1,4 +1,4 @@
-// Shared layer — query types
+// Shared layer - query types
 export type SortDir = 'ASC' | 'DESC';
 
 export interface SortState {

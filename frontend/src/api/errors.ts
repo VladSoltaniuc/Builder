@@ -1,4 +1,4 @@
-// API layer — error handling
+// API layer - error handling
 import i18n from '../i18n';
 import { getStatusMessage } from './errorMessages';
 import type { ErrorResponse, FieldError } from '../types/common';
@@ -20,7 +20,7 @@ export class ApiError extends Error {
   }
 }
 
-// Per-field validation codes → one localized line each, in the active language.
+// Per-field validation codes → one localized line each, in the active language
 function translateFieldErrors(errors: FieldError[]): string {
   return errors
     .map((e) => i18n.t(`errors.fields.${e.code}`, { defaultValue: e.code }))
@@ -29,9 +29,11 @@ function translateFieldErrors(errors: FieldError[]): string {
 
 export async function parseError(response: Response): Promise<ApiError> {
   const body = await response.json() as ErrorResponse;
-  const fieldErrors = body.error.errors;
+  const { status: code, detail, errors: fieldErrors } = body.error;
+  // The backend sends only a stable code; we own the user-facing text. `detail`
+  // carries any interpolation data (e.g. the column list for MISSING_COLUMNS)
   const message = fieldErrors?.length
     ? translateFieldErrors(fieldErrors)
-    : body.error.message;
-  return new ApiError(message, response.status, body.error.status, body.error.detail, fieldErrors);
+    : i18n.t(`errors.${code}`, { columns: detail, defaultValue: i18n.t('errors.UNKNOWN') });
+  return new ApiError(message, response.status, code, detail, fieldErrors);
 }

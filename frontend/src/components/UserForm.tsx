@@ -1,4 +1,4 @@
-// Presentation layer — detail view
+// Presentation layer - detail view
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { User, UserInput } from "../types/user";
@@ -20,11 +20,20 @@ interface UserFormProps {
 }
 
 const EMPTY_FORM: UserInput = {
-  name: "", email: "", phoneNumber: "", reportChannel: "None",
-  role: "Operator", features: 0,
+  name: "",
+  email: "",
+  phoneNumber: "",
+  reportChannel: "None",
+  role: "Operator",
+  features: 0,
 };
 
-export function UserForm({ user, currentUser, onSubmit, onCancel }: Readonly<UserFormProps>) {
+export function UserForm({
+  user,
+  currentUser,
+  onSubmit,
+  onCancel,
+}: Readonly<UserFormProps>) {
   const { t } = useTranslation();
   const [form, setForm] = useState<UserInput>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,8 +65,8 @@ export function UserForm({ user, currentUser, onSubmit, onCancel }: Readonly<Use
     setForm((prev) => ({
       ...prev,
       role,
-      // Reset features whenever the role changes — Admins don't need them,
-      // and it avoids carrying over stale bits when demoting to Operator.
+      // Reset features whenever the role changes - Admins don't need them,
+      // and it avoids carrying over stale bits when demoting to Operator
       features: 0,
     }));
   }
@@ -76,21 +85,21 @@ export function UserForm({ user, currentUser, onSubmit, onCancel }: Readonly<Use
     }
   }
 
-  const formTitle = user ? t('users.form.editTitle', { id: user.id }) : t('users.form.addTitle');
-  const submitLabel = user ? t('form.save') : t('users.add');
+  const formTitle = user
+    ? t("users.form.editTitle", { id: user.id })
+    : t("users.form.addTitle");
+  const submitLabel = user ? t("form.save") : t("users.add");
   const featuresDisabled = isSelf || form.role === "Admin";
 
   return (
     <form className="card" onSubmit={handleSubmit}>
       <h2>{formTitle}</h2>
 
-      {isSelf && (
-        <p className="error">{t('users.form.selfEditDisabled')}</p>
-      )}
+      {isSelf && <p className="error">{t("users.form.selfEditDisabled")}</p>}
 
       <div className="form-grid">
         <label>
-          {t('users.form.name')}
+          {t("users.form.name")}
           <input
             name="name"
             value={form.name}
@@ -103,7 +112,7 @@ export function UserForm({ user, currentUser, onSubmit, onCancel }: Readonly<Use
         </label>
 
         <label>
-          {t('users.form.email')}
+          {t("users.form.email")}
           <input
             name="email"
             type="email"
@@ -117,7 +126,7 @@ export function UserForm({ user, currentUser, onSubmit, onCancel }: Readonly<Use
 
         {isAdmin && (
           <label>
-            {t('users.form.role')}
+            {t("users.form.role")}
             <select
               value={form.role}
               onChange={(e) => handleRoleChange(e.target.value as Role)}
@@ -130,17 +139,36 @@ export function UserForm({ user, currentUser, onSubmit, onCancel }: Readonly<Use
         )}
 
         {isAdmin && (
-          <fieldset disabled={featuresDisabled} style={{ border: "none", padding: 0, margin: 0 }}>
+          <fieldset
+            disabled={featuresDisabled}
+            style={{ border: "none", padding: 0, margin: 0 }}
+          >
             <legend style={{ fontWeight: 500, marginBottom: 6 }}>
-              {t('users.form.features')}
+              {t("users.form.features")}
               {form.role === "Admin" && (
-                <span style={{ fontWeight: 400, marginLeft: 8, opacity: 0.6, fontSize: "0.85em" }}>
-                  {t('users.form.featuresHint')}
+                <span
+                  style={{
+                    fontWeight: 400,
+                    marginLeft: 8,
+                    opacity: 0.6,
+                    fontSize: "0.85em",
+                  }}
+                >
+                  {t("users.form.featuresHint")}
                 </span>
               )}
             </legend>
             {FEATURES.map(({ bit, key }) => (
-              <label key={bit} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: featuresDisabled ? "not-allowed" : "pointer" }}>
+              <label
+                key={bit}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 4,
+                  cursor: featuresDisabled ? "not-allowed" : "pointer",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={form.role === "Admin" || (form.features & bit) !== 0}
@@ -156,18 +184,31 @@ export function UserForm({ user, currentUser, onSubmit, onCancel }: Readonly<Use
         <ReportPreferenceFields
           channel={form.reportChannel}
           phoneNumber={form.phoneNumber ?? ""}
-          onChannelChange={(reportChannel) => setForm((prev) => ({ ...prev, reportChannel }))}
-          onPhoneChange={(phoneNumber) => setForm((prev) => ({ ...prev, phoneNumber }))}
+          onChannelChange={(reportChannel) =>
+            setForm((prev) => ({ ...prev, reportChannel }))
+          }
+          onPhoneChange={(phoneNumber) =>
+            setForm((prev) => ({ ...prev, phoneNumber }))
+          }
         />
       </div>
 
       <div className="form-actions">
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting || isSelf}>
-          {isSubmitting ? t('form.saving') : submitLabel}
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={isSubmitting || isSelf}
+        >
+          {isSubmitting ? t("form.saving") : submitLabel}
         </button>
         {user && (
-          <button type="button" className="btn" onClick={onCancel} disabled={isSubmitting}>
-            {t('form.cancel')}
+          <button
+            type="button"
+            className="btn"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            {t("form.cancel")}
           </button>
         )}
       </div>

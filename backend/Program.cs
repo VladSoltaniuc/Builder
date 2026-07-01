@@ -43,6 +43,8 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
+builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
+builder.Services.AddScoped<ProductExcel>();
 
 // --- Authentication (JWT bearer) ---
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
@@ -60,7 +62,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         // SignalR WebSocket handshakes can't set Authorization headers, so the JS client
-        // sends the JWT as ?access_token= in the query string instead.
+        // sends the JWT as ?access_token= in the query string instead
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = ctx =>
@@ -85,7 +87,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Background services are skipped under integration tests so they never touch the test DB.
+// Background services are skipped under integration tests so they never touch the test DB
 var isTesting = builder.Environment.IsEnvironment("Testing");
 
 builder.Services.Configure<IndexMaintenanceOptions>(builder.Configuration.GetSection("IndexMaintenance"));
@@ -110,7 +112,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     {
         // One entry per failed field; each carries a stable code (the attribute's
         // ErrorMessage) the client translates. Field names are camelCased to match
-        // the form fields on the frontend.
+        // the form fields on the frontend
         var errors = ctx.ModelState
             .Where(kv => kv.Value!.Errors.Count > 0)
             .SelectMany(kv => kv.Value!.Errors.Select(e => new FieldError(
@@ -119,7 +121,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
             .ToList();
         return new BadRequestObjectResult(
             new ErrorResponse(new ErrorDetail(
-                400, "INVALID_ARGUMENT", "One or more fields are invalid.", null, errors)));
+                400, "VALIDATION_FAILED", null, errors)));
 
         static string ToCamelCase(string key) =>
             string.IsNullOrEmpty(key) ? key : char.ToLowerInvariant(key[0]) + key[1..];
@@ -135,7 +137,7 @@ if (isRateLimitEnabled)
 
     builder.Services.AddRateLimiter(options =>
     {
-        // One fixed window per client IP â€” resets every WindowSeconds
+        // One fixed window per client IP resets every WindowSeconds
         options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
             RateLimitPartition.GetFixedWindowLimiter(
                 partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -173,27 +175,27 @@ app.UseCors(FrontendCorsPolicy);
 app.UseExceptionHandler(err => err.Run(async ctx =>
 {
     var ex = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
-    int code; string status, message;
+    int code; string status;
     string? detail = null;
     if (ex is UserFriendlyException ufe)
-        (code, status, message, detail) = (400, ufe.ErrorCode, ufe.Message, ufe.Detail);
-    // Someone else changed the row between our read and write (optimistic concurrency).
+        (code, status, detail) = (ufe.StatusCode, ufe.ErrorCode, ufe.Detail);
+    // Someone else changed the row between our read and write (optimistic concurrency)
     else if (ex is DbUpdateConcurrencyException)
-        (code, status, message) = (409, "CONFLICT", "This record was changed by another request. Please refresh and try again.");
-    // A unique index rejected a duplicate value. Map the index to a friendly message.
+        (code, status) = (409, "CONCURRENCY_CONFLICT");
+    // A unique index rejected a duplicate value. Map the index to a stable code
     else if (ex is DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pg })
-        (code, status, message) = (409, "CONFLICT", pg.ConstraintName switch
+        (code, status) = (409, pg.ConstraintName switch
         {
-            "IX_Orders_Awb"        => "Another order already uses this AWB.",
-            "IX_Users_Email_Unique" => "A user with this email already exists.",
-            _ => "That value conflicts with an existing record."
+            "IX_Orders_Awb"         => "AWB_ALREADY_EXISTS",
+            "IX_Users_Email_Unique" => "EMAIL_ALREADY_EXISTS",
+            _ => "UNIQUE_CONFLICT"
         });
     else
-        (code, status, message) = (500, "INTERNAL", "An unexpected error occurred.");
+        (code, status) = (500, "INTERNAL");
     ctx.Response.StatusCode = code;
     ctx.Response.ContentType = "application/json";
     await ctx.Response.WriteAsJsonAsync(
-        new ErrorResponse(new ErrorDetail(code, status, message, detail)));
+        new ErrorResponse(new ErrorDetail(code, status, detail)));
 }));
 
 if (isRateLimitEnabled)

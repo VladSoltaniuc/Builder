@@ -1,4 +1,4 @@
-// API layer — users
+// API layer - users
 import { httpCore } from './httpCore';
 import { buildPagedParams } from './buildPagedParams';
 import type { User, UserInput } from '../types/user';
@@ -7,8 +7,8 @@ import type { PagedResponse } from '../types/pagination';
 const RESOURCE = '/users';
 
 export const usersApi = {
-  getAll: (page: number, pageSize: number, sortBy?: string, search?: string, filters?: Record<string, string>) =>
-    httpCore.get<PagedResponse<User>>(`${RESOURCE}?${buildPagedParams(page, pageSize, sortBy, search, filters)}`),
+  getAll: (page: number, pageSize: number, sortBy?: string, search?: string) =>
+    httpCore.get<PagedResponse<User>>(`${RESOURCE}?${buildPagedParams(page, pageSize, sortBy, search)}`),
 
   getById: (id: number) => httpCore.get<User>(`${RESOURCE}/${id}`),
 

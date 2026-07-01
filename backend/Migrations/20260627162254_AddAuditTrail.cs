@@ -36,9 +36,9 @@ namespace ProductApi.Migrations
                 table: "AuditLogs",
                 columns: new[] { "TableName", "RowId" });
 
-            // Trigger function: snapshot the row before/after into AuditLogs.
+            // Trigger function: snapshot the row before/after into AuditLogs
             // Fires for INSERT/UPDATE/DELETE; "who" comes from a per-transaction
-            // session var the app sets (app.user_id) — null until Auth exists.
+            // session var the app sets (app.user_id) - null until Auth exists
             migrationBuilder.Sql("""
                 CREATE OR REPLACE FUNCTION write_audit()
                 RETURNS trigger

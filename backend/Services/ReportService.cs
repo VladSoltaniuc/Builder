@@ -21,13 +21,10 @@ public class ReportService(AppDbContext db) : IReportService
     public async Task SetSubscription(int userId, PreferredReportChannel channel, string? phoneNumber)
     {
         var user = await db.Users.FindAsync(userId)
-            ?? throw new UserFriendlyException("User not found.", "NOT_FOUND");
+            ?? throw new UserFriendlyException("User not found.", "USER_NOT_FOUND");
 
-        // Can't text someone without a number â€” require one when choosing SMS.
         var phone = phoneNumber?.Trim();
-        if (channel == PreferredReportChannel.Sms
-            && string.IsNullOrWhiteSpace(phone) && string.IsNullOrWhiteSpace(user.PhoneNumber))
-            throw new UserFriendlyException("A phone number is required for SMS reports.", "INVALID_ARGUMENT");
+        UserRules.RequirePhoneForSms(channel, string.IsNullOrWhiteSpace(phone) ? user.PhoneNumber : phone);
 
         user.ReportChannel = channel;
         if (!string.IsNullOrWhiteSpace(phone))

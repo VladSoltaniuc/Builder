@@ -13,7 +13,7 @@ public class AuditIntegrationTests(IntegrationTestFactory factory) : Integration
         var product = await CreateProductAsync(stock: 5);
         var order = await CreateOrderAsync(user.Id, product.Id, 1);
 
-        // The DB trigger should have logged the insert automatically.
+        // The DB trigger should have logged the insert automatically
         var history = await GetAsync<List<AuditLogResponse>>($"/api/audit?table=Orders&rowId={order.Id}");
 
         history.Should().NotBeNull();

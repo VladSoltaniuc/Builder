@@ -1,4 +1,4 @@
-// Service layer — users
+// Service layer - users
 import { useCallback, useEffect, useState } from 'react';
 import { usersApi } from '../api/users';
 import { ApiError } from '../api/errors';
@@ -18,21 +18,19 @@ export function useUsers() {
   // --- Sorting ---
   const [sort, setSort] = useState<SortState | null>(null);
 
-  // --- Filtering ---
+  // --- Search ---
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState<Record<string, string>>({});
 
   const loadUsers = useCallback(async function loadUsers(
     p: number,
     ps: number,
     s: SortState | null,
     search: string,
-    filters: Record<string, string>,
   ) {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await usersApi.getAll(p, ps, toSortBy(s), search || undefined, Object.keys(filters).length ? filters : undefined);
+      const data = await usersApi.getAll(p, ps, toSortBy(s), search || undefined);
       setUsers(data.items);
       setTotalCount(data.totalCount);
     } catch (err) {
@@ -44,9 +42,9 @@ export function useUsers() {
 
   const createUser = useCallback(async function createUser(input: UserInput) {
     await usersApi.create(input);
-    if (page === 1) void loadUsers(1, pageSize, sort, search, filters);
+    if (page === 1) void loadUsers(1, pageSize, sort, search);
     else setPage(1);
-  }, [loadUsers, page, pageSize, sort, search, filters]);
+  }, [loadUsers, page, pageSize, sort, search]);
 
   const updateUser = useCallback(async function updateUser(id: number, input: UserInput, version: number) {
     const updated = await usersApi.update(id, input, version);
@@ -56,13 +54,13 @@ export function useUsers() {
   const deleteUser = useCallback(async function deleteUser(id: number) {
     await usersApi.remove(id);
     const newPage = users.length === 1 && page > 1 ? page - 1 : page;
-    if (newPage === page) void loadUsers(page, pageSize, sort, search, filters);
+    if (newPage === page) void loadUsers(page, pageSize, sort, search);
     else setPage(newPage);
-  }, [loadUsers, page, pageSize, users.length, sort, search, filters]);
+  }, [loadUsers, page, pageSize, users.length, sort, search]);
 
   useEffect(() => {
-    void loadUsers(page, pageSize, sort, search, filters);
-  }, [loadUsers, page, pageSize, sort, search, filters]);
+    void loadUsers(page, pageSize, sort, search);
+  }, [loadUsers, page, pageSize, sort, search]);
 
   return {
     users, isLoading, error,
@@ -70,7 +68,6 @@ export function useUsers() {
     pageSize, setPageSize,
     sort, setSort,
     search, setSearch,
-    filters, setFilters,
     createUser, updateUser, deleteUser,
   };
 }

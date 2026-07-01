@@ -1,4 +1,4 @@
-// API layer — authentication
+// API layer - authentication
 import { httpCore } from "./httpCore";
 import type { AuthResult, LoginResult, Profile, RegisterResult } from "../types/auth";
 

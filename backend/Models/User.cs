@@ -12,7 +12,7 @@ public class User
     public string? ExternalId { get; set; }
     public bool TwoFactorEnabled { get; set; }
     public string? TwoFactorSecret { get; set; }
-    // New accounts are always Operator, can upgrade to Admin.
+    // New accounts are always Operator, can upgrade to Admin
     public UserRole Role { get; set; } = UserRole.Operator;
     public bool EmailVerified { get; set; }
     public string? EmailVerificationToken { get; set; }

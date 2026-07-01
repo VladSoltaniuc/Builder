@@ -18,7 +18,7 @@ namespace ProductApi.Migrations
                 name: "WeeklyReportSubscribed",
                 table: "Users");
 
-            // Existing users default to not subscribed.
+            // Existing users default to not subscribed
             migrationBuilder.AddColumn<string>(
                 name: "ReportChannel",
                 table: "Users",

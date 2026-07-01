@@ -16,7 +16,7 @@ export function ProfilePage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Seed the form from the loaded profile.
+  // Seed the form from the loaded profile
   useEffect(() => {
     if (user) {
       setChannel(user.reportChannel);

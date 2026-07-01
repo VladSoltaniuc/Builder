@@ -16,7 +16,7 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request)
         => Ok(await authService.Register(request));
 
-    // Confirms an emailed verification link, activating the account.
+    // Confirms an emailed verification link, activating the account
     [HttpPost("verify-email")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -32,14 +32,14 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         => Ok(await authService.Login(request));
 
-    // Completes a login for accounts with 2FA enabled.
+    // Completes a login for accounts with 2FA enabled
     [HttpPost("2fa/verify")]
     [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponse>> VerifyTwoFactor(TwoFactorLoginRequest request)
         => Ok(await authService.VerifyTwoFactorLogin(request));
 
-    // Begins 2FA enrollment for the signed-in user: returns the secret + QR URI.
+    // Begins 2FA enrollment for the signed-in user: returns the secret + QR URI
     [Authorize]
     [HttpPost("2fa/setup")]
     [ProducesResponseType(typeof(TwoFactorSetupResponse), StatusCodes.Status200OK)]
@@ -47,7 +47,7 @@ public class AuthController(IAuthService authService) : ApiControllerBase
     public async Task<ActionResult<TwoFactorSetupResponse>> SetupTwoFactor()
         => Ok(await authService.SetupTwoFactor(GetCurrentUserId()));
 
-    // Confirms a code from the authenticator app and turns 2FA on.
+    // Confirms a code from the authenticator app and turns 2FA on
     [Authorize]
     [HttpPost("2fa/enable")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -58,7 +58,7 @@ public class AuthController(IAuthService authService) : ApiControllerBase
         return NoContent();
     }
 
-    // Turns 2FA off after verifying a current code.
+    // Turns 2FA off after verifying a current code
     [Authorize]
     [HttpPost("2fa/disable")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

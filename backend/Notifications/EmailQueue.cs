@@ -1,5 +1,5 @@
 // Infrastructure layer
-// In-memory channel: unbounded, single-reader, jobs lost on restart.
+// In-memory channel: unbounded, single-reader, jobs lost on restart
 using System.Threading.Channels;
 
 namespace ProductApi.Notifications;

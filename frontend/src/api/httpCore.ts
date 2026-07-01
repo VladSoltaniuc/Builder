@@ -1,4 +1,4 @@
-// Transport layer — Core API requests
+// Transport layer - Core API requests
 import { ApiError, parseError } from './errors';
 import { getToken, clearToken, AUTH_LOGOUT_EVENT } from '../auth/token';
 
@@ -20,7 +20,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw ApiError.fromStatus(0);
   }
 
-  // Token missing/expired — drop the session and let the AuthProvider redirect.
+  // Token missing/expired - drop the session and let the AuthProvider redirect
   if (response.status === 401) {
     clearToken();
     window.dispatchEvent(new Event(AUTH_LOGOUT_EVENT));

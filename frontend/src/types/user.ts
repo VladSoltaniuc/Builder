@@ -1,4 +1,4 @@
-// Shared layer — API contract types
+// Shared layer - API contract types
 import type { ReportChannel, Role } from "./auth";
 
 export interface User {
