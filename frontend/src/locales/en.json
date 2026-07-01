@@ -3,7 +3,22 @@
     "products": "Products",
     "users": "Users",
     "orders": "Orders",
-    "profile": "Profile"
+    "profile": "Profile",
+    "audit": "Audit"
+  },
+  "audit": {
+    "title": "Audit Log",
+    "filterTable": "Filter by table...",
+    "empty": "No audit entries.",
+    "col": {
+      "time": "Time",
+      "user": "User",
+      "table": "Table",
+      "action": "Action",
+      "rowId": "Row",
+      "old": "Before",
+      "new": "After"
+    }
   },
   "auth": {
     "loginTitle": "Sign in",

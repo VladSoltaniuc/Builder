@@ -11,6 +11,6 @@ public static class UserRules
     public static void RequirePhoneForSms(PreferredReportChannel channel, string? effectivePhone)
     {
         if (channel == PreferredReportChannel.Sms && string.IsNullOrWhiteSpace(effectivePhone))
-            throw new UserFriendlyException("A phone number is required for SMS reports.", "PHONE_REQUIRED_FOR_SMS");
+            throw new UserFriendlyException("PHONE_REQUIRED_FOR_SMS");
     }
 }

@@ -100,10 +100,7 @@ public sealed class ProductExcel(AppDbContext db)
         var required = new[] { "name", "category", "price", "stock" };
         var missing = required.Where(r => !headers.ContainsKey(r)).ToArray();
         if (missing.Length > 0)
-            throw new UserFriendlyException(
-                $"Missing required columns: {string.Join(", ", missing)}",
-                "MISSING_COLUMNS",
-                string.Join(", ", missing));
+            throw new UserFriendlyException("MISSING_COLUMNS", detail: string.Join(", ", missing));
 
         int lastRow = ws.LastRowUsed()?.RowNumber() ?? 1;
 

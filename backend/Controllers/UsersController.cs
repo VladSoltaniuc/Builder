@@ -22,8 +22,7 @@ public class UsersController(IUserService userService) : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserResponse>> GetById(int id)
     {
-        var user = await userService.GetById(id);
-        return user is null ? ApiNotFound() : Ok(user);
+        return Ok(await userService.GetById(id));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -45,9 +44,7 @@ public class UsersController(IUserService userService) : ApiControllerBase
     {
         if (id == GetCurrentUserId())
             return ApiBadRequest("CANNOT_EDIT_SELF");
-        var result = await userService.Update(id, request);
-        if (result.IsConflict) return ApiConflict();
-        return result.User is null ? ApiNotFound() : Ok(result.User);
+        return Ok(await userService.Update(id, request));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -58,7 +55,7 @@ public class UsersController(IUserService userService) : ApiControllerBase
     {
         if (id == GetCurrentUserId())
             return ApiBadRequest("CANNOT_DELETE_SELF");
-        var deleted = await userService.Delete(id);
-        return deleted ? NoContent() : ApiNotFound();
+        await userService.Delete(id);
+        return NoContent();
     }
 }

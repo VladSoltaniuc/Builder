@@ -31,7 +31,7 @@ public class JwtTokenService(IOptions<JwtOptions> options) : IJwtTokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        return (Write(claims, expiresAt), expiresAt);
+        return (BuildToken(claims, expiresAt), expiresAt);
     }
 
     public string CreatePendingTwoFactorToken(User user)
@@ -43,7 +43,7 @@ public class JwtTokenService(IOptions<JwtOptions> options) : IJwtTokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        return Write(claims, DateTime.UtcNow.Add(PendingTokenLifetime));
+        return BuildToken(claims, DateTime.UtcNow.Add(PendingTokenLifetime));
     }
 
     public int? ReadPendingTwoFactorUserId(string token)
@@ -74,8 +74,8 @@ public class JwtTokenService(IOptions<JwtOptions> options) : IJwtTokenService
             return null;
         }
     }
-
-    private string Write(IEnumerable<Claim> claims, DateTime expiresAt)
+    
+    private string BuildToken(IEnumerable<Claim> claims, DateTime expiresAt)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

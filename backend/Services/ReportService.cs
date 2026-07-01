@@ -21,7 +21,7 @@ public class ReportService(AppDbContext db) : IReportService
     public async Task SetSubscription(int userId, PreferredReportChannel channel, string? phoneNumber)
     {
         var user = await db.Users.FindAsync(userId)
-            ?? throw new UserFriendlyException("User not found.", "USER_NOT_FOUND");
+            ?? throw new UserFriendlyException("USER_NOT_FOUND");
 
         var phone = phoneNumber?.Trim();
         UserRules.RequirePhoneForSms(channel, string.IsNullOrWhiteSpace(phone) ? user.PhoneNumber : phone);

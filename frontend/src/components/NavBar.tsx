@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import ReactCountryFlag from "react-country-flag";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { UserFeature, hasFeature } from "../constants/features";
 
 export function NavBar() {
   const { theme, toggle: toggleTheme } = useTheme();
@@ -41,6 +42,11 @@ export function NavBar() {
           <NavLink to="/profile" className={linkClass}>
             {t("nav.profile")}
           </NavLink>
+          {hasFeature(user, UserFeature.CanViewAuditLog) && (
+            <NavLink to="/audit" className={linkClass}>
+              {t("nav.audit")}
+            </NavLink>
+          )}
         </>
       )}
 

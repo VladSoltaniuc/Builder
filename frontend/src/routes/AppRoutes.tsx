@@ -7,7 +7,9 @@ import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { VerifyEmailPage } from "../pages/VerifyEmailPage";
 import { ProfilePage } from "../pages/ProfilePage";
+import { AuditLogPage } from "../pages/AuditLogPage";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { UserFeature } from "../constants/features";
 
 export function AppRoutes() {
   return (
@@ -46,6 +48,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/audit"
+        element={
+          <ProtectedRoute feature={UserFeature.CanViewAuditLog}>
+            <AuditLogPage />
           </ProtectedRoute>
         }
       />

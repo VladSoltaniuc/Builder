@@ -21,6 +21,7 @@ public class AuthService(
     IOptions<GoogleAuthOptions> googleOptions,
     IOptions<AppOptions> appOptions) : IAuthService
 {
+    // #Note: Maybe I can take these 2 out in defaults?
     private const string GoogleProvider = "Google";
     private static readonly TimeSpan VerificationTokenLifetime = TimeSpan.FromHours(24);
 
@@ -28,11 +29,7 @@ public class AuthService(
     {
         var email = UserRules.NormalizeEmail(request.Email);
         if (await db.Users.AnyAsync(u => u.Email == email))
-            throw new UserFriendlyException("A user with this email already exists.", "EMAIL_ALREADY_EXISTS");
-
-        // Self-registration NEVER mints an Admin it always creates an Operator. The
-        // founder Admin is provisioned from trusted config (see AdminSeed in Program),
-        // not by whoever happens to register first
+            throw new UserFriendlyException("EMAIL_ALREADY_EXISTS");
         var token = GenerateVerificationToken();
         var user = new User
         {
@@ -46,9 +43,6 @@ public class AuthService(
         };
         db.Users.Add(user);
         await db.SaveChangesAsync();
-
-        // Fire-and-forget: the user shouldn't wait on SMTP, and a mail hiccup must not
-        // fail registration. Failures are logged inside the queued task
         QueueVerificationEmail(user.Name, user.Email, token);
 
         return new RegisterResponse(email, "Verification email sent. Please check your inbox.");
@@ -58,7 +52,7 @@ public class AuthService(
     {
         var user = await db.Users.SingleOrDefaultAsync(u => u.EmailVerificationToken == token);
         if (user is null || user.EmailVerificationTokenExpiresAt < DateTime.UtcNow)
-            throw new UserFriendlyException("This verification link is invalid or has expired.", "VERIFICATION_LINK_INVALID");
+            throw new UserFriendlyException("VERIFICATION_LINK_INVALID");
 
         user.EmailVerified = true;
         user.EmailVerificationToken = null;
@@ -66,7 +60,7 @@ public class AuthService(
         await db.SaveChangesAsync();
     }
 
-    // Cryptographically random, URL-safe token (no padding/reserved chars)
+    // Cryptographically random, no padding/reserved chars
     private static string GenerateVerificationToken() =>
         Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
 
@@ -90,18 +84,13 @@ public class AuthService(
         var email = UserRules.NormalizeEmail(request.Email);
         var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email);
 
-        // Same error whether the email is unknown or the password is wrong, so the
-        // response can't be used to probe which emails are registered
         if (user is null || user.PasswordHash is null ||
             !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            throw new UserFriendlyException("Invalid email or password.", "INVALID_CREDENTIALS");
+            throw new UserFriendlyException("INVALID_CREDENTIALS");
 
-        // Account exists and password matches, but the email must be confirmed first
         if (!user.EmailVerified)
-            throw new UserFriendlyException("Please verify your email before signing in.", "EMAIL_NOT_VERIFIED");
+            throw new UserFriendlyException("EMAIL_NOT_VERIFIED");
 
-        // Password is correct, but if 2FA is on we issue only a short-lived pending
-        // token and withhold the real one until the TOTP code is verified
         if (user.TwoFactorEnabled)
             return LoginResponse.TwoFactorRequired(tokens.CreatePendingTwoFactorToken(user));
 
@@ -111,13 +100,13 @@ public class AuthService(
     public async Task<AuthResponse> VerifyTwoFactorLogin(TwoFactorLoginRequest request)
     {
         var userId = tokens.ReadPendingTwoFactorUserId(request.TwoFactorToken)
-            ?? throw new UserFriendlyException("Two-factor session expired. Please sign in again.", "TWO_FACTOR_SESSION_EXPIRED");
+            ?? throw new UserFriendlyException("TWO_FACTOR_SESSION_EXPIRED");
 
         var user = await db.Users.FindAsync(userId)
-            ?? throw new UserFriendlyException("Two-factor session expired. Please sign in again.", "TWO_FACTOR_SESSION_EXPIRED");
+            ?? throw new UserFriendlyException("TWO_FACTOR_SESSION_EXPIRED");
 
         if (!user.TwoFactorEnabled || !totp.Verify(user.TwoFactorSecret!, request.Code))
-            throw new UserFriendlyException("Invalid authentication code.", "INVALID_AUTH_CODE");
+            throw new UserFriendlyException("INVALID_AUTH_CODE");
 
         return BuildResponse(user);
     }
@@ -125,7 +114,7 @@ public class AuthService(
     public async Task<TwoFactorSetupResponse> SetupTwoFactor(int userId)
     {
         var user = await db.Users.FindAsync(userId)
-            ?? throw new UserFriendlyException("User not found.", "USER_NOT_FOUND");
+            ?? throw new UserFriendlyException("USER_NOT_FOUND");
 
         // Store the candidate secret but leave 2FA disabled until a code confirms it
         var secret = totp.GenerateSecret();
@@ -139,12 +128,12 @@ public class AuthService(
     public async Task EnableTwoFactor(int userId, string code)
     {
         var user = await db.Users.FindAsync(userId)
-            ?? throw new UserFriendlyException("User not found.", "USER_NOT_FOUND");
+            ?? throw new UserFriendlyException("USER_NOT_FOUND");
 
         if (string.IsNullOrEmpty(user.TwoFactorSecret))
-            throw new UserFriendlyException("Start two-factor setup first.", "TWO_FACTOR_SETUP_REQUIRED");
+            throw new UserFriendlyException("TWO_FACTOR_SETUP_REQUIRED");
         if (!totp.Verify(user.TwoFactorSecret, code))
-            throw new UserFriendlyException("Invalid authentication code.", "INVALID_AUTH_CODE");
+            throw new UserFriendlyException("INVALID_AUTH_CODE");
 
         user.TwoFactorEnabled = true;
         await db.SaveChangesAsync();
@@ -153,10 +142,10 @@ public class AuthService(
     public async Task DisableTwoFactor(int userId, string code)
     {
         var user = await db.Users.FindAsync(userId)
-            ?? throw new UserFriendlyException("User not found.", "USER_NOT_FOUND");
+            ?? throw new UserFriendlyException("USER_NOT_FOUND");
 
         if (!user.TwoFactorEnabled || !totp.Verify(user.TwoFactorSecret!, code))
-            throw new UserFriendlyException("Invalid authentication code.", "INVALID_AUTH_CODE");
+            throw new UserFriendlyException("INVALID_AUTH_CODE");
 
         user.TwoFactorEnabled = false;
         user.TwoFactorSecret = null;
@@ -167,7 +156,7 @@ public class AuthService(
     {
         var clientId = googleOptions.Value.ClientId;
         if (string.IsNullOrWhiteSpace(clientId))
-            throw new UserFriendlyException("Google sign-in is not configured.", "GOOGLE_SIGNIN_UNAVAILABLE");
+            throw new UserFriendlyException("GOOGLE_SIGNIN_UNAVAILABLE");
 
         GoogleJsonWebSignature.Payload payload;
         try
@@ -178,13 +167,10 @@ public class AuthService(
         }
         catch (InvalidJwtException)
         {
-            throw new UserFriendlyException("Invalid Google token.", "INVALID_GOOGLE_TOKEN");
+            throw new UserFriendlyException("INVALID_GOOGLE_TOKEN");
         }
 
         var email = UserRules.NormalizeEmail(payload.Email);
-
-        // Match by provider identity first, then fall back to email so an existing
-        // password account gets linked rather than duplicated
         var user = await db.Users.SingleOrDefaultAsync(u =>
             (u.ExternalProvider == GoogleProvider && u.ExternalId == payload.Subject) || u.Email == email);
 
@@ -194,8 +180,6 @@ public class AuthService(
             db.Users.Add(user);
         }
 
-        // Link / refresh the external identity on the resolved account. Google has
-        // already verified the address, so the account is verified by definition
         user.ExternalProvider = GoogleProvider;
         user.ExternalId = payload.Subject;
         user.EmailVerified = true;
@@ -207,7 +191,7 @@ public class AuthService(
     public async Task<ProfileResponse> GetProfile(int userId)
     {
         var user = await db.Users.FindAsync(userId)
-            ?? throw new UserFriendlyException("User not found.", "USER_NOT_FOUND");
+            ?? throw new UserFriendlyException("USER_NOT_FOUND");
         return new ProfileResponse(user.Id, user.Name, user.Email, user.Role, user.Features, user.PhoneNumber, user.ReportChannel);
     }
 

@@ -3,7 +3,22 @@
     "products": "Produse",
     "users": "Utilizatori",
     "orders": "Comenzi",
-    "profile": "Profil"
+    "profile": "Profil",
+    "audit": "Audit"
+  },
+  "audit": {
+    "title": "Jurnal de audit",
+    "filterTable": "Filtrează după tabel...",
+    "empty": "Nicio intrare de audit.",
+    "col": {
+      "time": "Oră",
+      "user": "Utilizator",
+      "table": "Tabel",
+      "action": "Acțiune",
+      "rowId": "Rând",
+      "old": "Înainte",
+      "new": "După"
+    }
   },
   "auth": {
     "loginTitle": "Autentificare",

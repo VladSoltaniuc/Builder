@@ -29,8 +29,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<OrderResponse>> GetById(int id)
     {
-        var order = await orderService.GetById(id);
-        return order is null ? ApiNotFound() : Ok(order);
+        return Ok(await orderService.GetById(id));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -40,7 +39,6 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     public async Task<ActionResult<OrderResponse>> Create(CreateOrderRequest request)
     {
         var created = await orderService.Create(request);
-        if (created is null) return ApiNotFound();
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
@@ -51,11 +49,9 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<OrderResponse>> Update(int id, UpdateOrderRequest request)
     {
-        var result = await orderService.Update(id, request);
-        if (result.IsConflict) return ApiConflict();
-        if (result.Order is null) return ApiNotFound();
-        await hub.Clients.All.SendAsync("OrderStatusChanged", result.Order);
-        return Ok(result.Order);
+        var order = await orderService.Update(id, request);
+        await hub.Clients.All.SendAsync("OrderStatusChanged", order);
+        return Ok(order);
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -64,8 +60,8 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await orderService.Delete(id);
-        return deleted ? NoContent() : ApiNotFound();
+        await orderService.Delete(id);
+        return NoContent();
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -74,8 +70,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<OrderResponse>> GenerateAwb(int id)
     {
-        var result = await orderService.AssignGeneratedAwb(id);
-        return result is null ? ApiNotFound() : Ok(result);
+        return Ok(await orderService.AssignGeneratedAwb(id));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -90,8 +85,7 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
         if (file.Length > ImageSettings.MaxInvoiceSizeBytes)
             return ApiBadRequest("INVOICE_TOO_LARGE");
 
-        var result = await orderService.UploadInvoice(id, file);
-        return result is null ? ApiNotFound() : Ok(result);
+        return Ok(await orderService.UploadInvoice(id, file));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -100,8 +94,8 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteInvoice(int id)
     {
-        var deleted = await orderService.DeleteInvoice(id);
-        return deleted ? NoContent() : ApiNotFound();
+        await orderService.DeleteInvoice(id);
+        return NoContent();
     }
 
     [HttpGet("{id:int}/invoice")]
@@ -110,7 +104,6 @@ public class OrdersController(IOrderService orderService, IHubContext<OrderHub> 
     public async Task<IActionResult> DownloadInvoice(int id)
     {
         var path = await orderService.GetInvoicePath(id);
-        if (path is null) return ApiNotFound();
         return PhysicalFile(path, "application/pdf", $"invoice-{id}.pdf");
     }
 }

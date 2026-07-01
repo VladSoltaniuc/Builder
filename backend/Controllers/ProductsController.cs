@@ -28,8 +28,7 @@ public class ProductsController(IProductService productService, ProductExcel pro
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProductResponse>> GetById(int id)
     {
-        var product = await productService.GetById(id);
-        return product is null ? ApiNotFound() : Ok(product);
+        return Ok(await productService.GetById(id));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -49,9 +48,7 @@ public class ProductsController(IProductService productService, ProductExcel pro
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ProductResponse>> Update(int id, UpdateProductRequest request)
     {
-        var result = await productService.Update(id, request);
-        if (result.IsConflict) return ApiConflict();
-        return result.Product is null ? ApiNotFound() : Ok(result.Product);
+        return Ok(await productService.Update(id, request));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -60,8 +57,8 @@ public class ProductsController(IProductService productService, ProductExcel pro
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await productService.Delete(id);
-        return deleted ? NoContent() : ApiNotFound();
+        await productService.Delete(id);
+        return NoContent();
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -77,8 +74,7 @@ public class ProductsController(IProductService productService, ProductExcel pro
         if (file.Length > ImageSettings.MaxImageSizeBytes)
             return ApiBadRequest("IMAGE_TOO_LARGE");
 
-        var result = await productService.UploadImage(id, file);
-        return result is null ? ApiNotFound() : Ok(result);
+        return Ok(await productService.UploadImage(id, file));
     }
 
     [Authorize(Roles = nameof(UserRole.Admin))]
@@ -87,8 +83,8 @@ public class ProductsController(IProductService productService, ProductExcel pro
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteImage(int id)
     {
-        var deleted = await productService.DeleteImage(id);
-        return deleted ? NoContent() : ApiNotFound();
+        await productService.DeleteImage(id);
+        return NoContent();
     }
 
     [HttpGet("export")]

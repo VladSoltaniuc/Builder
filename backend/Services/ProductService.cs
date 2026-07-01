@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Contracts;
 using ProductApi.Data;
+using ProductApi.Exceptions;
 using ProductApi.Infrastructure;
 using ProductApi.Models;
 
@@ -26,10 +27,11 @@ public class ProductService(AppDbContext db, IFileStorage files) : IProductServi
         return await query.ToPagedResponse(q.Page, q.PageSize, p => ToResponse(p));
     }
 
-    public async Task<ProductResponse?> GetById(int id)
+    public async Task<ProductResponse> GetById(int id)
     {
-        var product = await db.Products.FindAsync(id);
-        return product is null ? null : ToResponse(product);
+        var product = await db.Products.FindAsync(id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
+        return ToResponse(product);
     }
 
     public async Task<ProductResponse> Create(CreateProductRequest request)
@@ -46,14 +48,13 @@ public class ProductService(AppDbContext db, IFileStorage files) : IProductServi
         return ToResponse(product);
     }
 
-    public async Task<UpdateProductResult> Update(int id, UpdateProductRequest request)
+    public async Task<ProductResponse> Update(int id, UpdateProductRequest request)
     {
-        var product = await db.Products.FindAsync(id);
-        if (product is null)
-            return UpdateProductResult.NotFound();
+        var product = await db.Products.FindAsync(id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         if (product.Version != request.Version)
-            return UpdateProductResult.Conflict();
+            throw new UserFriendlyException("RESOURCE_CONFLICT", 409);
 
         product.Name = request.Name;
         product.Category = request.Category;
@@ -62,29 +63,25 @@ public class ProductService(AppDbContext db, IFileStorage files) : IProductServi
         product.Version++;
 
         await db.SaveChangesAsync();
-        return UpdateProductResult.Success(ToResponse(product));
+        return ToResponse(product);
     }
 
-    public async Task<bool> Delete(int id)
+    public async Task Delete(int id)
     {
-        var product = await db.Products.FindAsync(id);
-        if (product is null)
-            return false;
+        var product = await db.Products.FindAsync(id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         var imagePath = product.ImagePath;
         db.Products.Remove(product);
         await db.SaveChangesAsync();
 
-        // Delete the file only after the row is gone, so a failed commit can't strand a row
-        // pointing at a deleted file. Worst case now is a harmless orphaned file.
         files.DeleteIfPresent(imagePath);
-        return true;
     }
 
-    public async Task<ProductResponse?> UploadImage(int id, IFormFile file)
+    public async Task<ProductResponse> UploadImage(int id, IFormFile file)
     {
-        var product = await db.Products.FindAsync(id);
-        if (product is null) return null;
+        var product = await db.Products.FindAsync(id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         var previousPath = product.ImagePath;
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
@@ -95,17 +92,17 @@ public class ProductService(AppDbContext db, IFileStorage files) : IProductServi
         return ToResponse(product);
     }
 
-    public async Task<bool> DeleteImage(int id)
+    public async Task DeleteImage(int id)
     {
         var product = await db.Products.FindAsync(id);
-        if (product is null || product.ImagePath is null) return false;
+        if (product is null || product.ImagePath is null)
+            throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         var imagePath = product.ImagePath;
         product.ImagePath = null;
         await db.SaveChangesAsync();
 
         files.Delete(imagePath);
-        return true;
     }
 
     private static ProductResponse ToResponse(Product p) =>

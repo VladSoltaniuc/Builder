@@ -34,23 +34,24 @@ public class OrderService(AppDbContext db, IFileStorage files) : IOrderService
         return await query.ToPagedResponse(q.Page, q.PageSize, o => ToResponse(o));
     }
 
-    public async Task<OrderResponse?> GetById(int id)
+    public async Task<OrderResponse> GetById(int id)
     {
         var order = await db.Orders
             .Include(o => o.User)
             .Include(o => o.Product)
-            .FirstOrDefaultAsync(o => o.Id == id);
-        return order is null ? null : ToResponse(order);
+            .FirstOrDefaultAsync(o => o.Id == id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
+        return ToResponse(order);
     }
 
     // Real systems get the AWB via courier's API. We generate it ourselves
-    public async Task<OrderResponse?> AssignGeneratedAwb(int id)
+    public async Task<OrderResponse> AssignGeneratedAwb(int id)
     {
         var order = await db.Orders
             .Include(o => o.User)
             .Include(o => o.Product)
-            .FirstOrDefaultAsync(o => o.Id == id);
-        if (order is null) return null;
+            .FirstOrDefaultAsync(o => o.Id == id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         for (var attempt = 1; attempt <= OrderDefaults.AwbRetries; attempt++)
         {
@@ -75,7 +76,7 @@ public class OrderService(AppDbContext db, IFileStorage files) : IOrderService
         $"SIM-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(0, 1_000_000):D6}";
 
     // Oversell safety  via to the place_order() stored function - lock+check+decrement
-    public async Task<OrderResponse?> Create(CreateOrderRequest request)
+    public async Task<OrderResponse> Create(CreateOrderRequest request)
     {
         try
         {
@@ -88,26 +89,24 @@ public class OrderService(AppDbContext db, IFileStorage files) : IOrderService
         }
         catch (PostgresException ex) when (ex.MessageText is "USER_NOT_FOUND" or "PRODUCT_NOT_FOUND")
         {
-            return null; // -> 404
+            throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
         }
         catch (PostgresException ex) when (ex.MessageText is "INSUFFICIENT_STOCK")
         {
-            throw new UserFriendlyException("Not enough stock to fulfil this order.", "INSUFFICIENT_STOCK");
+            throw new UserFriendlyException("INSUFFICIENT_STOCK");
         }
     }
 
-    public async Task<UpdateOrderResult> Update(int id, UpdateOrderRequest request)
+    public async Task<OrderResponse> Update(int id, UpdateOrderRequest request)
     {
         var order = await db.Orders
             .Include(o => o.User)
             .Include(o => o.Product)
-            .FirstOrDefaultAsync(o => o.Id == id);
-
-        if (order is null)
-            return UpdateOrderResult.NotFound();
+            .FirstOrDefaultAsync(o => o.Id == id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         if (order.Version != request.Version)
-            return UpdateOrderResult.Conflict();
+            throw new UserFriendlyException("RESOURCE_CONFLICT", 409);
 
         order.Quantity = request.Quantity;
         order.TotalPrice = order.Product.Price * request.Quantity;
@@ -116,14 +115,13 @@ public class OrderService(AppDbContext db, IFileStorage files) : IOrderService
         order.Version++;
 
         await db.SaveChangesAsync();
-        return UpdateOrderResult.Success(ToResponse(order));
+        return ToResponse(order);
     }
 
-    public async Task<bool> Delete(int id)
+    public async Task Delete(int id)
     {
-        var order = await db.Orders.FindAsync(id);
-        if (order is null)
-            return false;
+        var order = await db.Orders.FindAsync(id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         var invoicePath = order.InvoicePath;
         db.Orders.Remove(order);
@@ -132,16 +130,15 @@ public class OrderService(AppDbContext db, IFileStorage files) : IOrderService
         // Delete the file only after the row is gone, so a failed commit can't strand a row
         // pointing at a deleted file. Worst case now is a harmless orphaned file.
         files.DeleteIfPresent(invoicePath);
-        return true;
     }
 
-    public async Task<OrderResponse?> UploadInvoice(int id, IFormFile file)
+    public async Task<OrderResponse> UploadInvoice(int id, IFormFile file)
     {
         var order = await db.Orders
             .Include(o => o.User)
             .Include(o => o.Product)
-            .FirstOrDefaultAsync(o => o.Id == id);
-        if (order is null) return null;
+            .FirstOrDefaultAsync(o => o.Id == id)
+            ?? throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         var previousPath = order.InvoicePath;
         order.InvoicePath = await files.Save(file, $"uploads/invoices/{id}.pdf");
@@ -151,23 +148,24 @@ public class OrderService(AppDbContext db, IFileStorage files) : IOrderService
         return ToResponse(order);
     }
 
-    public async Task<bool> DeleteInvoice(int id)
+    public async Task DeleteInvoice(int id)
     {
         var order = await db.Orders.FindAsync(id);
-        if (order is null || order.InvoicePath is null) return false;
+        if (order is null || order.InvoicePath is null)
+            throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
 
         var invoicePath = order.InvoicePath;
         order.InvoicePath = null;
         await db.SaveChangesAsync();
 
         files.Delete(invoicePath);
-        return true;
     }
 
-    public async Task<string?> GetInvoicePath(int id)
+    public async Task<string> GetInvoicePath(int id)
     {
         var order = await db.Orders.FindAsync(id);
-        if (order?.InvoicePath is null) return null;
+        if (order?.InvoicePath is null)
+            throw new UserFriendlyException("RESOURCE_NOT_FOUND", 404);
         return files.ResolvePath(order.InvoicePath);
     }
 
